@@ -30,7 +30,7 @@ SELECT * from drivers;
 SELECT * from vehicles;
 SELECT * from vehicles LIMIT 3;
 -- Driver with ID 2 no longer owns any vehicles. Update the database to reflect this.
-DELETE FROM vehicles where vehicles.driver_id  = 2;
+DELETE FROM vehicles WHERE vehicles.driver_id  = 2;
 -- Driver with ID 1 now owns a new vehicle in addition to the previous one they owned. Update the database to reflect this.
 INSERT INTO vehicles (driver_id,make, model) VALUES (1,'Subaru','Forester');
 
@@ -78,13 +78,13 @@ ADD reg_dt TIMESTAMP;
 SET timezone = 'America/Los_Angeles';
 --  Add the timezone columns info
 UPDATE vehicles
-SET reg_dt = '2022-11-12 09:20:25-07' where make = 'Ford' and driver_id = 1;
+SET reg_dt = '2022-11-12 09:20:25-07' WHERE make = 'Ford' and driver_id = 1;
 UPDATE vehicles
-SET reg_dt = '2022-12-23 16:14:21-07' where make = 'Subaru' and driver_id = 1;
+SET reg_dt = '2022-12-23 16:14:21-07' WHERE make = 'Subaru' and driver_id = 1;
 UPDATE vehicles
-SET reg_dt = '2023-01-02 09:26:23-07' where make = 'Toyota' and driver_id = 3;
+SET reg_dt = '2022-11-02 09:26:23-07' WHERE make = 'Toyota' and driver_id = 3;
 UPDATE vehicles
-SET reg_dt = '2023-05-28 12:38:45-07' where make = 'Chevy' and driver_id = 4;
+SET reg_dt = '2023-05-28 12:38:45-07' WHERE make = 'Chevy' and driver_id = 4;
 
 
 -- Get the current time
@@ -100,9 +100,13 @@ the next month, fetching their contact information as well as information
 about which vehicles need renewals. The DMV would like to run this query 
 every time they need to contact all drivers that have an upcoming renewal in 
 the next month. */
-ALTER TABLE vehicles
-ADD elapsed_time interval;
-update vehicles set elapsed_time = NOW() - vehicles.reg_dt;
 
--- Get the vehicles table
-SELECT * from vehicles;
+-- Add a new column called 'elapsed_time' with data type 'interval'
+ALTER TABLE vehicles ADD elapsed_time interval;
+-- Subtract the time today from the registration date to get how long since the car was registered
+update vehicles set elapsed_time = NOW() - vehicles.reg_dt;
+-- Get the vehicles and drivers table, select the drivers where the elapsed time remaining is >= 30 days
+-- Remember there are 365 days in a year, and select the driver id that matches with that vehicle
+-- This should return 2 drivers based on my execution date of Oct 27, 2023.
+SELECT * from vehicles,drivers WHERE vehicles.elapsed_time >= INTERVAL '335 days' 
+AND drivers.id = vehicles.driver_id;
