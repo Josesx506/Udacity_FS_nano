@@ -37,5 +37,5 @@ Use this two websites to test sql code interactively online. Make sure to save i
 - CREATE | DROP | SELECT | FROM | LIMIT
 - 'Wildcats' in sql can be accessed with `LIKE` e.g. 
 ```sql
-SELECT * FROM web_events_full WHERE referrer_url LIKE '%google%'
+SELECT * FROM web_events_full WHERE referrer_url LIKE '%google%';
 ```
