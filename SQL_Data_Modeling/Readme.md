@@ -31,10 +31,15 @@ Use this two websites to test sql code interactively online. Make sure to save i
 
 ### Creating your first database
 1. After launching sql, you can create your first table
+
+#### Database Tables Key Description
+<u><b>Primary Key (PK):</b></u> is a unique column in a particular table. It is commonly the first column in our tables in most databases and can be named "id".
+
+<u><b>Foreign Key (FK):</b></u> is a column in one table that is a primary key in a different table. 
 <br><br>
 
 ### Popular SQL commands
-- CREATE | DROP | SELECT | FROM | LIMIT
+- CREATE | DROP | SELECT | FROM | LIMIT | JOIN
 - 'Wildcats' in sql can be accessed with `LIKE` e.g. 
 ```sql
 SELECT * FROM web_events_full WHERE referrer_url LIKE '%google%';
