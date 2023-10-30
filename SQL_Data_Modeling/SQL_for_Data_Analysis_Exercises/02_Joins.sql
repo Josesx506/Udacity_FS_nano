@@ -8,6 +8,8 @@ Typically left joins are mostly used and the Udacity course uses them for the re
 Discusses database (db) normalization, how dbs should be set up to reduce latency when queried etc.
 Check out more on db normalization here - https://www.itprotoday.com/sql-server/sql-design-why-you-need-database-normalization
 In the Entity Relationship Diagrams (ERD) for parch_and_posey db, PK is primary key, FK is foreign key.
+For filtering purposes, using AND within the ON statement can reduce processing time for a join search instead of 
+using WHERE after the join statement has been executed.
 */
 
 -- ------------------------------------------------------------------------------------------------------------------
@@ -67,3 +69,79 @@ JOIN orders od     ON ac.id = od.account_id;
 -- LEFT JOIN statements. LEFT OUTER JOIN is equivalent to LEFT JOIN synthax.
 -- ------------------------------------------------------------------------------------------------------------------
 -- This allows you to include rows that have no data in a particular table within the query
+
+-- Provide a table that provides the region for each sales_rep along with their associated accounts. This time only for the Midwest region. 
+-- Your final table should include three columns: the region name, the sales rep name, and the account name. Sort the accounts 
+-- alphabetically (A-Z) according to account name.
+SELECT rg.name AS r_name, sr.name AS s_name, ac.name AS a_name 
+FROM region rg 
+JOIN sales_reps sr ON rg.id = sr.region_id AND rg.name = 'Midwest'
+JOIN accounts ac   ON sr.id = ac.sales_rep_id
+ORDER BY ac.name;
+
+-- Provide a table that provides the region for each sales_rep along with their associated accounts. 
+-- This time only for accounts where the sales rep has a first name starting with S and in the Midwest region. 
+-- Your final table should include three columns: the region name, the sales rep name, and the account name. 
+-- Sort the accounts alphabetically (A-Z) according to account name.
+SELECT rg.name AS r_name, sr.name AS s_name, ac.name AS a_name 
+FROM region rg 
+JOIN sales_reps sr ON rg.id = sr.region_id AND rg.name = 'Midwest' AND sr.name LIKE 'S%'
+JOIN accounts ac   ON sr.id = ac.sales_rep_id
+ORDER BY ac.name;
+
+-- Provide a table that provides the region for each sales_rep along with their associated accounts. 
+-- This time only for accounts where the sales rep has a last name starting with K and in the Midwest region. 
+-- Your final table should include three columns: the region name, the sales rep name, and the account name. 
+-- Sort the accounts alphabetically (A-Z) according to account name.
+SELECT rg.name AS r_name, sr.name AS s_name, ac.name AS a_name 
+FROM region rg 
+JOIN sales_reps sr ON rg.id = sr.region_id AND rg.name = 'Midwest' AND sr.name LIKE '% K%'
+JOIN accounts ac   ON sr.id = ac.sales_rep_id
+ORDER BY ac.name;
+
+-- Provide the name for each region for every order, as well as the account name and the unit price they paid (total_amt_usd/total) for the order. 
+-- However, you should only provide the results if the standard order quantity exceeds 100. Your final table should have 3 columns: region name, 
+-- account name, and unit price. In order to avoid a division by zero error, adding .01 to the denominator here is helpful total_amt_usd/(total+0.01)
+SELECT rg.name AS r_name, ac.name AS a_name, od.total_amt_usd/(od.total+0.01) AS unit_price 
+FROM region rg 
+JOIN sales_reps sr ON rg.id = sr.region_id
+JOIN accounts ac   ON sr.id = ac.sales_rep_id
+JOIN orders od     ON ac.id = od.account_id AND od.standard_qty > 100;
+
+-- Provide the name for each region for every order, as well as the account name and the unit price they paid (total_amt_usd/total) for the order. 
+-- However, you should only provide the results if the standard order quantity exceeds 100 and the poster order quantity exceeds 50. 
+-- Your final table should have 3 columns: region name, account name, and unit price. Sort for the smallest unit price first. 
+-- In order to avoid a division by zero error, adding .01 to the denominator here is helpful (total_amt_usd/(total+0.01).
+SELECT rg.name AS r_name, ac.name AS a_name, od.total_amt_usd/(od.total+0.01) AS unit_price 
+FROM region rg 
+JOIN sales_reps sr ON rg.id = sr.region_id
+JOIN accounts ac   ON sr.id = ac.sales_rep_id
+JOIN orders od     ON ac.id = od.account_id AND od.standard_qty > 100 AND od.poster_qty > 50
+ORDER BY unit_price;
+
+-- Provide the name for each region for every order, as well as the account name and the unit price they paid (total_amt_usd/total) for the order. 
+-- However, you should only provide the results if the standard order quantity exceeds 100 and the poster order quantity exceeds 50. 
+-- Your final table should have 3 columns: region name, account name, and unit price. Sort for the largest unit price first. 
+-- In order to avoid a division by zero error, adding .01 to the denominator here is helpful (total_amt_usd/(total+0.01).
+SELECT rg.name AS r_name, ac.name AS a_name, od.total_amt_usd/(od.total+0.01) AS unit_price 
+FROM region rg 
+JOIN sales_reps sr ON rg.id = sr.region_id
+JOIN accounts ac   ON sr.id = ac.sales_rep_id
+JOIN orders od     ON ac.id = od.account_id AND od.standard_qty > 100 AND od.poster_qty > 50
+ORDER BY unit_price DESC;
+
+-- What are the different channels used by account id 1001? 
+-- Your final table should have only 2 columns: account name and the different channels. 
+-- You can try SELECT DISTINCT to narrow down the results to only the unique values.
+-- SELECT DISTINCT is the equivalent of pandas .unique()
+SELECT DISTINCT ac.name, we.channel
+FROM accounts ac
+JOIN web_events we
+ON ac.id = we.account_id AND ac.id = '1001';
+
+-- Find all the orders that occurred in 2015. Your final table should have 4 columns: occurred_at, 
+-- account name, order total, and order total_amt_usd.
+SELECT od.occurred_at, ac.name, od.total, od.total_amt_usd
+FROM orders od
+JOIN accounts ac ON od.account_id = ac.id 
+AND od.occurred_at >= '2015-01-01' AND od.occurred_at < '2016-01-01';
