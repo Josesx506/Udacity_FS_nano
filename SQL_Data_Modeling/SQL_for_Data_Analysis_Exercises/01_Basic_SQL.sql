@@ -24,7 +24,9 @@ LIMIT 15;
 -- ORDER BY command. Used to sort a query by a column or multiple columns.
 -- ------------------------------------------------------------------------------------------------------------------
 -- Equivalent to pandas sort_values.
--- Default is ascending order but "DESC" decorator can be used to sort in descending order
+-- Default is ascending order but "DESC" decorator can be used to sort in descending order.
+-- Note: You can also order by the index values of the column names in a SELECT statement when the number of columns are numerous to list out
+-- e.g., ORDER BY 1,2,3 ...
 SELECT * FROM orders
 ORDER BY occurred_at DESC
 LIMIT 100;
