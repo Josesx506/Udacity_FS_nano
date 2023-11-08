@@ -1,4 +1,5 @@
 -- Aggregators only aggregate vertically - the values of a column. They are typically used in SELECT statements apart from GROUP BY.
+-- Major aggregating functions are SUM, COUNT, AVG, MIN, and MAX.
 -- To aggregate values across rows, you'll need to use arithmetic operators.
 -- When identifying NULLs in a WHERE clause, we write IS NULL or IS NOT NULL. We don't use =, 
 -- because NULL isn't considered a value in SQL. Rather, it is a property of the data.
