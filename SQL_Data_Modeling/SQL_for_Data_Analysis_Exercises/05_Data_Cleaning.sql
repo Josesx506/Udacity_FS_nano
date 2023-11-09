@@ -91,8 +91,9 @@ FROM sales_reps;
 
 
 -- ------------------------------------------------------------------------------------------------------------------
--- CONCAT or Piping `||` functions. Can be used to merge strings from multiple columns
+-- CONCAT or Piping `||` functions. Can be used to merge strings from multiple columns. It doesn't merge tables.
 -- ------------------------------------------------------------------------------------------------------------------
+-- The sql operator to merge tables is `UNION`. In python, pd.concat() is for appending tables to each other.
 -- e.g. CONCAT(first_name, ' ', last_name) or with 
 --      piping as: first_name || ' ' || last_name
 
@@ -183,7 +184,7 @@ SELECT date,(SUBSTRING(date,7,4) || '-' || SUBSTRING(date,1,2) || '-' || SUBSTRI
 
 
 -- ------------------------------------------------------------------------------------------------------------------
--- COALESCEfunction. Returns the first non-NULL value passed for each row. 
+-- COALESCE function. Returns the first non-NULL value passed for each row. 
 -- ------------------------------------------------------------------------------------------------------------------
 -- I didn't initially understand the explanation so it was mainly udacity solutions
 -- SImilar to pandas.fillna(), it can be used to replace null values in one column with a string or values from another column
