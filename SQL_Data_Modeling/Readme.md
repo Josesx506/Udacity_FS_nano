@@ -21,6 +21,7 @@ Type "help" for help.
 postgres=# 
 ```
 6. At this point you can create a database and add tables.
+7. You can also view your connection info like port and username with the ` \conninfo` command in postgres
 <br><br>
 
 ### Testing SQL synthax online
@@ -29,8 +30,9 @@ Use this two websites to test sql code interactively online. Make sure to save i
 - [https://www.db-fiddle.com/]
 <br><br>
 
-### Creating your first database
-1. After launching sql, you can create your first table
+### Creating your first database (DB's can be created in terminal or psql)
+1. After instaling sql, you can create your first table `create <dbname>` in terminal
+2. You can access the db with `psql <dbname> <username>`, or delete it with `dropdb <dbname>`. The username does not need to be explicitly included for local tests and can be omitted.
 
 #### Database Tables Key Description
 <u><b>Primary Key (PK):</b></u> is a unique column in a particular table. It is commonly the first column in our tables in most databases and can be named "id".
