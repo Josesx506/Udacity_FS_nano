@@ -4,5 +4,6 @@ This python package allows Object Relational Mapping (ORM) of sql database rows 
 **Connection Pool** also allows it to open and close database connections automatically reducing the amount low-level sql code written. It improves performance at scale by:
 1. Handing dropped connections.
 2. Avoiding very small calls to the db.
-3. Avoiding opening and closing connections for every data change. <br>
+3. Avoiding opening and closing connections for every data change. 
+<br><br>
 With sqlalchemy, the entire `fyyur` website project can be written with python.
