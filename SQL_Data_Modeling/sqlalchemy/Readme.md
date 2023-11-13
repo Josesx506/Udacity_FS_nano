@@ -1,12 +1,15 @@
 ### Sqlachemy overview
-This python package allows Object Relational Mapping (ORM) of sql database rows and columns of a SQL table into python classes and objects. <br>
+This python package allows Object Relational Mapping (ORM) of sql database rows and columns of a SQL table into python classes and objects. <br><br>
 There are 5 levels of abstraction which sqlalchemy uses to make database interactions easier.
 - Dialect
 - Connection Pool
 - Engine
 - SQL Expressions
 - ORM
+<br><br>
+
 ![udacity image](sqlalchemy-layers-of-abstraction.png)
+
 <br><br>
 
 **Dialects** allow it to work with multiple sql backends without changing the python code which is useful for testing e.g. use SQLite for developer environment since its lighter, and Postgres for production. <br><br>
@@ -51,5 +54,6 @@ result = conn.execute(sel)
 result.close()
 ```
 
-**ORM** is the highest layer of abstraction in SQLALchemy. It lets you compose SQL expressions by mapping python classes of objects to tables in the database, and wraps the `SQL Expressions` and `Engine` to work together to interact with the database.
+**ORM** is the highest layer of abstraction in SQLALchemy. It lets you compose SQL expressions by mapping python classes of objects to tables in the database, and wraps the `SQL Expressions` and `Engine` to work together to interact with the database.<br><br>
+
 With sqlalchemy, the entire `fyyur` website project can be written with python.
