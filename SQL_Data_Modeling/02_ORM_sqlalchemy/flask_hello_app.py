@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # Define configuration file for database connection. 
 # You can include an optional DBAPI e.g.  postgresql+psycopg2. psycopg2 is the default for postgres.
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://josesmac:@localhost:5432/fyyur'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://josesmac:@localhost:5432/udacity_test'
 # Use this line to silence the `SQLALCHEMY_TRACK_MODIFICATIONS adds significant overhead` warning
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

@@ -1,7 +1,7 @@
 import psycopg2
 
 # Create a connection to the database
-conn = psycopg2.connect('dbname=fyyur') 
+conn = psycopg2.connect('dbname=udacity_test') 
 # Cursor is used to queue up tasks
 cur = conn.cursor()
 
