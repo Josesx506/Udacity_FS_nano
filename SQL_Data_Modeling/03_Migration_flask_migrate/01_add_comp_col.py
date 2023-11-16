@@ -1,6 +1,6 @@
 # ----------------------------- Database migration and updating via html -----------------------------
 # This script is linked to an index.html template that allows you to update the db with a html form page.
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
