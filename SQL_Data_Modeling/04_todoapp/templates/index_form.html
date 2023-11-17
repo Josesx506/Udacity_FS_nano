@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- Insert a form that will be used to create new input data -->
+    <!-- Note: flask will grab data using the name attribute from the form input -->
+    <!-- In action="/todos/create", todos is the table name, create is the route name of action we want to perform -->
+    <form method="post" action="/todos/create">
+        <!-- The label is linked to the form input by the id attribute -->
+        <label for="desc_input">Description:</label>
+        <input type="text" name="description" id="desc_input"/>
+        <input type="submit" value="Create" />
+      </form>
+    <!-- View the data with the unordered list below -->
+    <ul>
+        <!-- Use a for loop to print all the items in the data list from flask -->
+        {% for d in data %}
+        <li>{{ d.description }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
