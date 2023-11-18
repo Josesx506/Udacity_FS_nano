@@ -48,10 +48,13 @@ Data can be updated using (This app uses the *form* method with the `index_form.
         // method type
         method: 'POST',
         // json formatted string
-        body: JSON.stringify({'description': 'some description here'}),
+        body: JSON.stringify({'<form_input_name>': 'some description here'}),
         // specify the data type as json so the server understands how to read it
         headers: {'Content-Type': 'application/json'
         }
     });
     ```
+<br><br>
 
+5. **`app05.py`** - shows how to deal with connections that fail to commit using the *try except* synthax and prints out error messages for debugging (This app uses the *form* method with the `index_form_async.html` template).
+    - The app uses flask abort to assign/describe error messages that arise in the html/js webpages.
