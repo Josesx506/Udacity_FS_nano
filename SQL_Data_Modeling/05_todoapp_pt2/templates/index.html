@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- CSS to hide the request errors -->
+    <style>
+        .hidden {display: none;}
+        /* Add a style to hide the dots on the unordered list with id todos */
+        /* #todos {list-style: none;
+                padding:0;
+                margin: 0;} */
+        ul {list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 300px;}
+        li {clear: both;}
+        li button {-webkit-appearance: none;
+            border: none;
+            outline: none;
+            color: red;
+            float: right;
+            cursor: pointer;
+            font-size: 20px;}
+        .lists-wrapper, .todos-wrapper {display: inline-block;
+            vertical-align: top;}
+    </style>
+</head>
+
+
+<body>
+    <div class="lists-wrapper"></div>
+        <ul id="lists">
+            {% for list in lists %}
+            <li>
+            <a href="/lists/{{ list.id }}"> {{ list.name }} </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="todos-wrapper"></div>
+    
+        <!-- Insert a form that will be used to create new input data -->
+        <!-- The input label name is linked to the form input by the id attribute -->
+        <form id="form">
+            <label for="desc_id">Description:</label>
+            <input type="text" name="desc_name" id="desc_id"/>
+            <input type="submit" value="Create" />
+        </form>
+        
+
+        <!-- Tag to deal with unsuccessful requests. This tag is hidden using the css style -->
+        <div id="error" class="hidden">Something went wrong!</div>
+
+
+        <!-- View the data with the unordered list below. The list needs an id so  -->
+        <ul id="todos">
+            <!-- Use a for loop to print all the items in the data list from flask -->
+            {% for d in data %}
+            <li>
+                {% raw %}
+                <!-- Raw tag prevents jinja from reading comments -->
+                <!-- Use jinja to insert an if statement that checks whether the box is ticked. -->
+                <!-- No gaps must exist between {% or %} in the jinja conditional statements -->
+                <!-- Include a custom attribute data-id that stores the id of the row from the psql table as a string -->
+                {% endraw %}
+                <input class="check-completed" data-id="{{ d.id }}" type="checkbox" {% if d.completed %} checked {% endif %} />
+                <!-- The description here is the name of the `sql column` being called -->
+                {{d.description }}
+            </li>
+            {% endfor %}
+        </ul>
+    
+    </div>
+
+
+    <!-- Create a script tag to implement the async fetch request -->
+    <script>
+        // Access the tag by the class name
+        const checkboxes = document.querySelectorAll('.check-completed');
+        // Perform a for loop through all the checkboxes and update them if they're ticked or not
+        for (let i = 0; i < checkboxes.length; i++) {
+            const checkbox = checkboxes[i];
+            checkbox.onchange = function(e) {
+                console.log('event', e);
+                // checked is a built in attribute of the input_type checkbox
+                const newCompleted = e.target.checked;
+                // The custom attribute of the input tag is saved under event.target.dataset
+                const todoId = e.target.dataset['id'];
+                // Use fetch to asynchronously update the webpage
+                fetch ('todos/' + todoId + '/set-completed', {
+                    method: 'POST',
+                    body: JSON.stringify({'completed': newCompleted}),
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .then(function() {
+                    // Hide updates that result in an error
+                    document.getElementById('error').classname='hidden';
+                })
+                // use this catch handler to deal with requests that don't work
+                .catch(function() {
+                    document.getElementById('error').classname='';
+                })
+            }
+        }
+
+
+        
+        // Use dom to listen to when the form is submitted and pass the values into a function
+        document.getElementById('form').onsubmit = function(e) {
+            // Use this line to prevent the default page refresh each time there is an update
+            e.preventDefault();
+            // Implement the asynchronous fetch
+            fetch("/todos/create", {
+                // method type
+                method: 'POST',
+                // json formatted string from the form input
+                body: JSON.stringify({'desc_name': document.getElementById('desc_id').value}),
+                // specify the data type as json so the server understands how to read it
+                headers: {'Content-Type': 'application/json'}
+            })
+            // Test that the function actually returns a json and log it to the browser console
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(jsonResponse) {
+                // Print the output to the browser console for debugging
+                console.log(jsonResponse);
+                // Create a `li` tag that can be appended to the unordered list
+                const liItem = document.createElement('li');
+                // The key being called must match the form input name
+                liItem.innerHTML = jsonResponse['desc_name'];
+                // This appends a child to the unordered list and the list tag must have an id='todos'
+                document.getElementById('todos').appendChild(liItem);
+                // Check the request error tag
+                document.getElementById('error').classname='hidden';
+            })
+            // use this catch handler to deal with requests that don't work
+            .catch(function() {
+                document.getElementById('error').classname='';
+            })
+        }
+    </script>
+    
+</body>
+</html>
