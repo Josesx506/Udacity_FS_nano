@@ -17,6 +17,13 @@
             margin: 0;
             width: 300px;}
         li {clear: both;}
+        li button {-webkit-appearance: none;
+            border: none;
+            outline: none;
+            color: red;
+            float: right;
+            cursor: pointer;
+            font-size: 20px;}
         .lists-wrapper, .todos-wrapper {display: inline-block;
             vertical-align: top;}
     </style>
@@ -63,6 +70,8 @@
                 <input class="check-completed" data-id="{{ d.id }}" type="checkbox" {% if d.completed %} checked {% endif %} />
                 <!-- The description here is the name of the `sql column` being called -->
                 {{d.description }}
+                <!-- Add a button that users can press to delete items that is represent by an x -->
+                <button class="delete-item" data-id="{{ d.id }}">&cross;</button>
             </li>
             {% endfor %}
         </ul>
@@ -70,9 +79,52 @@
     </div>
 
 
-    <!-- Create a script tag to implement the async fetch request -->
+    <!-- Create a script tag to implement the async fetch requests for update, and delete -->
     <script>
-        // Access the tag by the class name
+
+        // Access the delete button tag by the class name
+        const numdelbuttons = document.querySelectorAll('.delete-item');
+        // Perform a for loop through all the checkboxes and update them if they're ticked or not
+        for (let i = 0; i < numdelbuttons.length; i++) {
+            const delbutton = numdelbuttons[i];
+            delbutton.onclick = function(e) {
+                console.log('event', e);
+                // The custom attribute of the input tag is saved under event.target.dataset
+                const todoId = e.target.dataset['id'];
+                // Use fetch to asynchronously update the webpage
+                fetch ('/todos/' + todoId + '/delete-row', {
+                    method: 'DELETE'
+                })
+                .then(function () {
+                    // Hide updates that result in an error
+                    document.getElementById('error').classname='hidden';
+                })
+                .then(function() {
+                    // Update the UI based on the successful response
+                    updateUI(e.target);
+                })
+                // use this catch handler to deal with requests that don't work
+                .catch(function() {
+                    document.getElementById('error').classname='';
+                })
+            }
+        }
+
+        // Function to update the UI based on the clicked delete button
+        function updateUI(deleteButton) {
+            // Traverse the DOM to find the corresponding list item
+            const listItem = deleteButton.closest('li');
+
+            // Remove the list item from the DOM
+            if (listItem) {
+                listItem.remove();
+            }
+
+            // Add more logic as needed to update other parts of the UI
+        }
+
+
+        // Access the checkbox tag by the class name
         const checkboxes = document.querySelectorAll('.check-completed');
         // Perform a for loop through all the checkboxes and update them if they're ticked or not
         for (let i = 0; i < checkboxes.length; i++) {
@@ -84,7 +136,7 @@
                 // The custom attribute of the input tag is saved under event.target.dataset
                 const todoId = e.target.dataset['id'];
                 // Use fetch to asynchronously update the webpage
-                fetch ('todos/' + todoId + '/set-completed', {
+                fetch ('/todos/' + todoId + '/set-completed', {
                     method: 'POST',
                     body: JSON.stringify({'completed': newCompleted}),
                     headers: {'Content-Type': 'application/json'}
@@ -100,11 +152,11 @@
             }
         }
 
-
         
         // Use dom to listen to when the form is submitted and pass the values into a function
         document.getElementById('form').onsubmit = function(e) {
             // Use this line to prevent the default page refresh each time there is an update
+            // Note: This does not allow the checkbox to update dynamically onto the webpage till a refresh is done
             e.preventDefault();
             // Implement the asynchronous fetch
             fetch("/todos/create", {
