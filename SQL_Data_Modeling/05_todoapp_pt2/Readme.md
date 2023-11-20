@@ -9,3 +9,5 @@ The steps taken to implement the delete button are:
     - The controller takes the user input, and notifies the models to delete the To-Do object by ID. My implementation gets the item using the `session` instead of `model` that the udacity example used because of the SQLAlchemy 2.0 update.
     - On successful deletion by the models, the controller should notify the view to refresh the page (*This was implemented using a separate function*) and redirect to our homepage, showing a fresh fetch of all To-Do items to now exclude the removed item.
 
+3. In db relationships between primary and foreign keys, the datatype of both columns across the different models must match each other for a relationship to be formed. <br>
+The **`rel01.py`** script shows how to implement relationships between Parent and Child tables. It's not really part of the model but the concept is used in the next step.
