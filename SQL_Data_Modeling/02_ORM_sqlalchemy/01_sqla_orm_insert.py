@@ -1,5 +1,20 @@
 '''
 This script shows how to insert single and multiple rows into a database using sqlalchemy ORM.
+A column can have constraints such as a non-zero value or setting it to be a foreign key for a primary key in another table.
+    - For a parent table, the child relationship is set up using
+
+    class SomeParent(db.Model):
+        id = db.Column(db.Integer, primary_key=True)
+        child_col = db.relationship('someChild', backref='someParent')
+
+    - For a child table, the parent relationship is setup as a `constraint`
+
+    class SomeChild(db.model):
+        id = db.Column(db.Integer, primary_key=True)
+        someParent_id = db.Column(db.Integer, db.ForeignKey('someParent.id'), nullable=False)
+    
+    Note: In db relationships between primary and foreign keys, the datatype of both columns across the different models must match each other for a relationship to be formed.
+    
 It's built on top of the `flask_hello_app.py` script with a lot of repeated lines.
 Note: When rows are inserted, a rollback() can only be performed before the changes are `flushed`.
     i.e. before .query(),.first() or .all() are called on a db.Model object.
