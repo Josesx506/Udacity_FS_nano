@@ -11,3 +11,6 @@ The steps taken to implement the delete button are:
 
 3. In db relationships between primary and foreign keys, the datatype of both columns across the different models must match each other for a relationship to be formed. <br>
 The **`rel01.py`** script shows how to implement relationships between Parent and Child tables. It's not really part of the model but the concept is used in the next step.
+
+4. **`app03.py`** - shows how to implement the db relationships into the todoapp model by creating multiple todo lists with different items per list. It's an example of a *one to many* relationship. I also used flask migrate to create the db and track changes instead of using only SQLAlchemy. <br>
+We can establish maintenance windows during times when the app isn't well used and manipulate production data then, in order to prepare the data before a schema migration, and change it after a schema migration.
