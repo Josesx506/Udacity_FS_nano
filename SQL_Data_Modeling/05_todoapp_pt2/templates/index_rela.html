@@ -24,7 +24,9 @@
             float: right;
             cursor: pointer;
             font-size: 20px;}
-        .lists-wrapper, .todos-wrapper {display: inline-block;
+        /* Allow the different divs to show side by side with inline-block */
+        .lists-wrapper, .todos-wrapper {
+            display: inline-block;
             vertical-align: top;}
     </style>
 </head>
@@ -32,6 +34,7 @@
 
 <body>
     <div class="lists-wrapper">
+    <!-- Use these hyperlinks to navigate to different lists -->
         <ul id="lists">
             {% for list in lists %}
             <li>
@@ -42,7 +45,9 @@
     </div>
 
     <div class="todos-wrapper">
-    
+        <!-- Specify the List Title -->
+        <h4>{{ active_list.name }}</h4>
+
         <!-- Insert a form that will be used to create new input data -->
         <!-- The input label name is linked to the form input by the id attribute -->
         <form id="form">
@@ -50,28 +55,18 @@
             <input type="text" name="desc_name" id="desc_id"/>
             <input type="submit" value="Create" />
         </form>
-        
 
-        <!-- Tag to deal with unsuccessful requests. This tag is hidden using the css style -->
         <div id="error" class="hidden">Something went wrong!</div>
-
-
-        <!-- View the data with the unordered list below. The list needs an id so  -->
+        
         <ul id="todos">
             <!-- Use a for loop to print all the items in the data list from flask -->
-            {% for d in data %}
+            {% for todo in todos %}
             <li>
-                {% raw %}
-                <!-- Raw tag prevents jinja from reading comments -->
-                <!-- Use jinja to insert an if statement that checks whether the box is ticked. -->
-                <!-- No gaps must exist between {% or %} in the jinja conditional statements -->
-                <!-- Include a custom attribute data-id that stores the id of the row from the psql table as a string -->
-                {% endraw %}
-                <input class="check-completed" data-id="{{ d.id }}" type="checkbox" {% if d.completed %} checked {% endif %} />
+                <input class="check-completed" data-id="{{ todo.id }}" type="checkbox" {% if todo.completed %} checked {% endif %} />
                 <!-- The description here is the name of the `sql column` being called -->
-                {{d.description }}
+                {{todo.description }}
                 <!-- Add a button that users can press to delete items that is represent by an x -->
-                <button class="delete-item" data-id="{{ d.id }}">&cross;</button>
+                <button class="delete-item" data-id="{{ todo.id }}">&cross;</button>
             </li>
             {% endfor %}
         </ul>
@@ -82,7 +77,7 @@
     <!-- Create a script tag to implement the async fetch requests for update, and delete -->
     <script>
 
-        // Access the delete button tag by the class name
+        // ------------------------------------ Access the delete button tag by the class name ------------------------------------
         const numdelbuttons = document.querySelectorAll('.delete-item');
         // Perform a for loop through all the checkboxes and update them if they're ticked or not
         for (let i = 0; i < numdelbuttons.length; i++) {
@@ -96,42 +91,21 @@
                     method: 'DELETE'
                 })
                 .then(function () {
-                    // Hide updates that result in an error
-                    document.getElementById('error').classname='hidden';
-                })
-                .then(function() {
-                    // Update the UI based on the successful response
-                    updateUI(e.target);
-                })
-                // use this catch handler to deal with requests that don't work
-                .catch(function() {
-                    document.getElementById('error').classname='';
+                    // Use this function to remove the list item from the UI
+                    const item = e.target.parentElement;
+                    item.remove();
                 })
             }
         }
 
-        // Function to update the UI based on the clicked delete button
-        function updateUI(deleteButton) {
-            // Traverse the DOM to find the corresponding list item
-            const listItem = deleteButton.closest('li');
 
-            // Remove the list item from the DOM
-            if (listItem) {
-                listItem.remove();
-            }
-
-            // Add more logic as needed to update other parts of the UI
-        }
-
-
-        // Access the checkbox tag by the class name
+        // ------------------------------------ Access the checkbox tag by the class name ------------------------------------
         const checkboxes = document.querySelectorAll('.check-completed');
         // Perform a for loop through all the checkboxes and update them if they're ticked or not
         for (let i = 0; i < checkboxes.length; i++) {
             const checkbox = checkboxes[i];
             checkbox.onchange = function(e) {
                 console.log('event', e);
-                // checked is a built in attribute of the input_type checkbox
                 const newCompleted = e.target.checked;
                 // The custom attribute of the input tag is saved under event.target.dataset
                 const todoId = e.target.dataset['id'];
@@ -153,42 +127,69 @@
         }
 
         
-        // Use dom to listen to when the form is submitted and pass the values into a function
+        // --------------------- Use dom to listen to when the form is submitted and pass the values into a function ---------------------
+        const descInput = document.getElementById('desc_id');
         document.getElementById('form').onsubmit = function(e) {
             // Use this line to prevent the default page refresh each time there is an update
             // Note: This does not allow the checkbox to update dynamically onto the webpage till a refresh is done
             e.preventDefault();
+            const desc = descInput.value;
+            descInput.value = '';
             // Implement the asynchronous fetch
             fetch("/todos/create", {
-                // method type
-                method: 'POST',
-                // json formatted string from the form input
-                body: JSON.stringify({'desc_name': document.getElementById('desc_id').value}),
-                // specify the data type as json so the server understands how to read it
-                headers: {'Content-Type': 'application/json'}
+                  // method type
+                  method: 'POST',
+                  // json formatted string from the form input. Dictionary keys would be called in flask app
+                  body: JSON.stringify({'desc_name': desc,
+                                        'list_id': {{ active_list.id }}}),
+                  // specify the data type as json so the server understands how to read it
+                  headers: {'Content-Type': 'application/json'}
             })
-            // Test that the function actually returns a json and log it to the browser console
-            .then(function(response) {
-                return response.json();
-            })
+            .then(response => response.json())
             .then(function(jsonResponse) {
                 // Print the output to the browser console for debugging
                 console.log(jsonResponse);
                 // Create a `li` tag that can be appended to the unordered list
                 const liItem = document.createElement('li');
-                // The key being called must match the form input name
-                liItem.innerHTML = jsonResponse['desc_name'];
-                // This appends a child to the unordered list and the list tag must have an id='todos'
+
+                // Create a checkbox item that will be added to the list item
+                // Specify the class,type, and data-id attributes for the checkbox
+                const checkbox = document.createElement('input');
+                checkbox.className = 'check-completed';
+                checkbox.type = 'checkbox';
+                checkbox.setAttribute('data-id', jsonResponse.id);
+                // Append the checkbox to the list item
+                liItem.appendChild(checkbox);
+
+                // Append the text to the list item
+                // The json key being called must match the form input_tag `name`
+                const text = document.createTextNode(' ' + jsonResponse['desc_name']);
+                liItem.appendChild(text);
+
+                // Create a delete button item that will be added to the list item
+                // Specify the class,data-id attribute, and symbol type as cross for the button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-button';
+                deleteBtn.setAttribute('data-id', jsonResponse.id);
+                deleteBtn.innerHTML = '&cross;';
+                // Append the button to the list item
+                liItem.appendChild(deleteBtn);
+
+                
+                // This appends a child to the unordered list. 
+                // The child item will have a checkbox, text, and delete button associated with it
+                // The list tag must have an id='todos'
                 document.getElementById('todos').appendChild(liItem);
+
                 // Check the request error tag
                 document.getElementById('error').classname='hidden';
             })
             // use this catch handler to deal with requests that don't work
             .catch(function() {
+                console.error('Error occurred');
                 document.getElementById('error').classname='';
             })
         }
     </script>
-    
 </body>
 </html>
