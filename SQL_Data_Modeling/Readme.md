@@ -46,3 +46,8 @@ Use this two websites to test sql code interactively online. Make sure to save i
 ```sql
 SELECT * FROM web_events_full WHERE referrer_url LIKE '%google%';
 ```
+
+The communication protocol used to send and receive data over the internet is TCP/IP. It is an abbreviation that refers to  two main protocols
+    - Transmission Control Protocol (TCP) and 
+    - Internet Protocol (IP)
+Port 80 is responsible for HTTP requests. Port 5432 is the default port for Postgres and most databases. The higher the number of TCP connections open on a server, the worse the performance issues.
