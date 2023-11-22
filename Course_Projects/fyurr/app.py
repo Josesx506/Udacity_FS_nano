@@ -4,14 +4,17 @@
 
 import json
 import dateutil.parser
+from datetime import datetime
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+import os
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -21,6 +24,8 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 
+migrate = Migrate(app, db)
+
 # TODO: connect to a local postgresql database
 
 #----------------------------------------------------------------------------#
@@ -28,7 +33,7 @@ db = SQLAlchemy(app)
 #----------------------------------------------------------------------------#
 
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    __tablename__ = 'Venues'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -36,26 +41,43 @@ class Venue(db.Model):
     state = db.Column(db.String(120))
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
+    genres = db.Column(db.ARRAY(db.String(120)))
     facebook_link = db.Column(db.String(120))
+    image_link = db.Column(db.String(500))
+    website_link = db.Column(db.String(500))
+    seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
+    seeking_description = db.Column(db.String)
+    shows = db.relationship('Show', backref='venue', lazy=True)
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    # TODO: implement any missing fields, as a database migration using Flask-Migrate - DONE
 
 class Artist(db.Model):
-    __tablename__ = 'Artist'
+    __tablename__ = 'Artists'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
+    genres = db.Column(db.ARRAY(db.String(120)))
     facebook_link = db.Column(db.String(120))
+    image_link = db.Column(db.String(500))
+    website_link = db.Column(db.String(500))
+    seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
+    seeking_description = db.Column(db.String)
+    shows = db.relationship('Show', backref='artist', lazy=True)
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    # TODO: implement any missing fields, as a database migration using Flask-Migrate - DONE
 
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration. - DONE
+
+class Show(db.Model):
+   __tablename__ = 'Shows'
+
+   id = db.Column(db.Integer, primary_key=True)
+   start_time = db.Column(db.DateTime)
+   artist_id = db.Column(db.Integer, db.ForeignKey('Artists.id'), nullable=False)
+   venue_id = db.Column(db.Integer, db.ForeignKey('Venues.id'), nullable=False)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -68,6 +90,9 @@ def format_datetime(value, format='medium'):
   elif format == 'medium':
       format="EE MM, dd, y h:mma"
   return babel.dates.format_datetime(date, format, locale='en')
+
+# FLASK_WTF returns y/n instead of T/F and this dictionary helps to convert it.
+talent_dict = {'y': True, None: False}
 
 app.jinja_env.filters['datetime'] = format_datetime
 
@@ -219,14 +244,41 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
 
-  # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+  try:
+    # TODO: insert form data as a new Venue record in the db, instead
+    newVenue = Venue(name = request.form['name'],
+                    city = request.form['city'],
+                    state = request.form['state'],
+                    address = request.form['address'],
+                    phone = request.form['phone'],
+                    genres = request.form.getlist('genres'),
+                    facebook_link = request.form['facebook_link'],
+                    image_link = request.form['image_link'],
+                    website_link = request.form['website_link'],
+                    seeking_talent = talent_dict[request.form.get('seeking_talent')], # Get the form id instead
+                    seeking_description = request.form['seeking_description'])
+    
+    # TODO: modify data to be the data object returned from db insertion
+    data = newVenue
+
+    # Add and commit db changes
+    db.session.add(newVenue)
+    db.session.commit()
+    # on successful db insert, flash success
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+
+  except():
+    # TODO: on unsuccessful db insert, flash an error instead.,
+    db.session.rollback()
+    flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    
+  finally:
+    db.session.close()
+    
+  
+  # This will be done in show_venue() 
+  
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
@@ -510,12 +562,10 @@ if not app.debug:
 #----------------------------------------------------------------------------#
 
 # Default port:
-if __name__ == '__main__':
-    app.run()
+# if __name__ == '__main__':
+#     app.run()
 
 # Or specify port manually:
-'''
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
-'''
+    port = int(os.environ.get('PORT', 3000))
+    app.run(host='0.0.0.0', port=port, debug=True)

@@ -51,3 +51,5 @@ The communication protocol used to send and receive data over the internet is TC
     - Transmission Control Protocol (TCP) and 
     - Internet Protocol (IP)
 Port 80 is responsible for HTTP requests. Port 5432 is the default port for Postgres and most databases. The higher the number of TCP connections open on a server, the worse the performance issues.
+
+Flask-SQLAlchemy 3.1.1
