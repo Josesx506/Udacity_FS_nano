@@ -1,16 +1,24 @@
-### Fyurr Steps
-Here are the lists of Todo Items I've completed. Note: **POST** requests are handled with request.form['<form_label_name>']
+### Fyurr Implementation Checklist
+Here are the lists of Todo Items I've completed. They were not completed sequentially but it helped me keep track. <br>
+Note: **POST** requests are handled with request.form['<form_label_name>'] unlike dom from javascript.
 - [x] Link app with local psql db in `config` file.
 - [x] Initialize and monitor db changes with Flask-Migrate.
 - [x] Setup missing columns for `Artists` and `Venues` models including Foreign keys
-- [x] Setup `Shows` models that links to the Artists and Venues that were booked for the show.
+- [x] Setup `Shows` model that links to the Artists and Venues that were booked for the show.
 - [x] Link `create_venue_submission()` to psql db
-    - [ ] Update `venues` page with data from the psql db (outstanding link to shows db)
+    - [x] Update `venues` page with data from the psql db
+    - [x] Update `show_venues()` function with data from psql db
     - [x] Populate `edit_venue` form with psql db
-    - [x] Update psql db when the button is submitted `edit_venue_submission`
+    - [x] Update psql db when the button is submitted with `edit_venue_submission()`
+    - [x] Implement case-insentitive search of venue table from psql with `search_venues`
+    - [ ] Implement delete button for show_venues page.
     <br>
 - [x] Link `create_artist_submission()` to psql db
     - [x] Update `artists` page with data from psql db
+    - [x] Update `show_artist()` function with data from psql db
     - [x] Populate `edit_artist` form with psql db
-    - [x] Update psql db when the button is submitted `edit_artist_submission`
-
+    - [x] Update psql db when the button is submitted with `edit_artist_submission()`
+    - [x] Implement case-insentitive search of artist table from psql with `search_artists`
+    <br>
+- [x] Link `create_show_submission` to psql db
+    - [x] Update `shows` page with data from psql db
