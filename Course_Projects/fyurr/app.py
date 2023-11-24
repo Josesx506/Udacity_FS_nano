@@ -275,9 +275,6 @@ def create_venue_submission():
     
   finally:
     db.session.close()
-    
-  
-  # This will be done in show_venue() 
   
   return render_template('pages/home.html')
 
@@ -295,16 +292,7 @@ def delete_venue(venue_id):
 @app.route('/artists')
 def artists():
   # TODO: replace with real data returned from querying the database
-  data=[{
-    "id": 4,
-    "name": "Guns N Petals",
-  }, {
-    "id": 5,
-    "name": "Matt Quevedo",
-  }, {
-    "id": 6,
-    "name": "The Wild Sax Band",
-  }]
+  data= Artist.query.order_by('id').all()
   return render_template('pages/artists.html', artists=data)
 
 @app.route('/artists/search', methods=['POST'])
@@ -327,7 +315,7 @@ def show_artist(artist_id):
   # shows the artist page with the given artist_id
   # TODO: replace with real artist data from the artist table, using artist_id
   data1={
-    "id": 4,
+    "id": 1,
     "name": "Guns N Petals",
     "genres": ["Rock n Roll"],
     "city": "San Francisco",
@@ -349,7 +337,7 @@ def show_artist(artist_id):
     "upcoming_shows_count": 0,
   }
   data2={
-    "id": 5,
+    "id": 2,
     "name": "Matt Quevedo",
     "genres": ["Jazz"],
     "city": "New York",
@@ -369,7 +357,7 @@ def show_artist(artist_id):
     "upcoming_shows_count": 0,
   }
   data3={
-    "id": 6,
+    "id": 3,
     "name": "The Wild Sax Band",
     "genres": ["Jazz", "Classical"],
     "city": "San Francisco",
@@ -404,27 +392,58 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-  form = ArtistForm()
+  # Extract the active artist from the db
+  activeArtist = db.session.get(Artist, artist_id)
+  
+  # Pass the artist attributes into a dictionary
   artist={
-    "id": 4,
-    "name": "Guns N Petals",
-    "genres": ["Rock n Roll"],
-    "city": "San Francisco",
-    "state": "CA",
-    "phone": "326-123-5000",
-    "website": "https://www.gunsnpetalsband.com",
-    "facebook_link": "https://www.facebook.com/GunsNPetals",
-    "seeking_venue": True,
-    "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-    "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
+    "id": activeArtist.id,
+    "name": activeArtist.name,
+    "genres": activeArtist.genres,
+    "city": activeArtist.city,
+    "state": activeArtist.state,
+    "phone": activeArtist.phone,
+    "website": activeArtist.website_link,
+    "facebook_link": activeArtist.facebook_link,
+    "seeking_venue": activeArtist.seeking_venue,
+    "seeking_description": activeArtist.seeking_description,
+    "image_link": activeArtist.image_link
   }
   # TODO: populate form with fields from artist with ID <artist_id>
+  form = ArtistForm(data=artist)
+
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
+  # Extract the active artist from the db
+  activeArtist = db.session.get(Artist, artist_id)
+
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
+  try:
+    activeArtist.name = request.form['name']
+    activeArtist.city = request.form['city']
+    activeArtist.state = request.form['state']
+    activeArtist.phone = request.form['phone']
+    activeArtist.genres = request.form.getlist('genres')
+    activeArtist.facebook_link = request.form['facebook_link']
+    activeArtist.image_link = request.form['image_link']
+    activeArtist.website_link = request.form['website_link']
+    activeArtist.seeking_venue = talent_dict[request.form.get('seeking_venue')] # Get the form id instead
+    activeArtist.seeking_description = request.form['seeking_description']
+
+    db.session.commit()
+    # on successful db insert, flash success
+    flash('Artist ' + request.form['name'] + ' was successfully updated!')
+
+  except():
+    # TODO: on unsuccessful db insert, flash an error instead.,
+    db.session.rollback()
+    flash('An error occurred. Artist ' + request.form['name'] + ' could not be updated.')
+    
+  finally:
+    db.session.close()
 
   return redirect(url_for('show_artist', artist_id=artist_id))
 
@@ -466,12 +485,36 @@ def create_artist_form():
 def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
+  try:
+    # TODO: insert form data as a new Venue record in the db, instead
+    newArtist = Artist(name = request.form['name'],
+                       city = request.form['city'],
+                       state = request.form['state'],
+                       phone = request.form['phone'],
+                       genres = request.form.getlist('genres'),
+                       facebook_link = request.form['facebook_link'],
+                       image_link = request.form['image_link'],
+                       website_link = request.form['website_link'],
+                       seeking_venue = talent_dict[request.form.get('seeking_venue')], # Get the form id instead
+                       seeking_description = request.form['seeking_description'])
+    
+    # TODO: modify data to be the data object returned from db insertion
+    data = newArtist
 
-  # on successful db insert, flash success
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+    # Add and commit db changes
+    db.session.add(newArtist)
+    db.session.commit()
+    # on successful db insert, flash success
+    flash('Artist ' + request.form['name'] + ' was successfully listed!')
+
+  except():
+    # TODO: on unsuccessful db insert, flash an error instead.,
+    db.session.rollback()
+    flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+    
+  finally:
+    db.session.close()
+  
   return render_template('pages/home.html')
 
 
