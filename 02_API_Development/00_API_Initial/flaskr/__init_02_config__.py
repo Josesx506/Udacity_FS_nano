@@ -31,6 +31,3 @@ def create_app(test_config=None):
         pass
     
     return app
-
-# $env:FLASK_APP="flaskr"
-# $env:FLASK_ENV="development"

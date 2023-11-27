@@ -7,7 +7,7 @@
 
 ### Python Packages used.
 - Flask
-- Flask-CORS
+- Flask-CORS (Cross-Origin Resource Sharing)
 - SQLAlchemy
 - JSONify
 - Unittest
@@ -19,14 +19,43 @@ The flask app used here is setup in a slightly different way. Unlike the `SQL_Da
 ├── Backend
 │   └── flaskr
 │       ├── __init__.py
-│       └── config.py
+│       ├── config.py
+│       └── models.py
 └── Frontend
 ```
-Specify the environment variables on mac with `export FLASK_APP=flaskr FLASK_ENV=development FLASK_DEBUG=True` from the `Backend` directory. This only needs to be run once. Subsequently, the app can be launced with `flask run`. <br><br>
+Specify the environment variables on mac with `export FLASK_APP=flaskr FLASK_ENV=development FLASK_DEBUG=True` from the `Backend` directory. This only needs to be run once. Subsequently, the app can be launced with `flask run`.  <br><br>
+
+The `00_API_Initial` has files with scripts on how to: 
+- set up the flask app, 
+- perform CORS, and 
+- do pagination on the `plants` db. 
+<br>
+
+The remaining folders are for implementing the `Udacity bookshelf app` whichs uses the `books` db.<br><br>
 
 
 #### CURL
 - Use `Cmd+Shift+C` to go to Chrome developer tools in your browser or use the 3 buttons at the top right or use `Fn+F12`
 - Check if curl is installed with `curl --version`. The documentation help can be accessed with `curl --help`.
 - Test a url using curl with `curl -X POST <url_link>`. Specify *-X POST* lets curl know it's a post request otherwise it implementsa a GET request by default.
-- You can also pipe the results to json format using the command line **jq** processor e.g. `curl https://restcountries.com/v3.1/currency/cop | jq "."`. This makes the response easier to read. jq is installed as part of conda on my mac.
+- You can also pipe the results to json format using the command line **jq** processor e.g. `curl https://restcountries.com/v3.1/currency/cop | jq "."`. This makes the response easier to read. jq is installed as part of conda on my mac.<br><br>
+
+
+#### Request Endpoints
+- Endpoints should be organized by resource and in the structure of `collection/item/collection`. e.g. `genres/1/movies` should access all movies related to genre 1.
+- collection names are usually plural in production e.g. `genres`,`tasks`,`messages`,`movies` etc.
+- `http` and `https` are different protocols.
+- To create the `plants` db locally that matches the udacity workspace. Run the script below
+```bash
+su - postgres bash -c "dropdb plants"
+su - postgres bash -c "createdb plants"
+su - postgres bash -c "psql < plantsdb_setup/plantsdb-setup.sql"
+su - postgres bash -c "psql plants < plantsdb_setup/plants.psql"
+```
+
+#### Terminal Tips
+- Kill a process with 
+```bash
+ps -a
+sudo kill <pid>
+```
