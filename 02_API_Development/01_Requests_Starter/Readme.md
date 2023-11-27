@@ -45,15 +45,15 @@ npm run start
 <br>
 
 #### Chapter Deliverables
-This chapter was originally for only creating requests, however I merged it with the error handling chapter because that chapter was short. <br> The **TODO** items in this chapter included <br> 
-[x] Setup a flask app that is connected to the `bookshelf` db
-[x] Use CORS to define the valid request headers and methods
-[x] Create API endpoints for
-    [x] **GET**ting all the books from the db and rendering them with pagination 
-    [x] **UPDATE** the book ratings from the db interactively using the frontend or manually with curl requests
-    [x] **DELETE** a book from the db interactively using the frontend or manually with curl requests
-    [x] **POST** a new book to the db interactively using the frontend or manually with curl requests
-[x] Create error handlers to return *human-readable* response messages when errors are encountered.
+This chapter was originally for only creating requests, however I merged it with the error handling chapter because that chapter was short. <br> The **TODO** items in this chapter included.
+- [x] Setup a flask app that is connected to the `bookshelf` db.
+- [x] Use CORS to define the valid request headers and methods.
+- [x] Create API endpoints for
+    - [x] **GET**ting all the books from the db and rendering them with pagination
+    - [x] **UPDATE** the book ratings from the db interactively using the frontend or manually with curl requests
+    - [x] **DELETE** a book from the db interactively using the frontend or manually with curl requests
+    - [x] **POST** a new book to the db interactively using the frontend or manually with curl requests
+- [x] Create error handlers to return *human-readable* response messages when errors are encountered.
     - Error messages were accessed using a different route handler `@app.errorhandler(<error_status_code)` that replaces the default html message from flask's abort with a json message.
 [x] Test all the endpoints using curl.
 <br><br>
