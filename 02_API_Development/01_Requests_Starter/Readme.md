@@ -45,7 +45,7 @@ npm run start
 <br>
 
 #### Chapter Deliverables
-This chapter was originally for only creating requests, however I merged it with the error handling chapter because that chapter was short. The **TODO** items in this chapter included
+This chapter was originally for only creating requests, however I merged it with the error handling chapter because that chapter was short. <br> The **TODO** items in this chapter included <br> 
 [x] Setup a flask app that is connected to the `bookshelf` db
 [x] Use CORS to define the valid request headers and methods
 [x] Create API endpoints for
