@@ -18,7 +18,7 @@ The flask app in this chapter is setup in an `__init__.py` file with a folder st
 ```
 Specify the environment variables on mac with `export FLASK_APP=flaskr FLASK_ENV=development FLASK_DEBUG=True` from the `backend` directory. This only needs to be run once. Subsequently, the app can be launced with `flask run`. The `node_modules` folder is large and was excluded in the .gitignore file <br><br>
 
-### App Requirements
+#### App Requirements
 This is the first part of the `Udacity bookshelf` app that handles creating api endpoints and handling errors. 
 - It uses the `bookshelf` db that can be installed with 
 ```bash
@@ -42,7 +42,7 @@ npm audit fix --force
 # Launch the server
 npm run start
 ```
-<br><br>
+<br>
 
 #### Chapter Deliverables
 This chapter was originally for only creating requests, however I merged it with the error handling chapter because that chapter was short. The **TODO** items in this chapter included
