@@ -30,5 +30,6 @@ The psql db script also created a `bookshelf_test` which we'll be using in this 
 **Note**: all test functions must start with `test_` for them to run
 - Modified the `create_app()` function in `flaskr/__init__.py` to accept a db_name as an argument.
 - Changed the db from the `bookshelf` development db to the `bookshelf_test` in the `test_flaskr.py` `setUp()` function
+- The tests can be implemented whether the flask app is running or not.
 - I implemented tests to evaluate successful and unsuccessful requests for the GET,PATCH,POST and DELETE requests
 - Synced multiple functions to keep the test db length static. I might be able to implement this once I learn `tearDown` later in this chapter.

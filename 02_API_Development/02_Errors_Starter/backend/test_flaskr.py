@@ -77,12 +77,18 @@ class BookTestCase(unittest.TestCase):
         res0 = self.client().get('/books')
         data0 = json.loads(res0.data)
         first_id = data0['books'][0]['id']
+        rating = 4
 
-        res = self.client().patch(f'/books/{first_id}',json={'rating': 3})
+        res = self.client().patch(f'/books/{first_id}',json={'rating': rating})
         data = json.loads(res.data)
+        # Load the book rating from the db and confirm if it has been updated
+        with self.app.app_context():
+            book = Book.query.filter(Book.id == first_id).one_or_none()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+        # Check that the updated rating matches the one in the request above
+        self.assertEqual(book.format()['rating'], rating)
     
 
     def test_update_nonexisting_book_rating(self):
@@ -121,11 +127,18 @@ class BookTestCase(unittest.TestCase):
         res = self.client().delete(f'/books/{last_id}')
         data = json.loads(res.data)
 
+        # Load the book rating from the db and confirm if it has been deleted
+        with self.app.app_context():
+            book = Book.query.filter(Book.id == last_id).one_or_none()
+
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertTrue(data['deleted'])
+        # Check that the deleted book.id matches the id specified in the request
+        self.assertEqual(data['deleted'], last_id)
         self.assertTrue(len(data['books']))
         self.assertTrue(data['total_books'])
+        # Check that the deleted book id from the db is None
+        self.assertEqual(book, None)
         
 
     def test_delete_nonexistent_book(self):
@@ -187,7 +200,7 @@ class BookTestCase(unittest.TestCase):
         self.assertTrue(data['total_books'])
 
     # I couldn't implement an error test for the post request to the `/books` route except I change the route name to generate
-    # an error. 
+    # an error. (This was what the instructor did). 
     
 
     def test_404_sent_requesting_beyond_valid_page(self):
@@ -201,8 +214,11 @@ class BookTestCase(unittest.TestCase):
     def test_error_405_invalid_request_method(self):
         """Test the error 405 handler """
         res = self.client().post('/books/9')
+        data = json.loads(res.data)
+
         self.assertEqual(res.status_code, 405)
-        # print('error_405_status test successful')
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'method not allowed')
     
     
     def tearDown(self):
