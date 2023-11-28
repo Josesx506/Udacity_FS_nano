@@ -43,6 +43,7 @@ npm audit fix --force
 # Launch the server
 npm run start
 ```
+- **NOTE**: The flask server must be running for the react app to work
 <br>
 
 #### Chapter Deliverables
