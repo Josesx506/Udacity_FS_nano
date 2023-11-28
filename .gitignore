@@ -6,4 +6,4 @@ Screenshots_Udacity/
 */*/*/__pycache__
 */*/*/*/__pycache__
 Books/
-02_API_Development/01_Requests_Starter/frontend/node_modules
+02_API_Development/*/*/node_modules

@@ -5,6 +5,7 @@ The flask app in this chapter is setup in an `__init__.py` file with a folder st
 ├── backend
 │   ├── flaskr
 │   │   └── __init__.py
+│   ├── books.psql
 │   ├── models.py
 │   ├── requirements.txt
 │   └── setup.sql
