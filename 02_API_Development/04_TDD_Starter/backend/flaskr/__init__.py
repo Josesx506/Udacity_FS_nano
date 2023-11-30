@@ -120,7 +120,7 @@ def create_app(test_config=None,db_name=db_name):
                 return jsonify(
                     {
                         "success": True,
-                        "title": book_title,
+                        "keyword_title": book_title,
                         "count_books": selection.count(),
                         "books": books,
                     })
@@ -168,21 +168,6 @@ def create_app(test_config=None,db_name=db_name):
     @app.errorhandler(400)
     def bad_request(error):
         return jsonify({"success": False, "error": 400, "message": "bad request"}), 400
-    
-
-    # @app.route("/books/search", methods=["POST"])
-    # def search_books():
-    #     body = request.get_json()
-
-    #     if 'search_title' in body:
-    #         book_title = body.get("search_title")
-    #     else:
-    #         abort(400)
-        
-    #     try:
-            
-    #     except:
-    #         abort(404)
 
 
     return app

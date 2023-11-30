@@ -120,12 +120,12 @@ class BookTestCase(unittest.TestCase):
 
         # Check that the number of return book names match the ones in the db
         with self.app.app_context():
-            count_books = Book.query.filter(Book.title.ilike(f"%{data['title']}%")).count()
+            count_books = Book.query.filter(Book.title.ilike(f"%{data['keyword_title']}%")).count()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertEqual(data["count_books"],count_books)
-        self.assertTrue(data["title"])
+        self.assertTrue(data["keyword_title"])
         self.assertTrue(data["books"])
 
     
@@ -140,13 +140,13 @@ class BookTestCase(unittest.TestCase):
 
         # Check that the number of return book names match the ones in the db
         with self.app.app_context():
-            count_books = Book.query.filter(Book.title.ilike(f"%{data['title']}%")).count()
+            count_books = Book.query.filter(Book.title.ilike(f"%{data['keyword_title']}%")).count()
 
         
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertEqual(data["count_books"],count_books)
-        self.assertTrue(data["title"])
+        self.assertTrue(data["keyword_title"])
         self.assertEqual(data["books"],[])
 
 

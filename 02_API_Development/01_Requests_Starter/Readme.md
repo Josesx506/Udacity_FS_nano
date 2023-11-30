@@ -66,6 +66,7 @@ API tests were performed to validate the endpoints. The command to
 - Update a single book's rating - `curl http://127.0.0.1:5000/books/8 -X PATCH -H "Content-Type: application/json" -d '{"rating":"1"}'`
 - Delete a single book - `curl -X DELETE http://127.0.0.1:5000/books/8`
 - Create/Post a new book - `curl -X POST -H "Content-Type: application/json" -d '{"title":"Neverwhere", "author":"Neil Gaiman", "rating":"5"}' http://127.0.0.1:5000/books`
+- Curl requests can be piped to a terminal json formatter `jq` with `curl http://127.0.0.1:5000/books | jq '.'`
 - Testing endpoints manually with curl is tiresome and an updated test method is introduced in subsequent chapters.
 <br><br>
 
