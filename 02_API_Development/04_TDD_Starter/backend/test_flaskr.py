@@ -115,35 +115,39 @@ class BookTestCase(unittest.TestCase):
         This function tests that a valid search request will return the books 
         from the db that match the title name
         '''
-        res = self.client().post("/books/search", json={'search_title': 'Anansi Boys'})
+        res = self.client().post("/books", json={'search_title': 'Anansi Boys'})
         data = json.loads(res.data)
 
         # Check that the number of return book names match the ones in the db
         with self.app.app_context():
-            count = Book.query.filter(Book.title.ilike(f"%{data['title']}%")).count()
+            count_books = Book.query.filter(Book.title.ilike(f"%{data['title']}%")).count()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
-        self.assertEqual(data["count"],count)
+        self.assertEqual(data["count_books"],count_books)
         self.assertTrue(data["title"])
-        self.assertTrue(len(data["books"]))
+        self.assertTrue(data["books"])
 
     
     def test_search_nonexistent_book_title(self):
         '''
-        This function checks that the correct error status code is reached if an 
-        invalid book title search is performed
+        This function checks tests a search for an invalid book title. It returns a 
+        server successful error and indicates that the nuber of books the match the search is 0
         '''
 
-        res = self.client().post("/books/search", json={'searches': None})
+        res = self.client().post("/books", json={'search_title': 'Things fall apart'})
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 400)
-        self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "bad request")
+        # Check that the number of return book names match the ones in the db
+        with self.app.app_context():
+            count_books = Book.query.filter(Book.title.ilike(f"%{data['title']}%")).count()
 
-
-
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(data["count_books"],count_books)
+        self.assertTrue(data["title"])
+        self.assertEqual(data["books"],[])
 
 
 # Make the tests conveniently executable

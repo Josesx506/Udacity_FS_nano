@@ -111,26 +111,37 @@ def create_app(test_config=None,db_name=db_name):
         new_title = body.get("title", None)
         new_author = body.get("author", None)
         new_rating = body.get("rating", None)
+        book_title = body.get("search_title", None)
 
         try:
-            if new_title is None:
-                abort(422)
+            if book_title is not None:
+                selection = Book.query.order_by(Book.id).filter(Book.title.ilike(f"%{book_title}%"))
+                books = paginate_books(request, selection)
+                return jsonify(
+                    {
+                        "success": True,
+                        "title": book_title,
+                        "count_books": selection.count(),
+                        "books": books,
+                    })
+            
+            elif new_title is not None:
+                    book = Book(title=new_title, author=new_author, rating=new_rating)
+                    book.insert()
+
+                    selection = Book.query.order_by(Book.id).all()
+                    current_books = paginate_books(request, selection)
+
+                    return jsonify(
+                        {
+                            "success": True,
+                            "created": book.id,
+                            "books": current_books,
+                            "total_books": len(Book.query.all()),
+                        }
+                    )
             else:
-                book = Book(title=new_title, author=new_author, rating=new_rating)
-                book.insert()
-
-            selection = Book.query.order_by(Book.id).all()
-            current_books = paginate_books(request, selection)
-
-            return jsonify(
-                {
-                    "success": True,
-                    "created": book.id,
-                    "books": current_books,
-                    "total_books": len(Book.query.all()),
-                }
-            )
-
+                abort(422)
         except:
             abort(422)
 
@@ -159,28 +170,19 @@ def create_app(test_config=None,db_name=db_name):
         return jsonify({"success": False, "error": 400, "message": "bad request"}), 400
     
 
-    @app.route("/books/search", methods=["POST"])
-    def search_books():
-        body = request.get_json()
+    # @app.route("/books/search", methods=["POST"])
+    # def search_books():
+    #     body = request.get_json()
 
-        if 'search_title' in body:
-            book_title = body.get("search_title")
-        else:
-            abort(400)
+    #     if 'search_title' in body:
+    #         book_title = body.get("search_title")
+    #     else:
+    #         abort(400)
         
-        try:
-            search = Book.query.filter(Book.title.ilike(f"%{book_title}%"))
-            books = [book.format() for book in search.all()]
-
-            return jsonify(
-                {
-                    "success": True,
-                    "title": book_title,
-                    "count": search.count(),
-                    "books": books,
-                })
-        except:
-            abort(404)
+    #     try:
+            
+    #     except:
+    #         abort(404)
 
 
     return app
