@@ -48,18 +48,22 @@ def create_app(test_config=None,db_name=db_name):
     for all available categories.
     """
     @app.route("/categories")
-    def retrieve_categories():
-        selection = Category.query.order_by(Category.id).all()
-        current_categories = [category.format() for category in selection]
+    def get_categories():
+        '''
+        Performs GET requests to access all the categories in the db
+        '''
+        selection_category = Category.query.order_by(Category.id).all()
+        current_categories = {cat.format()['id']:cat.format()['type'] for cat in selection_category}
 
         if len(current_categories) == 0:
             abort(404)
 
+        # categories must be passed as a dictionary so that a loop can be applied on the keys and values
+        # passing it as a list causes an error with the indexing
         return jsonify(
             {
                 "success": True,
-                "categories": current_categories,
-                "totalCategories": len(Category.query.all()),
+                "categories": current_categories
             }
         )
 
@@ -76,11 +80,14 @@ def create_app(test_config=None,db_name=db_name):
     Clicking on the page numbers should update the questions.
     """
     @app.route("/questions")
-    def retrieve_questions():
+    def get_questions():
+        '''
+        Performs GET requests to access all the questions in the db
+        '''
         selection_question = Question.query.order_by(Question.category).all()
         current_questions = paginate_questions(request, selection_question)
         selection_category = Category.query.order_by(Category.id).all()
-        all_categories = [category.format()['type'] for category in selection_category]
+        all_categories =  {cat.format()['id']:cat.format()['type'] for cat in selection_category}
 
         if len(current_questions) == 0:
             abort(404)
@@ -102,6 +109,30 @@ def create_app(test_config=None,db_name=db_name):
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
+    @app.route("/questions/<int:q_id>")
+    def delete_question(q_id):
+        '''
+        Implements delete requests based on a question id
+        '''
+        try:
+            question = Question.query.filter(Question.id == q_id).one_or_none()
+
+            if question is None:
+                abort(404)
+
+            question.delete()
+
+            # The front end is used to call the `get_questions()` again which refreshes the view
+            # Hence there's no need to query the db to return remaining question
+            return jsonify(
+                {
+                    "success": True,
+                    "deleted": q_id,
+                }
+            )
+
+        except:
+            abort(422)
 
     """
     @TODO:
@@ -134,14 +165,14 @@ def create_app(test_config=None,db_name=db_name):
     category to be shown.
     """
     @app.route("/categories/<int:cat_id>/questions")
-    def retrieve_questions_by_category(cat_id):
+    def get_questions_by_category(cat_id):
         '''
         I added 1 to the id because the react app is using zero indexing to call the category ids, while the id numbers start from 1 in the db
         '''
         dict_ids = {0:1,1:2,2:3,3:4,4:5,5:6}
-        selection_question = Question.query.filter(Question.category == dict_ids[cat_id]).order_by(Question.category).all()
+        selection_question = Question.query.filter(Question.category == cat_id).order_by(Question.category).all()
         current_questions = paginate_questions(request, selection_question)
-        current_category = [category.format()['type'] for category in Category.query.filter(Category.id == dict_ids[cat_id]).all()]
+        current_category = Category.query.filter(Category.id == cat_id).one_or_none()
 
         if len(current_questions) == 0:
             abort(404)
@@ -151,7 +182,7 @@ def create_app(test_config=None,db_name=db_name):
                 "success": True,
                 "questions": current_questions,
                 "totalQuestions": len(selection_question),
-                "currentCategory": current_category,
+                "currentCategory": current_category.type,
             }
         )
 
