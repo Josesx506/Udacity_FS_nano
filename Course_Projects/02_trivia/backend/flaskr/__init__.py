@@ -96,9 +96,9 @@ def create_app(test_config=None,db_name=db_name):
             {
                 "success": True,
                 "questions": current_questions,
-                "totalQuestions": len(Question.query.all()),
+                "total_questions": len(selection_question),
                 "categories": all_categories,
-                "currentCategory": None,
+                "current_category": 'None',
             }
         )
 
