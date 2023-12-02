@@ -109,7 +109,7 @@ def create_app(test_config=None,db_name=db_name):
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
-    @app.route("/questions/<int:q_id>")
+    @app.route("/questions/<int:q_id>", methods=['DELETE'])
     def delete_question(q_id):
         '''
         Implements delete requests based on a question id
@@ -144,7 +144,6 @@ def create_app(test_config=None,db_name=db_name):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
-
     """
     @TODO:
     Create a POST endpoint to get questions based on a search term.
@@ -155,6 +154,55 @@ def create_app(test_config=None,db_name=db_name):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
+    @app.route("/questions", methods=['POST'])
+    def post_question():
+        '''
+        This function implements the post requests for adding a new book and searching for trivia questions in the db
+        '''
+        body = request.get_json()
+
+        new_question = body.get("question", None)
+        new_answer = body.get("answer", None)
+        new_difficulty = body.get("difficulty", None)
+        new_category = body.get("category", None)
+
+
+        search_question = body.get("searchTerm", None)
+
+        try:
+            if search_question is not None:
+                selection = Question.query.order_by(Question.id).filter(Question.question.ilike(f"%{search_question}%"))
+                questions = paginate_questions(request, selection)
+                return jsonify(
+                    {
+                        "success": True,
+                        "questions": questions,
+                        "total_questions": selection.count(),
+                        "current_category": 'None',
+                    })
+            
+            elif new_question is not None:
+                    question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
+                    question.insert()
+
+                    selection_question = Question.query.order_by(Question.category).all()
+                    current_questions = paginate_questions(request, selection_question)
+                    selection_category = Category.query.order_by(Category.id).all()
+                    all_categories =  {cat.format()['id']:cat.format()['type'] for cat in selection_category}
+
+                    return jsonify(
+                        {
+                            "success": True,
+                            "questions": current_questions,
+                            "total_questions": len(selection_question),
+                            "categories": all_categories,
+                            "current_category": new_category,
+                        }
+                    )
+            else:
+                abort(422)
+        except:
+            abort(422)
 
     """
     @TODO:
