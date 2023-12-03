@@ -207,7 +207,7 @@ def create_app(test_config=None,db_name=db_name):
                             "questions": current_questions,
                             "total_questions": len(selection_question),
                             "categories": all_categories,
-                            "current_category": new_category,
+                            "current_category": all_categories[new_category],
                         }
                     )
             else:
