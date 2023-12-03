@@ -22,7 +22,7 @@ Note: all requests are handled with *REACT* with asynchronous fetch.
 
 - [x] Perform api tests for all the request and error endpoints in `backend/test_flaskr.py`
     - [x] Create a `trivia_test` db that mimics the trivia db structure for testing purposes
-    - [x] API test for success & unsuccessful GET `categories` endpoint.
+    - [x] API test for successful & unsuccessful GET `categories` endpoint.
 <br><br><br><br>
 
 
