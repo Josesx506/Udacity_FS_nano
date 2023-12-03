@@ -89,7 +89,7 @@ def create_app(test_config=None,db_name=db_name):
         '''
         Performs GET requests to access all the questions in the db
         '''
-        selection_question = Question.query.order_by(Question.category).all()
+        selection_question = Question.query.order_by(Question.id).all()
         current_questions = paginate_questions(request, selection_question)
         selection_category = Category.query.order_by(Category.id).all()
         all_categories =  {cat.format()['id']:cat.format()['type'] for cat in selection_category}
@@ -276,6 +276,7 @@ def create_app(test_config=None,db_name=db_name):
             # Extract the category name and id from the json data. The category type/name is not used
             cat_type = category['type']
             cat_id = int(category['id'])
+
         else:
             abort(400)
         

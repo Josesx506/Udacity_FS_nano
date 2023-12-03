@@ -23,6 +23,17 @@ Note: all requests are handled with *REACT* with asynchronous fetch.
 - [x] Perform api tests for all the request and error endpoints in `backend/test_flaskr.py`
     - [x] Create a `trivia_test` db that mimics the trivia db structure for testing purposes
     - [x] API test for successful & unsuccessful GET `categories` endpoint.
+    - [x] API test for successful & unsuccessful GET `categories/<int:cat_id>/questions` endpoint.
+    - [x] API test for successful & unsuccessful GET `questions` endpoint.
+    - [x] API test for successful & unsuccessful DELETE `questions` endpoint.
+    - [x] API test for successful & unsuccessful POST new `questions` endpoint (Allows creation of new questions in db).
+    - [x] API test for successful & unsuccessful POST search `questions` endpoint (Allows search of existing/non-existing question sub-string in db).
+    - [x] API test for successful & unsuccessful POST play trivia `quizzes` endpoint (Allows users to play the game).
+        - [x] Test for playing game with all categories
+        - [x] Test for playing game with specific categories
+        - [x] Test for ending game when questions have been exhausted
+        - [x] Test for raising `400` error when request is improperly formatted
+    - [x] Error tests are already included in API tests above
 <br><br><br><br>
 
 
