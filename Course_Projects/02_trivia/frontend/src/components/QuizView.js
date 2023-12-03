@@ -69,6 +69,9 @@ class QuizView extends Component {
           guess: '',
           forceEnd: result.question ? false : true,
         });
+        // Print statements I implemented to investigate what the frontend was getting
+        // console.log(this.state.currentQuestion.question);
+        // console.log(this.state.previousQuestions);
         return;
       },
       error: (error) => {

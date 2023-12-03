@@ -52,20 +52,25 @@ def create_app(test_config=None,db_name=db_name):
         '''
         Performs GET requests to access all the categories in the db
         '''
-        selection_category = Category.query.order_by(Category.id).all()
-        current_categories = {cat.format()['id']:cat.format()['type'] for cat in selection_category}
 
-        if len(current_categories) == 0:
-            abort(404)
+        try:
+            selection_category = Category.query.order_by(Category.id).all()
+            current_categories = {cat.format()['id']:cat.format()['type'] for cat in selection_category}
 
-        # categories must be passed as a dictionary so that a loop can be applied on the keys and values
-        # passing it as a list causes an error with the indexing
-        return jsonify(
-            {
-                "success": True,
-                "categories": current_categories
-            }
-        )
+            if len(current_categories) == 0:
+                abort(404)
+            
+            else:
+                # categories must be passed as a dictionary so that a loop can be applied on the keys and values
+                # passing it as a list causes an error with the indexing
+                return jsonify(
+                    {
+                        "success": True,
+                        "categories": current_categories
+                    }
+                )
+        except:
+            abort(400)
 
     """
     @TODO:
@@ -92,15 +97,16 @@ def create_app(test_config=None,db_name=db_name):
         if len(current_questions) == 0:
             abort(404)
 
-        return jsonify(
-            {
-                "success": True,
-                "questions": current_questions,
-                "total_questions": len(selection_question),
-                "categories": all_categories,
-                "current_category": 'None',
-            }
-        )
+        else:
+            return jsonify(
+                {
+                    "success": True,
+                    "questions": current_questions,
+                    "total_questions": len(selection_question),
+                    "categories": all_categories,
+                    "current_category": 'None',
+                }
+            )
 
     """
     @TODO:
@@ -161,13 +167,18 @@ def create_app(test_config=None,db_name=db_name):
         '''
         body = request.get_json()
 
+        # Parameters to create a new question
         new_question = body.get("question", None)
         new_answer = body.get("answer", None)
         new_difficulty = body.get("difficulty", None)
         new_category = body.get("category", None)
 
-
+        # Parameters to search for a question in the db
         search_question = body.get("searchTerm", None)
+
+        # Check the validity of the request to confirm there are no errors
+        if search_question is None and new_question is None:
+            abort(400)
 
         try:
             if search_question is not None:
@@ -217,22 +228,30 @@ def create_app(test_config=None,db_name=db_name):
         '''
         I added 1 to the id because the react app is using zero indexing to call the category ids, while the id numbers start from 1 in the db
         '''
-        dict_ids = {0:1,1:2,2:3,3:4,4:5,5:6}
+        all_categories = Category.query.order_by(Category.id).all()
+        category_ids = [cat.format()['id'] for cat in all_categories]
+
+        # If the category id is not in the category table indicate that the request is bad
+        if cat_id not in category_ids:
+            abort(400)
+
         selection_question = Question.query.filter(Question.category == cat_id).order_by(Question.category).all()
         current_questions = paginate_questions(request, selection_question)
         current_category = Category.query.filter(Category.id == cat_id).one_or_none()
 
+        # If there are no questions for the specified category, indicate the resource is not available
         if len(current_questions) == 0:
             abort(404)
 
-        return jsonify(
-            {
-                "success": True,
-                "questions": current_questions,
-                "totalQuestions": len(selection_question),
-                "currentCategory": current_category.type,
-            }
-        )
+        else:
+            return jsonify(
+                {
+                    "success": True,
+                    "questions": current_questions,
+                    "totalQuestions": len(selection_question),
+                    "currentCategory": current_category.type,
+                }
+            )
 
 
     """
@@ -246,12 +265,110 @@ def create_app(test_config=None,db_name=db_name):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
+    @app.route("/quizzes", methods=['POST'])
+    def post_quiz_game():
+        body = request.get_json()
+
+        prev_questions =  body.get("previous_questions", None) # This is a list of previous question ids
+        category =  body.get("quiz_category", None)
+
+        if category is not None:
+            # Extract the category name and id from the json data. The category type/name is not used
+            cat_type = category['type']
+            cat_id = int(category['id'])
+        else:
+            abort(400)
+        
+
+        try:
+            if cat_id == 0:
+
+                # This is for all the question categories
+                category_questions = Question.query.all()
+                all_question_ids = [question.format()['id'] for question in category_questions]
+
+                # Extract the list of remaining questions that haven't been asked
+                remaining_question_ids = list(set(all_question_ids).difference(prev_questions))
+
+                # Randomly select a question id from the list of remaining question ids
+                if len(remaining_question_ids) != 0 :
+                    future_question_id = random.choice(remaining_question_ids)
+                    question = Question.query.filter(Question.id == future_question_id).all()[0]
+
+                    return jsonify(
+                        {
+                            "success": True,
+                            "question": question.format(),
+                        }
+                    )
+                
+                # Else return an empty question key to the frontend
+                else:
+                    return jsonify(
+                        {
+                            "success": True,
+                            "question": '',
+                        }
+                    )
+            
+            elif cat_id > 0:
+
+                # This is for specific question categories
+                category_questions = Question.query.filter(Question.category == cat_id).all()
+                all_question_ids = [question.format()['id'] for question in category_questions]
+
+                # Extract the list of remaining questions that haven't been asked
+                remaining_question_ids = list(set(all_question_ids).difference(prev_questions))
+
+                # Randomly select a question id from the list of remaining question ids
+                if len(remaining_question_ids) != 0 :
+                    future_question_id = random.choice(remaining_question_ids)
+                    question = Question.query.filter(Question.id == future_question_id).all()[0]
+
+                    return jsonify(
+                        {
+                            "success": True,
+                            "question": question.format(),
+                        }
+                    )
+                
+                # Else return an empty question key to the frontend
+                else:
+                    return jsonify(
+                        {
+                            "success": True,
+                            "question": '',
+                        }
+                    )
+
+            else:
+                abort(404)
+        except:
+            abort(422)
 
     """
     @TODO:
     Create error handlers for all expected errors
     including 404 and 422.
     """
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({"success": False, "error": 400, "message": "bad request"}), 400
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return (
+            jsonify({"success": False, "error": 404, "message": "resource not found"}),
+            404,
+        )
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return (
+            jsonify({"success": False, "error": 422, "message": "unprocessable"}),
+            422,
+        )
 
     return app
 
