@@ -43,6 +43,8 @@ The hardest endpoint I had trouble implementing was creating a post request to t
         "success": true
         }
     ```
+<br>
+
 - An example of a successful request when all the questions have been exhausted is 
     - ```bash
         {
@@ -50,4 +52,6 @@ The hardest endpoint I had trouble implementing was creating a post request to t
         "success": true
         }
     ```
+<br>
+
 - **Note**: Even if all categories are selected, only 5 questions are asked before a final score is returned.
