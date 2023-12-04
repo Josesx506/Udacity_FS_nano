@@ -39,7 +39,17 @@ Note: all requests are handled with *REACT* with asynchronous fetch.
 
 The hardest endpoint I had trouble implementing was creating a post request to the play the trivia game. 
 
-- **Note**: Even if all categories are selected, only 5 questions are asked before a final score is returned.
+- **Note**: Even if all categories are selected, only 5 questions are asked before a final score is returned. <br><br>
+
+#### Install the environment
+```bash
+# Create the environment
+~ $python -m venv trivpy
+~ $source trivpy/bin/activate
+~ $pip install -r backend/requirements.txt
+# Assign the environment variables
+~ $source .env
+```
 
 
 ##### ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
