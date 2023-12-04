@@ -8,4 +8,6 @@ Screenshots_Udacity/
 Books/
 02_API_Development/*/*/node_modules
 Course_Projects/*/*/node_modules
+# Python virtual environment folders
 Course_Projects/02_trivia/trivpy
+03_IAM/01_Foundations_FlaskRecap/flaskrc
