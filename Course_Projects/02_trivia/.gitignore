@@ -3,3 +3,5 @@ trivpy/
 .env
 frontend/node_modules
 .DS_Store
+setup.sql
+trivia.psql
