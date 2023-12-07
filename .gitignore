@@ -10,4 +10,4 @@ Books/
 Course_Projects/*/*/node_modules
 # Python virtual environment folders
 Course_Projects/02_trivia/trivpy
-03_IAM/01_Foundations_FlaskRecap/flaskrc
+03_IAM/01_Identity_and_Auth/01_FlaskRecap/flaskrc

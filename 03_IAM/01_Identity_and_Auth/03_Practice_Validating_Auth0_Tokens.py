@@ -4,7 +4,7 @@ from urllib.request import urlopen
 
 # Configuration
 # UPDATE THIS TO REFLECT YOUR AUTH0 ACCOUNT
-AUTH0_DOMAIN = 'fsnd.auth0.com'
+AUTH0_DOMAIN = 'dev-ehgjons8p0spxtoc.us.auth0.com'
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'image'
 
