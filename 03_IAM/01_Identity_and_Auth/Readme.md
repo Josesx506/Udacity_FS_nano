@@ -61,13 +61,14 @@ localStorage.setItem("token", jwt)
 // To retrieve it for use
 jwt = localStorage.getItem("token")
 ``` 
-<br><br>
+<br>
 
 - There are inherent risks associated with using local storage. 
     - For example, a malicious attack can inject foreign code into a website to execute on that website to access all of the keys within the local store and drops it into the malicious server.
     - **Cross-Site-Scripting (XSS)** attacks can be used to download all the valid keys from localStorage or even inject data into our db. 
     - For this reason, users of our apps/pages should never be allowed to run javascript from open ended form inputs. This can be avoided by using JS libraries like `DOMPurify` to sanitize our website strings. <br>
     - Packages installed with package managers like pip, brew, or npm should also be carefully vetted before using them to install any packages to avoid malicious attacks.
+- Check how the values of payload can be retrieved with localStorage in `02_Extract_LocalStorage_token.html`.
 
 
 ### Sending Tokens either locally or retrieving them from request headers
