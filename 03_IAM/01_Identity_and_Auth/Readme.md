@@ -22,9 +22,9 @@ This module uses **`Auth0`** for third party authentication. <br>
     - Specify the callback urls and allowed login and logout endpoint names
     - After creating it, extract the following key values from your application and api
         - Domain Name - `dev-**********.us.auth0.com`
-        - Audience - `image`. Any string works. Different strings can be used for different website services e.g. calendar.
-        - Scope - ''.         This can be set to an empty string initially
-        - Response Type - `token`. This indicates a token value should be returned.
+        - Audience - `image`.              Any string works. Different strings can be used for different website services e.g. calendar.
+        - Scope - ''.                      This can be set to an empty string initially
+        - Response Type - `token`.         This indicates a token value should be returned.
         - Client ID - `*****VFFgf9******`. Random base64 encoded string
         - Redirect/Callback URL - `https://127.0.0.1:8080/login-results`. This can be any endpoint but this is where the Auth0 api will reroute the token each time a user tries to log in.
 - Create an Auth0_authentication url by filling in the placeholders with values from the created application and api in Auth0 `https://{{YOUR_DOMAIN}}/authorize?audience={{API_IDENTIFIER}}&response_type=token&client_id={{YOUR_CLIENT_ID}}&redirect_uri={{YOUR_CALLBACK_URI}}`
