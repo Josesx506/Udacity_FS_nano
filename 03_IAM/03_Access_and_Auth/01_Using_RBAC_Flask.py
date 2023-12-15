@@ -61,27 +61,23 @@ def verify_decode_jwt(token):
             return payload
 
         except jwt.ExpiredSignatureError:
-            raise AuthError({
-                'code': 'token_expired',
-                'description': 'Token expired.'
-            }, 401)
+            raise AuthError({'code': 'token_expired',
+                             'description': 'Token expired.'
+                             }, 401)
 
         except jwt.JWTClaimsError:
-            raise AuthError({
-                'code': 'invalid_claims',
-                'description': 'Incorrect claims. Please, check the audience and issuer.'
-            }, 401)
+            raise AuthError({'code': 'invalid_claims',
+                             'description': 'Incorrect claims. Please, check the audience and issuer.'
+                             }, 401)
         
         except Exception:
-            raise AuthError({
-                'code': 'invalid_header',
-                'description': 'Unable to parse authentication token.'
-            }, 400)
+            raise AuthError({'code': 'invalid_header',
+                             'description': 'Unable to parse authentication token.'
+                             }, 400)
         
-    raise AuthError({
-                'code': 'invalid_header',
-                'description': 'Unable to find the appropriate key.'
-            }, 400)
+    raise AuthError({'code': 'invalid_header',
+                     'description': 'Unable to find the appropriate key.'
+                     }, 400)
 
 
 def get_token_auth_header():
@@ -118,23 +114,46 @@ def get_token_auth_header():
     return header_token
 
 
-# Create the custom decorator
-def requires_auth(f):
-    '''This function will return the wrapper'''
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        '''
-        The wrapper can accept multiple arguments. For now it is set up to 
-        extract the jwt from the request header and return it to the decorator
-        '''
-        req_token = get_token_auth_header()
-        try:
-            payload = verify_decode_jwt(req_token)
-        except:
-            abort(401)
-        return f(payload, *args, **kwargs)
-    return wrapper
+# Create the custom decorator that will check user permissions before granting access
+def check_permissions(permission, payload):
+    '''
+    The function checks that the specified user permission matches the required permission
+    for an endpoint befor granting access
+    '''
+    # Check that the payload has a permission key
+    if 'permissions' not in payload:
+        raise AuthError({'code': 'invalid_claims',
+                         'description': 'Permissions not included in JWT.'
+                         }, 400)
+    # Check that the user permission specified matches the one in the payload
+    elif permission not in payload['permissions']:
+        raise AuthError({'code': 'unauthorized',
+                         'description': 'Permission not found.'
+                         }, 403)
+    else:
+        return True
 
+def requires_auth(permission=''):
+    def requires_auth_decorator(f):
+        '''This function will return the wrapper'''
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            '''
+            The wrapper can accept multiple arguments. For now it is set up to 
+            extract the jwt from the request header and return it to the decorator
+            '''
+            req_token = get_token_auth_header()
+            try:
+                payload = verify_decode_jwt(req_token)
+            except:
+                abort(401)
+
+            # Call a function to validate the permissions within a payload
+            check_permissions(permission, payload)
+            
+            return f(payload, *args, **kwargs)
+        return wrapper
+    return requires_auth_decorator
 
 
 
@@ -142,10 +161,18 @@ def requires_auth(f):
 app = Flask(__name__)
 
 @app.route('/headers')
-@requires_auth          # Custom decorator to get jwt token that can be repeated across multiple endpoints
+@requires_auth('get:images')          # Custom decorator to get jwt token that can be repeated across multiple endpoints
 def headers(validated_payload):
     print(validated_payload)
-    return 'not implemented'
+    return 'not implemented header'
+
+
+# Create an endpoint for the image api
+@app.route('/image')
+@requires_auth('get:images') # Specify the permission type in the authentication decorator
+def images(jwt):
+    print(jwt)
+    return 'not implemented image'
 
 
 if __name__ == '__main__':

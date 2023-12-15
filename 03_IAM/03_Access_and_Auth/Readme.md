@@ -8,7 +8,7 @@ The more people have access to a role, the less actions they should be able to p
     - Add a new role and description
     - Assign permissions that each role has 
 3. Go to API-><Selected_API>->Settings
-    - Authorize Role Based Authentication (RBAC)
+    - Authorize *Role Based Access Control* (RBAC)
     - Allow Permissions to be added to the access token
 4. Go to User_Management->Users
     - Manually assign a role to each user.
@@ -30,4 +30,10 @@ The more people have access to a role, the less actions they should be able to p
 
 Now when each new user is added, their roles are added to the permission json web token. <br>
 
-In Auth0, you can define all the permissions that the API uses. **Note:** that the permissions are heavily dependent on the actions that your API will be fulfilling and you should be careful about assigning each endpoint its own permission.
+In Auth0, you can define all the permissions that the API uses. **Note:** that the permissions are heavily dependent on the actions that your API will be fulfilling and you should be careful about assigning each endpoint its own permission. <br><br>
+
+In this lesson, we discussed the role-based access control design pattern. Following are a list of topics we covered.
+- Role-permission based access
+- Defining roles in Auth0
+- Using RBAC in Flask
+- Restricting features in frontend
