@@ -5,10 +5,13 @@ Screenshots_Udacity/
 */*/__pycache__
 */*/*/__pycache__
 */*/*/*/__pycache__
+*/*/*/*/*/__pycache__
 Books/
 # Front end folders
 02_API_Development/*/*/node_modules
 Course_Projects/*/*/node_modules
+# Database files
+Course_Projects/03_coffee_shop/backend/src/database/coffeespice.db
 # Python virtual environment folders
 Course_Projects/02_trivia/trivpy
 Course_Projects/03_coffee_shop/coffeepy

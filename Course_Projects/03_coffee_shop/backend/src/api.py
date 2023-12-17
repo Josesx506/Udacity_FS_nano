@@ -11,13 +11,20 @@ app = Flask(__name__)
 setup_db(app)
 CORS(app)
 
+# @app.after_request
+# def after_request(response):
+#     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,true")
+#     response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,PATCH,DELETE,OPTIONS")
+    
+#     return response
+
 '''
 @TODO uncomment the following line to initialize the datbase
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 '''
-# db_drop_and_create_all()
+# db_drop_and_create_all(app)
 
 # ROUTES
 '''
@@ -28,7 +35,34 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+@app.route("/drinks")
+@requires_auth('get:drinks')
+def get_drinks(jwt):
+    '''
+    Performs GET requests to access all the drinks in the db
+    '''
 
+    try:
+        all_drinks = Drink.query.order_by(Drink.id).all()
+        current_drinks = [drink.long() for drink in all_drinks]
+
+        if len(current_drinks) == 0:
+            raise AuthError({'code': 'empty_db',
+                            'description': 'No drinks exist in the db.'
+                            }, 404)
+        
+        else:
+            # drinks are passed as a list that is formatted to return the short form of the drink type
+            return jsonify(
+                {
+                    "success": True,
+                    "drinks": current_drinks
+                }
+            )
+    except:
+        raise AuthError({'code': 'invalid_claims',
+                            'description': 'Permissions not included in JWT.'
+                            }, 400)
 
 '''
 @TODO implement endpoint
@@ -38,7 +72,34 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+@app.route("/drinks-detail")
+@requires_auth('get:drinks-detail')
+def get_drinks_details(jwt):
+    '''
+    Performs GET requests to access all the drinks in the db
+    '''
 
+    try:
+        all_drinks = Drink.query.order_by(Drink.id).all()
+        current_drinks = [drink.long() for drink in all_drinks]
+
+        if len(current_drinks) == 0:
+            raise AuthError({'code': 'empty_db',
+                            'description': 'No drinks exist in the db.'
+                            }, 404)
+        
+        else:
+            # drinks are passed as a list that is formatted to return the long form of the drink type
+            return jsonify(
+                {
+                    "success": True,
+                    "drinks": current_drinks
+                }
+            )
+    except:
+        raise AuthError({'code': 'invalid_claims',
+                            'description': 'Permissions not included in JWT.'
+                            }, 400)
 
 '''
 @TODO implement endpoint
@@ -106,9 +167,21 @@ def unprocessable(error):
 @TODO implement error handler for 404
     error handler should conform to general task above
 '''
-
+@app.errorhandler(404)
+def not_found(error):
+    return (
+        jsonify({"success": False, "error": 404, "message": "resource not found"}),
+        404,
+    )
 
 '''
 @TODO implement error handler for AuthError
     error handler should conform to general task above
 '''
+@app.errorhandler(AuthError)
+def unprocessable(error):
+    print('\n','\n','\n',error,'\n','\n','\n','\n')
+    return (
+        jsonify({"success": False, "error": 401, "message": "unauthorized"}),
+        422,
+    )
