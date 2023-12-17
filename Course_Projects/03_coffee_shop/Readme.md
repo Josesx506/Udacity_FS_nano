@@ -1,7 +1,7 @@
 ### Coffee Shop Implementation Checklist
 Here are the lists of Todo Items I've completed. They were not completed sequentially but it helped me keep track. <br>
 
-<!-- Note: all requests are handled with *IONIC* with asynchronous fetch. -->
+Note: all requests are handled within the *IONIC* frontend app.
 - [x] Setup local python environment and installed all requirements.
 - [x] Setup authorization domain for the app on auth0.com.
 - [x] Setup environment variables in `backend/src/settings.py` and `.env`.
@@ -33,10 +33,19 @@ Here are the lists of Todo Items I've completed. They were not completed sequent
 <br>
 
 **POSTMAN Todos**
-- [x]
+- [x] Implement GET request to obtains drinks and drink details for Baristas
+- [x] Implement GET request to obtains drinks and drink details for Managers
+- [x] Implement POST and PATCH requests to create and edit drinks in the db for Managers
+- [x] Implement DELETE request to delete existing drinks from the db for Managers
+<br>
 
 **Main API Todos**
 - [x] Create the flask app and import all dependencies
 - [x] Uncomment `db_drop_and_create_all()` the first time the app is run to create the local SQLite db. 
     - It is commented afterwards to prevent the app from deleting the db each time the app is restarted.
 - [x] Create an endpoint to GET all the drinks in the db.
+- [x] Create an endpoint to GET all the drinks detail in the db.
+- The todo items here only works for the manager and administrator roles
+    - [x] Create an endpoint to POST a new drink to the db.
+    - [x] Create an endpoint to PATCH an existing drink to the db.
+    - [x] Create an endpoint to DELETE an existing drink from the db.

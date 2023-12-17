@@ -11,13 +11,6 @@ app = Flask(__name__)
 setup_db(app)
 CORS(app)
 
-# Additional data for CORS headers
-@app.after_request
-def after_request(response):
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,true")
-    response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,PATCH,DELETE,OPTIONS")
-    return response
-
 '''
 @TODO uncomment the following line to initialize the datbase
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
@@ -43,8 +36,9 @@ def get_drinks(jwt):
     '''
 
     try:
-        all_drinks = Drink.query.order_by(Drink.id).all()
-        current_drinks = [drink.long() for drink in all_drinks]
+        with app.app_context():
+            all_drinks = Drink.query.order_by(Drink.id).all()
+            current_drinks = [drink.long() for drink in all_drinks]
 
         if len(current_drinks) == 0:
             abort(404)
@@ -76,8 +70,9 @@ def get_drinks_details(jwt):
     '''
 
     try:
-        all_drinks = Drink.query.order_by(Drink.id).all()
-        current_drinks = [drink.long() for drink in all_drinks]
+        with app.app_context():
+            all_drinks = Drink.query.order_by(Drink.id).all()
+            current_drinks = [drink.long() for drink in all_drinks]
 
         if len(current_drinks) == 0:
             abort(404)
@@ -102,7 +97,42 @@ def get_drinks_details(jwt):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+@app.route("/drinks", methods=['POST'])
+@requires_auth('post:drinks')
+def post_drink(jwt):
+    '''
+    This function implements the post requests for adding a new drink to the db
+    '''
+    body = request.get_json()
 
+    # Parameters to create a new drink
+    new_title = body.get("title", None)
+    new_recipe = str(body.get("recipe", None)).replace("'", '"') # Replace single quotes with double quotes
+
+    # Check the validity of the request to confirm there are no errors
+    if new_title is None:
+        abort(400)
+
+    try:
+        if new_title is not None:
+            with app.app_context():
+                new_drink = Drink(title=new_title, recipe=new_recipe)
+                new_drink.insert()
+
+                # Extract the last drink from the db
+                recent_drink = Drink.query.order_by(Drink.id.desc()).first()
+                current_drink = [recent_drink.long()]
+
+            return jsonify(
+                {
+                    "success": True,
+                    "drinks": current_drink,
+                }
+            )
+        else:
+            abort(422)
+    except:
+        abort(422)
 
 '''
 @TODO implement endpoint
@@ -115,7 +145,77 @@ def get_drinks_details(jwt):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:d_id>', methods=['PATCH'])
+@requires_auth('patch:drinks')
+def patch_drinks(jwt, d_id):
+    '''
+    This function implements the patch requests for editing an existing drink in the db
+    It uses a specified drink id (d_id)
+    '''
+    body = request.get_json()
 
+    # Parameters to create a new drink
+    updt_title = body.get("title", None)
+    updt_recipe = str(body.get("recipe", None)).replace("'", '"')
+
+    # Check the validity of the request to confirm there are no errors
+    if d_id is None:
+        abort(400)
+
+    try:
+        # Check if only the title is updated
+        if d_id is not None and updt_title is not None and updt_recipe == 'None':
+            with app.app_context():
+                current_drink = Drink.query.filter(Drink.id == d_id).all()[0]
+                current_drink.title = updt_title
+                current_drink.update()
+                
+                # Extract the updated drink long format
+                updated_drink = [current_drink.long()]
+
+            return jsonify(
+                {
+                    "success": True,
+                    "drinks": updated_drink,
+                })
+        
+        # Check if only the recipe is updated
+        elif d_id is not None and updt_title is None and updt_recipe != 'None':
+            with app.app_context():
+                current_drink = Drink.query.filter(Drink.id == d_id).all()[0]
+                current_drink.recipe = updt_recipe
+                current_drink.update()
+                
+                # Extract the updated drink long format
+                updated_drink = [current_drink.long()]
+
+            return jsonify(
+                {
+                    "success": True,
+                    "drinks": updated_drink,
+                })
+        
+        # Check if the recipe and title are updated
+        elif d_id is not None and updt_title is not None and updt_recipe != 'None':
+            with app.app_context():
+                current_drink = Drink.query.filter(Drink.id == d_id).all()[0]
+                current_drink.title = updt_title
+                current_drink.recipe = updt_recipe
+                current_drink.update()
+                
+                # Extract the updated drink long format
+                updated_drink = [current_drink.long()]
+
+            return jsonify(
+                {
+                    "success": True,
+                    "drinks": updated_drink,
+                })
+        
+        else:
+            abort(422)
+    except:
+        abort(422)
 
 '''
 @TODO implement endpoint
@@ -127,14 +227,36 @@ def get_drinks_details(jwt):
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
+@app.route("/drinks/<int:d_id>", methods=['DELETE'])
+@requires_auth('delete:drinks')
+def delete_drink(jwt,d_id):
+    '''
+    Implements delete requests based on a drink id
+    '''
+    try:
+        with app.app_context():
+            drink = Drink.query.filter(Drink.id == d_id).one_or_none()
+
+            if drink is None:
+                abort(404)
+
+            drink.delete()
+        
+        return jsonify(
+            {
+                "success": True,
+                "delete": d_id,
+            }
+        )
+
+    except:
+        abort(422)
 
 
 # Error Handling
 '''
 Example error handling for unprocessable entity
 '''
-
-
 @app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
@@ -154,6 +276,13 @@ def unprocessable(error):
                     }), 404
 
 '''
+@app.errorhandler(400)
+def bad_request(error):
+    return (jsonify({"success": False, "error": 400, "message": "bad request"}), 400)
+
+@app.errorhandler(422)
+def unprocessable(error):
+    return (jsonify({"success": False, "error": 422, "message": "unprocessable"}), 422)
 
 '''
 @TODO implement error handler for 404
@@ -161,10 +290,7 @@ def unprocessable(error):
 '''
 @app.errorhandler(404)
 def not_found(error):
-    return (
-        jsonify({"success": False, "error": 404, "message": "resource not found, drinks not in the db"}),
-        404,
-    )
+    return (jsonify({"success": False, "error": 404, "message": "resource not found, drinks not in the db"}), 404)
 
 '''
 @TODO implement error handler for AuthError

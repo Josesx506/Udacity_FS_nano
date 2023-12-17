@@ -44,7 +44,7 @@ def db_drop_and_create_all(app):
         # add one demo row which is helping in POSTMAN test
         drink = Drink(
             title='water',
-            recipe='[{"name": "water", "color": "blue", "parts": 1}]')
+            recipe='[{"name": "water", "color": "blue", "parts": 1},{"name": "milk", "color": "#FFFFED", "parts": 1}]')
         drink.insert()
 # ROUTES
 
@@ -61,7 +61,11 @@ class Drink(db.Model):
     title = Column(String(80), unique=True)
     # the ingredients blob - this stores a lazy json blob
     # the required datatype is [{'color': string, 'name':string, 'parts':number}]
-    recipe = Column(String(180), nullable=False)
+    recipe = Column(String(250), nullable=False)
+
+    def __init__(self, title, recipe):
+        self.title = title
+        self.recipe = recipe
 
     '''
     short()
