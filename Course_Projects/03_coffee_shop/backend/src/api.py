@@ -11,12 +11,12 @@ app = Flask(__name__)
 setup_db(app)
 CORS(app)
 
-# @app.after_request
-# def after_request(response):
-#     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,true")
-#     response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,PATCH,DELETE,OPTIONS")
-    
-#     return response
+# Additional data for CORS headers
+@app.after_request
+def after_request(response):
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,true")
+    response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,PATCH,DELETE,OPTIONS")
+    return response
 
 '''
 @TODO uncomment the following line to initialize the datbase
@@ -47,9 +47,7 @@ def get_drinks(jwt):
         current_drinks = [drink.long() for drink in all_drinks]
 
         if len(current_drinks) == 0:
-            raise AuthError({'code': 'empty_db',
-                            'description': 'No drinks exist in the db.'
-                            }, 404)
+            abort(404)
         
         else:
             # drinks are passed as a list that is formatted to return the short form of the drink type
@@ -60,9 +58,7 @@ def get_drinks(jwt):
                 }
             )
     except:
-        raise AuthError({'code': 'invalid_claims',
-                            'description': 'Permissions not included in JWT.'
-                            }, 400)
+        abort(400)
 
 '''
 @TODO implement endpoint
@@ -84,9 +80,7 @@ def get_drinks_details(jwt):
         current_drinks = [drink.long() for drink in all_drinks]
 
         if len(current_drinks) == 0:
-            raise AuthError({'code': 'empty_db',
-                            'description': 'No drinks exist in the db.'
-                            }, 404)
+            abort(404)
         
         else:
             # drinks are passed as a list that is formatted to return the long form of the drink type
@@ -97,9 +91,7 @@ def get_drinks_details(jwt):
                 }
             )
     except:
-        raise AuthError({'code': 'invalid_claims',
-                            'description': 'Permissions not included in JWT.'
-                            }, 400)
+        abort(400)
 
 '''
 @TODO implement endpoint
@@ -170,7 +162,7 @@ def unprocessable(error):
 @app.errorhandler(404)
 def not_found(error):
     return (
-        jsonify({"success": False, "error": 404, "message": "resource not found"}),
+        jsonify({"success": False, "error": 404, "message": "resource not found, drinks not in the db"}),
         404,
     )
 
@@ -180,8 +172,7 @@ def not_found(error):
 '''
 @app.errorhandler(AuthError)
 def unprocessable(error):
-    print('\n','\n','\n',error,'\n','\n','\n','\n')
     return (
-        jsonify({"success": False, "error": 401, "message": "unauthorized"}),
-        422,
+        jsonify({"success": False, "error": error.status_code, "message": error.error['description']}),
+        error.status_code,
     )

@@ -47,10 +47,4 @@ The tools utilized include:
     ```
 
 ### Coffee Shop
-
-
-
-
-https://coffeeshop-udy-fsnd.us.auth0.com/authorize?audience=coffee&response_type=token&client_id=Rh1hjjexp2D0th7fcvjpc5ka2daoCAWp&redirect_uri=https://127.0.0.1:8100/login-results
-
-
+- [x] 
