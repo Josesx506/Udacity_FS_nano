@@ -1,9 +1,3 @@
-<!-- <div class="cup">
-  <div 
-  *ngFor="let detail of barista && barista.flavors"
-  class="detail"
-  [style.flexGrow]="detail.parts"
-  [style.background]="detail.color">
-    {{t}}
-  </div>
-</div> -->
+<div class="barista_img">
+  <img *ngIf="barista && barista.image_url" [src]="barista.image_url" alt="Barista Image" class="barista-image">
+</div>

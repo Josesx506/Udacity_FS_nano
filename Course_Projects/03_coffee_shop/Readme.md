@@ -37,6 +37,9 @@ Note: all requests are handled within the *IONIC* frontend app.
 - [x] Implement GET request to obtains drinks and drink details for Managers
 - [x] Implement POST and PATCH requests to create and edit drinks in the db for Managers
 - [x] Implement DELETE request to delete existing drinks from the db for Managers
+- [x] Implement POST and PATCH requests to create and edit baristas in the db for Managers and Administrators
+- [x] Implement DELETE request to delete existing baristas from the db for Managers and Administrators
+- [x] All tests ran successfully in the collection and it was exported with an `backend/updated_*.json` prefix. Appropriate tokens were also included.
 <br>
 
 **Main API Todos**
@@ -49,3 +52,30 @@ Note: all requests are handled within the *IONIC* frontend app.
     - [x] Create an endpoint to POST a new drink to the db.
     - [x] Create an endpoint to PATCH an existing drink to the db.
     - [x] Create an endpoint to DELETE an existing drink from the db.
+<br>
+
+**Above and Beyond Todos**
+- [x] Barista access is limited (can do nothing)
+- [x] Manager access is limited (can manage baristas)
+- [x] Administrator access is limited (can manage baristas, managers)
+- [x] Created a new tab for managing Baristas. This tab allows Managers/Administrators to
+    - POST new baristas
+    - PATCH existing baristas
+    - DELETE existing baristas
+    - Each Barista has an id, name, flavors of coffee (fixed list) they can prepare, and an image.
+- [x] Created a new tab where administrators can manage Managers too but I didn't populate it.
+    - It would have required a **cafe** table too where baristas will be linked to the cafes, managers will be linked to baristas, and admins will be linked to managers (probably something I can work on after the nano degree).
+<br>
+
+#### Install the environment
+```bash
+# Create the environment
+~ $python -m venv coffeepy
+~ $source coffeepy/bin/activate
+~ $pip install -r backend/requirements.txt
+# Assign the environment variables
+~ $source .env
+```
+<br><br>
+
+The main repo has a .gitignore file so I didn't include one in this folder. For security purposes, the environment variable files should not be tracked but I included them here to enable replication.

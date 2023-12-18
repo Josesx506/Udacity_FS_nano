@@ -10,8 +10,8 @@
 
     <form (ngSubmit)="logForm()">
       <ion-item>
-        <ion-label>Barista Title</ion-label>
-        <ion-input type="text" [(ngModel)]="barista.title" name="title"></ion-input>
+        <ion-label>Barista Name</ion-label>
+        <ion-input type="text" [(ngModel)]="barista.name" name="name"></ion-input>
       </ion-item>
 
       <ion-item>
@@ -26,10 +26,18 @@
         <ion-input type="text" [(ngModel)]="barista.proficiency" name="proficiency"></ion-input>
       </ion-item>
 
+      <ion-item>
+        <ion-label>Image URL</ion-label>
+        <ion-input type="text" [(ngModel)]="barista.image_url" name="image_url"></ion-input>
+      </ion-item>
+
+      <!-- Delete Button -->
       <ion-button 
         [disabled]="!auth.can('delete:baristas')"
         (click)="deleteClicked()">Delete</ion-button><br />
       <ion-button (click)="closeModal()">Cancel</ion-button>
+      
+      <!-- Save button -->
       <ion-button 
         [disabled]="!auth.can('patch:baristas') || !auth.can('post:baristas')"
         (click)="saveClicked()">Save</ion-button>

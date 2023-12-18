@@ -12,13 +12,16 @@ export class BaristaFormComponent implements OnInit {
   @Input() barista: Barista;
   @Input() isNew: boolean;
   availableFlavors: string[] = [
-    "Hot Water",
-    "Hot Chocolate",
-    "Vanilla",
+    "Americano",
     "Chocolate",
     "Caramel",
     "Hazelnut",
+    "Hot Chocolate",
+    "Hot Water",
+    "Latte",
     "Mocha",
+    "Nitro",
+    "Vanilla",
     ];
 
   constructor(
@@ -34,6 +37,7 @@ export class BaristaFormComponent implements OnInit {
         name: '',
         flavors: [],
         proficiency: 1,
+        image_url: '',
       };
       this.addDetails();
     }

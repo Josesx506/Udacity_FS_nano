@@ -9,6 +9,7 @@ export interface Barista {
   name: string;
   flavors: string[]; // Array of strings representing flavors
   proficiency: number;
+  image_url: string;
 }
 
 @Injectable({
@@ -25,6 +26,7 @@ export class BaristasService {
   //                                         name: 'Padre Thomas',
   //                                         flavors: ['latte', 'mocha'],
   //                                         proficiency: 2
+  //                                         image_url: 'https://seattleheadshotpro.com/wp-content/uploads/2018/08/Thom-Seattle-Headshot-Pro-Professional-Headshots-corporate-headshots-seattle-500px.jpg'
   //                                       }
   //                                     };
 
@@ -40,13 +42,12 @@ export class BaristasService {
   }
 
   getBaristas() {
-    if (this.auth.can('get:baristas')) {
-      this.http.get(this.url + '/baristas', this.getHeaders())
-      .subscribe((res: any) => {
-        this.baristasToItems(res.baristas);
-        console.log(res);
-      });
-    } 
+    this.http.get(this.url + '/baristas', this.getHeaders())
+    .subscribe((res: any) => {
+      this.baristasToItems(res.baristas);
+      console.log(res);
+    });
+
   }
 
   saveBarista(barista: Barista) {

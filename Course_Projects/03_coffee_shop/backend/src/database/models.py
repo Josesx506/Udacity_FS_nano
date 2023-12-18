@@ -41,11 +41,38 @@ def db_drop_and_create_all(app):
     with app.app_context():
         db.drop_all()
         db.create_all()
-        # add one demo row which is helping in POSTMAN test
-        drink = Drink(
-            title='water',
-            recipe='[{"name": "water", "color": "blue", "parts": 1},{"name": "milk", "color": "#FFFFED", "parts": 1}]')
-        drink.insert()
+        # --------------------- add six demo row which is helping in POSTMAN test ---------------------
+        drink1 = Drink(title='Hot Water',
+                       recipe='[{"name": "water", "color": "lightblue", "parts": 1}]')
+        drink2 = Drink(title='Hot Milk',
+                       recipe='[{"name": "water", "color": "lightblue", "parts": 1},{"name": "milk", "color": "beige", "parts": 1}]')
+        drink3 = Drink(title='Hot Chocolate',
+                       recipe='[{"name": "water", "color": "lightblue", "parts": 1},{"name": "milk", "color": "beige", "parts": 1},{"name": "chocolate", "color": "#C0856B", "parts": 2}]')
+        drink4 = Drink(title='Mocha',
+                       recipe='[{"name": "water", "color": "lightblue", "parts": 1},{"name": "milk", "color": "beige", "parts": 1},{"name": "coffee", "color": "#6f4e37", "parts": 1},{"name": "chocolate", "color": "#C0856B", "parts": 4}]')
+        drink5 = Drink(title='Latte',
+                       recipe='[{"name": "milk", "color": "beige", "parts": 1},{"name": "coffee", "color": "#6f4e37", "parts": 1}]')
+        drink6 = Drink(title='Water',
+                       recipe='[{"name": "water", "color": "blue", "parts": 1}]')
+        # Insert all the drinks into the db and replace drink.insert()
+        drinks = [drink1,drink2,drink3,drink4,drink5,drink6]
+        db.session.add_all(drinks)
+        db.session.commit() 
+
+        # --------------------- Baristas ---------------------
+        # add two demo row to the Barista table - barista.insert()
+        barista1 = Barista(name='John Doe',
+                           flavors='["Americano", "Latte", "Mocha"]',
+                           proficiency=3,
+                           image_url='https://seattleheadshotpro.com/wp-content/uploads/2018/08/Brandon-Seattle-Headshot-Pro-Headshots-Seattle-500px.jpg')
+        barista2 = Barista(name='Jane Doe',
+                           flavors='["Americano", "Latte", "Mocha", "Chocolate"]',
+                           proficiency=4,
+                           image_url='https://pbs.twimg.com/profile_images/1687103676438269952/zNqrw_eY_400x400.jpg')
+        baristas = [barista1,barista2]
+        db.session.add_all(baristas)
+        db.session.commit() 
+
 # ROUTES
 
 '''
@@ -73,7 +100,7 @@ class Drink(db.Model):
     '''
 
     def short(self):
-        print(json.loads(self.recipe))
+        # print(json.loads(self.recipe))
         short_recipe = [{'color': r['color'], 'parts': r['parts']} for r in json.loads(self.recipe)]
         return {
             'id': self.id,
@@ -135,3 +162,47 @@ class Drink(db.Model):
 
     def __repr__(self):
         return json.dumps(self.short())
+
+
+class Barista(db.Model):
+    # Autoincrementing, unique primary key
+    id = Column(Integer().with_variant(Integer, "sqlite"), primary_key=True)
+    # String Title
+    name = Column(String(80), unique=True)
+    # the coffee flavors each barista can prepare - this stores a lazy json blob
+    # the required datatype is '["Americana", "Latte", "Mocha"]'
+    flavors = Column(String(250), nullable=False)
+    proficiency = Column(Integer().with_variant(Integer, "sqlite"), default=3)
+    image_url = Column(String(250), nullable=True)
+
+    def __init__(self, name, flavors, proficiency, image_url):
+        self.name = name
+        self.flavors = flavors
+        self.proficiency = proficiency
+        self.image_url = image_url
+    
+    def short(self):
+        short_flavors = [flvr for flvr in json.loads(self.flavors)]
+        return {
+            'id': self.id,
+            'name': self.name,
+            'flavors': short_flavors,
+            'proficiency': self.proficiency,
+            'image_url': self.image_url,
+        }
+    
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def __repr__(self):
+        return json.dumps(self.short())
+
+
