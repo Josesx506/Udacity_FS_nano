@@ -78,4 +78,6 @@ Note: all requests are handled within the *IONIC* frontend app.
 ```
 <br><br>
 
-The main repo has a .gitignore file so I didn't include one in this folder. For security purposes, the environment variable files should not be tracked but I included them here to enable replication.
+The main repo has a .gitignore file so I didn't include one in this folder. For security purposes, the environment variable files should not be tracked but I included them here to enable replication. <br><br>
+
+You have to remove the venv and node_modules folder for the submission to go through unless the portal throws an error.
