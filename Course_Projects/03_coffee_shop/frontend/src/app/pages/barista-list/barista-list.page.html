@@ -1,0 +1,34 @@
+<ion-header>
+  <ion-toolbar style="text-align: center">
+    <ion-title><b>Uda-Spice Latte</b> Baristas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="baristas && baristas.items">
+<div style="display: flex; justify-content: center; padding-top: 20px;">
+    <ion-card
+     style="align-items: center; display: flex; flex-direction: column; cursor: pointer;" 
+     *ngFor="let barista of Object.keys(baristas.items)"
+     (click)="openForm(baristas.items[barista])">
+        <ion-card-header>
+          <ion-card-title>{{baristas.items[barista].name}}</ion-card-title>
+        </ion-card-header>
+      
+        <ion-card-content>
+            <app-barista-graphic [barista]="baristas.items[barista]"></app-barista-graphic>
+        </ion-card-content>
+      </ion-card>
+    <ion-card
+     style="opacity: .7; align-items: center; display: flex; flex-direction: column; cursor: pointer;" 
+     *ngIf="auth.can('post:baristas')"
+     (click)="openForm()">
+        <ion-card-header>
+          <ion-card-title>Hire Barista</ion-card-title>
+        </ion-card-header>
+      
+        <ion-card-content style="color:grey; font-size: 256%;">
+            <ion-icon name="person-add"></ion-icon>
+        </ion-card-content>
+      </ion-card>
+</div>
+</ion-content>

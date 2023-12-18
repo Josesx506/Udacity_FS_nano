@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title *ngIf="isNew">New Barista Creator</ion-title>
+    <ion-title *ngIf="!isNew">Barista Editor</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="barista">
+    <app-barista-graphic [barista]="barista"></app-barista-graphic>
+
+    <form (ngSubmit)="logForm()">
+      <ion-item>
+        <ion-label>Barista Title</ion-label>
+        <ion-input type="text" [(ngModel)]="barista.title" name="title"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Mixable Flavors</ion-label>
+        <ion-select placeholder="Select Flavors" multiple [(ngModel)]="barista.flavors" name="flavors">
+          <ion-select-option *ngFor="let flavor of availableFlavors" [value]="flavor">{{ flavor }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Barista Proficiency</ion-label>
+        <ion-input type="text" [(ngModel)]="barista.proficiency" name="proficiency"></ion-input>
+      </ion-item>
+
+      <ion-button 
+        [disabled]="!auth.can('delete:baristas')"
+        (click)="deleteClicked()">Delete</ion-button><br />
+      <ion-button (click)="closeModal()">Cancel</ion-button>
+      <ion-button 
+        [disabled]="!auth.can('patch:baristas') || !auth.can('post:baristas')"
+        (click)="saveClicked()">Save</ion-button>
+
+    </form>
+</ion-content>

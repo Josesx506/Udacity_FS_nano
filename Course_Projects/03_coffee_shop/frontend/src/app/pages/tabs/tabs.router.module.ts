@@ -8,6 +8,8 @@ const routes: Routes = [
     component: TabsPage,
     children: [
       { path: 'drink-menu', loadChildren: '../drink-menu/drink-menu.module#DrinkMenuPageModule' },
+      { path: 'barista-list', loadChildren: '../barista-list/barista-list.module#BaristaListPageModule' },
+      // { path: 'manager-list', loadChildren: '../manager-list/manager-list.module#ManagerListPageModule' },
       { path: 'user-page', loadChildren: '../user-page/user-page.module#UserPagePageModule' }, 
       {
         path: '',
