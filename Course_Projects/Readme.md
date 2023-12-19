@@ -47,4 +47,25 @@ The tools utilized include:
     ```
 
 ### Coffee Shop
-- [x] 
+Designed coffee shop website where different drink flavors could be added, and baristas serving in cafes could be managed. This project introduced authentication and website security. It highlighted some of the potential adversarial attacks (*cross site scripting and sql injection*) that can affect future projects and how to guard against them. Endpoints were secured using json web tokens (jwt) to restrict access and Auth0 was used to validate users. Backend was developed with flask and Auth0. API tests were performed with POSTMAN collections. Frontend was designed with ionic. <br>
+Like the previous project, environment variables were stored in an environment file for security reasons. SQLite was used in the dev environment which didn't require a separate database script, and could be launched directly from python. Key learnings were
+- [x] Introducing Authentication in CORS within app
+- [x] Validating endpoints using jwts to restrict user access. E.g only Managers can create new coffee drinks while baristas can only view existing drinks
+- [x] Performing integration and unit tests for api with POSTMAN
+- [x] Creating development database with `SQLite`.
+- [x] Test code review on git to restrict access during dev.
+- ```bash
+    .
+    ├── Backend
+    │   ├── dotenv (handling environment variables)
+    │   ├── Flask (local server)
+    │   ├── Flask-SQLAlchemy (DB_ORM)
+    │   ├── Flask-CORS (Resource Sharing)
+    │   ├── SQLite (DB)
+    │   └── POSTMAN (scripted api tests)
+    └── Frontend
+        ├── Node Package Manager (npm)
+        ├── Ionic (includes HTML & CSS (UI))
+        │   └── Creates forms with tags for updating db 
+        └── Angular, JS and TS (asynchronous requests for backend)
+    ```
