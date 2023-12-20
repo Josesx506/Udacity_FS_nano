@@ -8,7 +8,7 @@ The topics learnt include:
     - Perform integration and unit tests with postman
     - For each request, a test can be included to validate the expected response
         - Postman tests are written with javascript
-        - ```js
+            ```js
             pm.test("Status code is 401", function(){
                 pm.response.to.have.status(401);
                 });
@@ -29,3 +29,8 @@ The topics learnt include:
         - Do they use secure 3-rd parties?
         - Who has access?
         - Do they have any certifications?
+
+
+<br><br><br>
+
+`@TODO - configure request limit for websites to enhance security against brute force attacks`
