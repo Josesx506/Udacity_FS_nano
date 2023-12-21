@@ -18,3 +18,4 @@ Course_Projects/03_coffee_shop/coffeepy
 03_IAM/01_Identity_and_Auth/01_FlaskRecap/flaskrc
 # Environment variables
 04_Server_Deployment/03_AWS_and_Kubernetes/aws.env
+04_Server_Deployment/03_AWS_and_Kubernetes/jo-udy-fsnd-eks-keyPair.pem
