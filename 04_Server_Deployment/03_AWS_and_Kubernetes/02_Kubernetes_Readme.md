@@ -183,7 +183,7 @@ If you are running your application on EKS, then you can invest your time more o
 6. Creation Implementation
     ```bash
     # Create an EKS cluster - this takes a while (almost 10 minutes)
-    ~ $eksctl create cluster --name eksctl-demo --nodes=2 --version=1.28.2 --instance-types=t2.medium --region=us-east-2
+    ~ $eksctl create cluster --name eksctl-demo --nodes=2 --version=1.28 --instance-types=t2.medium --region=us-east-2
 
     # After cluster has been created, check the health status of the cluster nodes with
     ~ $kubectl get nodes
@@ -196,7 +196,7 @@ If you are running your application on EKS, then you can invest your time more o
     ```
     - You can check the status of the cluster being created under the `Cloud Formation` tab in AWS web console.
     - **Known Issue** - Sometimes, the cluster creation may fail in the *us-east-1* region. In such a case, use `--region=us-east-2` option. It is because the **us-east-1** region does not have sufficient capacity to support the cluster.
-    - Note that we have chosen the `--version=1.28.2` because the local kubectl version is also close to `1.28.2`. You can check your local kubectl using `kubectl version --client`. The command above will take a few minutes to execute, and create an EKS cluster "eksctl-demo" with:
+    - Note that we have chosen the `--version=1.28` because the local kubectl version is also close to `1.28`. You can check your local kubectl using `kubectl version --client`. The command above will take a few minutes to execute, and create an EKS cluster "eksctl-demo" with:
         1. One node group containing two nodes
         2. Two subnets in separate availability zones
         3. Two separate CloudFormation stacks - one for the cluster, and other for the initial nodegroup
