@@ -257,7 +257,7 @@ We have given you a Cloudformation template, template_EC2.yml, that will create 
 
 3. Launch the instance using the `create-stack` command with a parameters argument
     ```bash
-    aws cloudformation create-stack  --stack-name myStack2 --region us-east-2 --template-body file://template_EC2.yml --parameters file://my_parameters.json
+    ~ $aws cloudformation create-stack  --stack-name myStack2 --region us-east-2 --template-body file://template_EC2.yml --parameters file://my_parameters.json
     ```
 
 4. Navigate to the AWS console to verify the stack, and EC2 instance if has created. Look at the Cloudformation stack events to see the chronological list of events, as shown in the snapshot below

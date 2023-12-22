@@ -91,7 +91,7 @@ An IAM User with admin access was created for accessing the services from AWS CL
 1. Create a public bucket in the us-east-1 region:
     ```bash
     # Bucket names are unique across the Internet, just like DNS. 
-    aws s3api  create-bucket --bucket <bucketName> --acl bucket-owner-full-control --region us-east-2 --create-bucket-configuration LocationConstraint=us-east-2
+    ~ $aws s3api  create-bucket --bucket <bucketName> --acl bucket-owner-full-control --region us-east-2 --create-bucket-configuration LocationConstraint=us-east-2
     ```
     In the command above,
 - `--bucket` option specifies the bucket name of your choice. It must be unique across all AWS accounts.
@@ -103,7 +103,7 @@ Reference - [aws s3api create-bucket command](https://docs.aws.amazon.com/cli/la
 
 2. Upload a sample file to your bucket. The command below uploads a file names `sample.html`, however, you can choose any file from your local system
     ```bash
-    aws s3api put-object --bucket <bucketName> --key sample.html --body sample.html --content-type text/html
+    ~ $aws s3api put-object --bucket <bucketName> --key sample.html --body sample.html --content-type text/html
     ```
     In the command above,
 - `--key` option specifies the name you want to assign to your object in the bucket
@@ -118,9 +118,9 @@ Reference [aws s3api put-object](https://docs.aws.amazon.com/cli/latest/referenc
 4. Delete the bucket and its content. A bucket can only be deleted if it is empty. Therefore, first delete the `Sample.html`, and then delete the bucket, as follows:
     ```bash
     # Empty the bucket
-    aws s3api delete-object --bucket <bucketName> --key sample.html
+    ~ $aws s3api delete-object --bucket <bucketName> --key sample.html
     # Delete the nucket
-    aws s3api delete-bucket --bucket <bucketName>
+    ~ $aws s3api delete-bucket --bucket <bucketName>
     ```
     Reference - [aws s3api commands](https://docs.aws.amazon.com/cli/latest/reference/s3api/#available-commands)
 <br><br>
