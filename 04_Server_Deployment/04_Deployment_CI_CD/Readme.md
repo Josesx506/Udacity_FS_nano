@@ -10,10 +10,10 @@
     - **Continuous Deployment**: code changes to an application are released automatically into the production environment.
 <br><br>
 
-4. **04_Create_Pipeline_S3** shows how an S3 bucket can be used to build a code pipeline. An AWS stack is created and link to an S3 bucket and Docker Image. Whenever updates are made in the buid template, the CodePipeline is rebuilt. The pipeline in this chapter only echoes `Hello from Code Build!` with the docker container and the results can be viewed in the build logs.
+4. **04_Create_Pipeline_S3** shows how an S3 bucket can be used to build a code pipeline. An AWS stack is created and link to an S3 bucket and Docker Image. Whenever updates are made in the build template that is uploaded to the S3 bucket, the CodePipeline is rebuilt. The pipeline in this chapter only echoes `Hello from Code Build!` with the docker container and the results can be viewed in the build logs.
 <br><br>
 
-5. 
+5. **05_Final_Pipeline_Git** shows how a simple git repository can be to build a code pipeline. An EKS cluster and NodeGroup are created. IAM roles and permissions are defined and attached to the cluster. A stack is created that is linked to the git repository and kubernetes cluster. Within the stack, a CodeBuild template is used to build a pipeline. Once the build is successful, subsequent git commits trigger the pipeline. The simple app returns `Hello, World from Flask!` and the results can be viewed as a webpage by exposing a public IP on the deployment service.
 <br><br>
 
 
