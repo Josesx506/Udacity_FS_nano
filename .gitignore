@@ -15,6 +15,7 @@ Course_Projects/03_coffee_shop/backend/src/database/coffeespice.db
 # Python virtual environment folders
 Course_Projects/02_trivia/trivpy
 Course_Projects/03_coffee_shop/coffeepy
+Course_Projects/04_jwt_kube/tokenspy
 03_IAM/01_Identity_and_Auth/01_FlaskRecap/flaskrc
 # Environment variables
 04_Server_Deployment/03_AWS_and_Kubernetes/aws.env
