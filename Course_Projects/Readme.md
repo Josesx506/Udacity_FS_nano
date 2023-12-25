@@ -7,7 +7,7 @@ Designed artist management system where users could add artists, venues, and sho
 - [x] Performing CRUD on DB
 - [x] Using asynchronous requests to update webpage views.
 The tools utilized include:
-- ```bash
+    ```bash
     .
     ├── Backend
     │   ├── Flask (local server)
@@ -29,7 +29,7 @@ Unlike the first project, environment variables like the DB_NAME,USER, & PASSWOR
 - [x] Performing api tests to validate response of every successful/unsuccessful api requests
 - [x] Creating PostgreSQL DBs with `.psql` scripts
 The tools utilized include:
-- ```bash
+    ```bash
     .
     ├── Backend
     │   ├── curl (manual api tests in terminal)
@@ -54,7 +54,7 @@ Like the previous project, environment variables were stored in an environment f
 - [x] Performing integration and unit tests for api with POSTMAN
 - [x] Creating development database with `SQLite`.
 - [x] Test code review on git to restrict access during dev.
-- ```bash
+    ```bash
     .
     ├── Backend
     │   ├── dotenv (handling environment variables)
@@ -69,3 +69,28 @@ Like the previous project, environment variables were stored in an environment f
         │   └── Creates forms with tags for updating db 
         └── Angular, JS and TS (asynchronous requests for backend)
     ```
+
+### JWT Kubernetes
+Designed the backend for a simple flask app that had only 3 endpoints. The first endpoint was a GET request to check that the backend server was active. The second endpoint allowed the user to encode an email and password pair and generate jwts. The last endpoint allowed decoding of the previously encoded token. `gunicorn` was used as the production server instead of flask. No frontend architecture was developed, and all endpoints had to be queried with `curl`. The project was focused on deploying the flask app to AWS EKS with the aid of containers, kubernetes and AWS services. Key learnings were
+- [x] Containerizing applications with docker
+- [x] Managing users, roles, and permissions with AWS web console
+- [x] Using AWS cli to create, populate, empty and delete S3 buckets.
+- [x] Using `eksctl` to create kubernetes clusters, node groups, and load balancers
+    - [x] Using `kubectl` to manage existing aws services like assessing the health of nodes and updating authentication.
+- [x] Using template configuration `.yaml` files to create AWS stacks which include EC2 instances, IAM roles, lambda functions, S3 buckets, and VPCs.
+- [x] Creating environment variables within AWS Parameter Store instead of using local environment variables.
+- [x] Linking multiple AWS services to create **automatic pipelines** that source code from Git repos/S3 buckets, build the code and start servers, perform unit tests, and expose API endpoints.
+
+    ```bash
+    .
+    ├── curl (manual api tests in terminal)
+    ├── docker (container for packaging application)
+    ├── flask (development server)
+    ├── gunicorn (production server)
+    ├── github (repo for code pipeline)
+    ├── kubernetes (automatic load balancing)
+    └── Multiple AWS services (notably EKS, CodeBuild, CodePipeline)
+    ```
+
+### Deployment
+Basics of configuring and deploying apps to Heroku and Render cloud platforms.
