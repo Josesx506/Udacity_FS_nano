@@ -4,7 +4,7 @@ The following steps describe how to run the Flask API locally with the standard 
 1. **Install python dependencies** <br>
     These dependencies are kept in a requirements.txt file in the root directory of the repository. To install them, go to the project directory that you’ve just downloaded, and run the command:
     ```bash
-    # Assuming you are in the cd0157-Server-Deployment-and-Containerization/ directory
+    # Assuming you are in the backend/ directory
     ~ $pip install -r requirements.txt
     ```
 2. **Set up the environment** <br>
@@ -23,7 +23,10 @@ The following steps describe how to run the Flask API locally with the standard 
 3. **Run the app** <br>
     Run the app using the Flask server, from the root directory of the downloaded repository, run:
     ```bash 
+    # Start development server
     ~ $python main.py
+    # Start production server
+    ~ $gunicorn -b :8080 main:APP
     ```
     Open http://127.0.0.1:8080/ in a new browser OR run `curl --request GET http://localhost:8080/` on the command-line terminal. It will give you a response as "Healthy".
 4. **Install a command-line JSON processor** <br>
