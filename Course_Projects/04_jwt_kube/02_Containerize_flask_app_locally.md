@@ -39,8 +39,8 @@ The following steps describe how to complete the Dockerization part of the proje
     Create and run a container using the image locally:
     - You can pass the name of the env file using the flag <br>
         `--env-file=<YOUR_ENV_FILENAME>`.
-    - You should expose the port 8080 of the container to port 80 on your host machine. <br>
-    `~ $docker run --name myContainer --env-file=.env_file -p 80:8080 myimage`
+    - You should expose the port 8080 of the container to port 80 on your host machine. Include the `--detach` flag if you intend to run it in the background <br>
+    `~ $docker run --detach --name myContainer --env-file=.env_file -p 80:8080 myimage`
     ```bash
     # Other useful commands
     # List running containers
