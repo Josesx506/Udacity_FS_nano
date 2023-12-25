@@ -2,18 +2,20 @@
 """
 A simple app to create a JWT token.
 """
-import os
-import logging
 import datetime
+from flask import Flask, jsonify, request, abort
 import functools
-import jwt
+from jose import jwt
+import logging
+import os
+import sys
 
 # pylint: disable=import-error
-from flask import Flask, jsonify, request, abort
 
-
-JWT_SECRET = os.environ.get('JWT_SECRET', 'abc123abc1234')
-LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+# Setup the python file path to enable importing the system variables
+sys.path.append(os.getcwd())
+from settings import JWT_SECRET,LOG_LEVEL
+# In dev mode, the LOG_LEVEL=DEBUG, in production, it should be LOG_LEVEL=INFO
 
 
 def _logger():
@@ -80,7 +82,7 @@ def auth():
 
     user_data = body
 
-    return jsonify(token=_get_jwt(user_data).decode('utf-8'))
+    return jsonify(token=_get_jwt(user_data))#.decode('utf-8')
 
 
 @APP.route('/contents', methods=['GET'])
