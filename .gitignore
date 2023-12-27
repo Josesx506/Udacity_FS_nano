@@ -10,6 +10,7 @@ Books/
 # Front end folders
 02_API_Development/*/*/node_modules
 Course_Projects/*/*/node_modules
+05_HTML_CSS_JS_Intro/02_CSS_Synthax_Exercises/figures
 # Database files
 Course_Projects/03_coffee_shop/backend/src/database/coffeespice.db
 # Python virtual environment folders
