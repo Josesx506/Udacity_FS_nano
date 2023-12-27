@@ -19,6 +19,8 @@ The `<head>`, on the other hand, is never visible, but the information in it des
 
 [Void elements](https://html.spec.whatwg.org/multipage/syntax.html#void-elements) like `img` do not require closing tags. <br><br><br>
 
+
+
 # CSS - Cascading Style Sheets
 CSS is made of rulesets. A selector e.g `div`, and a declaration block which is the text written within the curly braces e.g. `text-align: right`. A complete example of a ruleset is
 ```css
@@ -105,3 +107,16 @@ References <br>
 - [Named Colors and Hex Equivalents](https://css-tricks.com/snippets/css/named-colors-and-hex-equivalents/)
 - [CSS Shorthand Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties)
 - [CSS Shorthand Hexadecimal form](https://en.wikipedia.org/wiki/Web_colors#Shorthand_hexadecimal_form)
+
+<br>
+
+### CSS Stylesheets
+Stylesheets are used when we want to use the same CSS styles on more than one webpage. A stylesheet is a file containing the code that describes how elements on your webpage should be displayed. To link a stylesheet to a html file
+```html
+<link href="path-to-stylesheet/stylesheet.css" rel="stylesheet">
+```
+This is usually included in the header tag of the html file.<br><br><br>
+
+
+
+# JS - JavaScript
