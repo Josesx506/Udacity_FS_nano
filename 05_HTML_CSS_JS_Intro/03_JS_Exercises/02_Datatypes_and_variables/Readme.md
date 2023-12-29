@@ -85,7 +85,7 @@ Popular datatypes include numbers, strings, booleans, null, and undefined etc. V
 
 #### Scope and Variable Declaration
 - The **scope** is defined as a specific portion of the code. There are three types of scope in Javascript
-    1. **Global scope** - When a particular variable is visible (can be used) anywhere in the code. Such a variable is generally called as **Global variable**.
+    1. **Global scope** - When a particular variable is visible (can be used) anywhere in the code. Such a variable is generally called as **Global variable**. Global variables can conflict with other global variables of the same name. Once your programs get larger and larger, it'll get harder and harder to keep track and prevent this from happening. Hence, their use should be minimized.
     2. **Function scope** - When a particular variable is visible (can be used) within a particular function only. Such a variable is generally called as **Local variable**.
     3. **Block scope** - When a particular variable is visible (can be used) within a pair of curly brackets `{ . . . }` only.
 

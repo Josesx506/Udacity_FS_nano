@@ -33,3 +33,13 @@ Learnt about:
     > let text = "Hello world, welcome to the universe.";
     > let result = text.indexOf("welcome"); // returns "13" where the welcome word starts
     ```
+
+4. To avoid variable overwriting, always define function variables explicitly so they don't overwrite global variables.
+    ```js
+    var bookTitle = "Le Petit Prince";
+
+    function displayBook() {
+        bookTitle = "The little prince"     // bad: will lead to overwriting of the global variable above
+        var bookTitle = "The little prince" // good: will preserve the global and function variables
+    }
+    ```
