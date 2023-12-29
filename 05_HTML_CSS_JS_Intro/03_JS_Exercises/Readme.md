@@ -6,3 +6,19 @@
 
 Learnt about:
 - [x] Data Types and Variables
+- [x] Conditionals
+- [x] Loops
+
+### TIPS
+1. Float values can be rounded off with the `.toFixed()` method. e.g
+    ```js
+    > var balance = 325.2583;
+    > console.log(balance.toFixed(2)) // Returns 325.26
+    ```
+    <br>
+
+2. Integers can be printed as formatted strings with the `.toLocaleString()` method. e.g
+    ```js
+    > var salary = 300000;
+    > console.log(salary.toLocaleString("en-US")) // Returns 300,000
+    ```

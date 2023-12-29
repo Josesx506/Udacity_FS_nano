@@ -53,12 +53,7 @@ A **flowchart** is a visual diagram that outlines the solution to a problem thro
     <br>
 
     **TIP**: Logical expressions are evaluated from **left to right**. Similar to mathematical expressions, logical expressions can also use parentheses to signify parts of the expression that should be evaluated first. <br>
-
-    **TIP**: Float values can be rounded off with the `.toFixed()` method. e.g
-    ```js
-    > var balance = 325.2583;
-    > console.log(balance.toFixed(2)) // Returns 325.26
-    ```
+    
 
 - **Truthy and Falsy statements** - Every value in JavaScript has an inherent boolean value. When that value is evaluated in the context of a boolean expression, the value will be transformed into that inherent boolean value. <br>
 These are similar to python values that default to true or false like 0 and 1 even when equal statements are not provided.
@@ -221,5 +216,3 @@ These are similar to python values that default to true or false like 0 and 1 ev
         ```
     
         You can add a `default` case to a switch statement and it will be executed when none of the values match the value of the switch expression. This is similar to an else statement.
-
-    
