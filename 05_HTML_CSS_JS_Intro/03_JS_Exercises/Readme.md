@@ -4,7 +4,7 @@
 ### console.log
 `console.log()` is the equivalent of a python print statement. It can be used to test js syntax and debug multiple lines of code. An example is `console.log("hiya friend!");`.
 
-### Data Tyoes and Variables
+### Data Types and Variables
 Popular datatypes include numbers, strings, variables etc.
 
 - **Numbers** are values like integers or floats. Arithmetic operations and boolean comparisons can be performed for numbers
@@ -19,6 +19,7 @@ Popular datatypes include numbers, strings, variables etc.
 
 - **Strings** can be concatenated with a `+` sign e.g. `console.log("Hello," + " New York City")`. <br>
     *Implicit type coercion* can occur if a string is concatenated with an integer e.g. `console.log("Hello" + 5*10) -> Hello50`. <br>
+    Strings in Js are case sensitive, and can be compared with `==` and `!=` arithmetic operations. <br>
 
 - **Variables** can allow repeated use of assigned values compared to undefined strings and numbers. 
     - **Naming Conventions** - When you create a variable, you write the name of the variable using camelCase (the first word is lowercase, and all following words are uppercase). Also try to use a variable name that accurately, but succinctly describes what the data is about.
@@ -47,6 +48,7 @@ Popular datatypes include numbers, strings, variables etc.
         | ' | ' (single quote) |
         | \n | newline |
         | \t | tab |
+
         The special characters can be combined with inline code
         ```js
         > console.log("Up up\n\tdown down")
