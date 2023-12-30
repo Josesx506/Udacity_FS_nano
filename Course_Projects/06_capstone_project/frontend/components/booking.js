@@ -2,6 +2,17 @@ var today = new Date();
 
 var active_events = [];
 
+var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', 
+		  '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
+		  '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A', 
+		  '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC',
+		  '#66994D', '#B366CC', '#4D8000', '#B33300', '#CC80CC', 
+		  '#66664D', '#991AFF', '#E666FF', '#4DB3FF', '#1AB399',
+		  '#E666B3', '#33991A', '#CC9999', '#B3B31A', '#00E680', 
+		  '#4D8066', '#809980', '#E6FF80', '#1AFF33', '#999933',
+		  '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3', 
+		  '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
+
 // let events = [
 //     {
 //         id: 'event-1',
@@ -48,6 +59,10 @@ var events = [ {
     type: "event"
 }];
 
+function getRandom(a) {
+    return Math.floor(Math.random() * a);
+}
+
 $(document).ready(function() {
     $("#calendar").evoCalendar({
         format: "mm/dd/yyyy",//"MM dd, yyyy",
@@ -86,9 +101,7 @@ $(document).ready(function() {
         }
     });
 
-    function getRandom(a) {
-        return Math.floor(Math.random() * a);
-    }
+    
 
     // function updateCalendarEvents() {
     //     $('#calendar').evoCalendar('removeAllEvents');
@@ -113,38 +126,67 @@ document.getElementById('addBtn').onclick = function(e) {
     e.preventDefault();
 
     // Show the booking form
-    showPopupForm();
+    $('.bookingForm').toggleClass('open');
+    // Fill the date with the active date
+    var curDate = $("#calendar").evoCalendar('getActiveDate').split("/"); // date format is mm/dd/yyyy
+    var fillDatetime = curDate[2] + "-" + curDate[0] + "-" + curDate[1] + "T" + "09:00:00";
+    // Get the first item of from the class
+    document.getElementsByClassName('bookDateTime')[0].value = fillDatetime;
+    // showPopupForm();
 };
 
-document.getElementsByClassName('bookingForm').onsubmit = function(e) {
+document.getElementsByClassName('bookingForm')[0].onsubmit = function(e) {
     e.preventDefault();
+    // Extract the items from the form
+    var firstName =  document.getElementById('firstName').value
+    var lastName = document.getElementById('lastName').value
+    var phoneNum = document.getElementsByClassName('bookPhoneNum')[0].value
+    var emailAdd = document.getElementsByClassName('bookEmail')[0].value
+    var dateTime = document.getElementsByClassName('bookDateTime')[0].value
 
     // Implement the asynchronous fetch
     fetch("/appointments/book", {
         // method type
         method: 'POST',
         // json formatted string from the form input
-        body: JSON.stringify({'first': document.getElementById('firstName').value,
-                                'last': document.getElementById('lastName').value,
-                                'phone': document.getElementsByClassName('bookPhoneNum')[0].value,
-                                'email': document.getElementsByClassName('bookEmail')[0].value,
-                                'date_time': document.getElementsByClassName('bookDateTime')[0].value}),
+        body: JSON.stringify({'first': firstName,
+                                'last': lastName,
+                                'phone': phoneNum,
+                                'email': emailAdd,
+                                'date_time': dateTime}),
         // specify the data type as json so the server understands how to read it
         headers: {'Content-Type': 'application/json'}
     })
 
-    // Process form submission logic here
-    hidePopupForm();
+    // Update the frontend with a new booking
+    var apptTitle = "Hair Appointment";
+    var splitDateTime = dateTime.split('T') // Split the dates
+    var splitDate = splitDateTime[0].split('-');
+    var rearrangedDate = splitDate[1]+"/"+splitDate[2]+"/"+splitDate[0];
+    var description = "<b>Time:</b> "+splitDateTime[1]+"\n"+"<b>Name:</b> "+firstName +" "+ lastName
+
+    $("#calendar").evoCalendar('addCalendarEvent', [
+        {
+          id: 'skibo',
+          name: apptTitle,
+          date: rearrangedDate,
+          color: colorArray[getRandom(colorArray.length)],
+          description: description,
+        }
+    ]);
+    
+    // Hide the form after booking the appointment
+    $('.bookingForm').toggleClass('open');
 };
 
-function showPopupForm() {
-    document.getElementById('popupForm').style.display = 'block';
-    var curDate = $("#calendar").evoCalendar('getActiveDate').split("/"); // date format is mm/dd/yyyy
-    var fillDatetime = curDate[2] + "-" + curDate[0] + "-" + curDate[1] + "T" + "09:00:00";
-    // Get the first item of from the class
-    document.getElementsByClassName('bookDateTime')[0].value = fillDatetime;
-}
+// function showPopupForm() {
+//     // document.getElementById('popupForm').style.display = 'block';
+//     var curDate = $("#calendar").evoCalendar('getActiveDate').split("/"); // date format is mm/dd/yyyy
+//     var fillDatetime = curDate[2] + "-" + curDate[0] + "-" + curDate[1] + "T" + "09:00:00";
+//     // Get the first item of from the class
+//     document.getElementsByClassName('bookDateTime')[0].value = fillDatetime;
+// }
 
-function hidePopupForm() {
-    document.getElementById('popupForm').style.display = 'none';
-}
+// function hidePopupForm() {
+//     document.getElementById('popupForm').style.display = 'none';
+// }
