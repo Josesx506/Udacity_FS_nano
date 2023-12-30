@@ -8,6 +8,9 @@ Learnt about:
 - [x] Data Types and Variables
 - [x] Conditionals
 - [x] Loops
+- [x] Functions
+- [x] Arrays
+- [x] Objects
 
 ### TIPS
 1. Float values can be rounded off with the `.toFixed()` method. e.g
@@ -36,10 +39,18 @@ Learnt about:
 
 4. To avoid variable overwriting, always define function variables explicitly so they don't overwrite global variables.
     ```js
-    var bookTitle = "Le Petit Prince";
+    > var bookTitle = "Le Petit Prince";
 
-    function displayBook() {
+    > function displayBook() {
         bookTitle = "The little prince"     // bad: will lead to overwriting of the global variable above
         var bookTitle = "The little prince" // good: will preserve the global and function variables
     }
+    ```
+
+5. The `typeof` operator can be used to define a variables type e.g. `typof umbrella`. This returns a string that tells you a data type.
+    ```js
+    > typeof "hello"              // returns "string"
+    > typeof true                 // returns "boolean"
+    > typeof [1, 2, 3]            // returns "object" (Arrays are a type of object)
+    > typeof function hello() { } // returns "function"
     ```

@@ -5,4 +5,4 @@ Learnt about HTML templates. <br>
 Learnt about rulesets, css selectors, and stylesheets.<br>
 
 ## JS - JavaScript
-Learnt about 
+Learnt about js variables, conditionals, loops, functions, arrays, and objects.
