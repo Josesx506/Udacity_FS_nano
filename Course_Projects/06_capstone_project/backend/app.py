@@ -1,5 +1,6 @@
 import os
 from flask import Flask, request, abort, jsonify, render_template
+from datetime import datetime
 # from flask_moment import Moment
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -13,14 +14,15 @@ from models import setup_db, db, Booking, Service, Stylist,  database_path
 db_name = database_path
 
 
+# ---------------------------------------- Create the Flask app ----------------------------------------
 def create_app(test_config=None, db_name=db_name):
   # create and configure the app
   app = Flask(__name__, template_folder='templates/')
   setup_db(app,db_name)
   migrate = Migrate(app, db) # Track changes
   CORS(app, resources={r"/api/*": {"origins": "*"}})
-
   return app
+
 
 app: Flask = create_app()
 
@@ -29,21 +31,14 @@ app: Flask = create_app()
 def after_request(response):
     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,true")
     response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,PATCH,DELETE,OPTIONS")
-    
     return response
 
-# Use the ProxyFix middleware to handle the reverse proxy
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+# date_string = "12-31-2023 09:00 AM"
+# Convert the string to a datetime object
+#  datetime_obj = datetime.strptime(date_string, '%m-%d-%Y %I:%M %p')
 
-SITE_NAME = '127.0.0.1'
 
-# Define proxy server.
-# @app.route('/', defaults={'path': ''})
-# @app.route('/<path:path>', methods=['GET','POST','PUT','DELETE'])
-# def proxy(path):
-#   response = request.get_json(f'{SITE_NAME}{path}')
-#   print(response)
-#   return response
+
 
 @app.route("/home")
 def index():

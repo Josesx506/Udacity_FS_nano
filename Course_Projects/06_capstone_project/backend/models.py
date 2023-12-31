@@ -39,16 +39,18 @@ class Booking(db.Model):
     email = db.Column(db.String(500))
     start_time = db.Column(db.DateTime)
     completed = db.Column(db.Boolean, nullable=False, default=False)
-    stylists = db.relationship('Stylist', backref='booking', lazy=True)
+    # stylists = db.relationship('Stylist', backref='bookings', lazy=True)
+    # stylist_id = db.Column(db.Integer, nullable=False)
+    stylist_id = db.Column(db.Integer, db.ForeignKey('Stylists.id'), nullable=False)
 
-    def __init__(self, first_name, last_name, phone, email, start_time, completed, stylists):
+    def __init__(self, first_name, last_name, phone, email, start_time, completed, stylist_id):
         self.first_name = first_name
         self.last_name = last_name
         self.phone = phone
         self.email = email
         self.start_time = start_time
         self.completed = completed
-        self.stylists = stylists
+        self.stylist_id = stylist_id
     
     def insert(self):
         db.session.add(self)
@@ -70,7 +72,7 @@ class Booking(db.Model):
             'email': self.email,
             'start_time': self.start_time,
             'completed': self.completed,
-            'stylists': self.stylists
+            'stylist_id': self.stylist_id
             }
 
 
@@ -127,15 +129,16 @@ class Stylist(db.Model):
     email = db.Column(db.String(500))
     skills = db.Column(db.ARRAY(db.String(120)))
     image_link = db.Column(db.String(500))
-    booking_id = db.Column(db.Integer, db.ForeignKey('Bookings.id'), nullable=False)
+    # booking_id = db.Column(db.Integer, db.ForeignKey('Bookings.id'), nullable=False)
+    # bookings = db.relationship('Booking', backref='stylist', lazy=True) 
 
-    def __init__(self, name, phone, email, skills, image_link, booking_id):
+    def __init__(self, name, phone, email, skills, image_link):
         self.name = name
         self.phone = phone
         self.email = email
         self.skills = skills
         self.image_link = image_link
-        self.booking_id = booking_id
+        # self.bookings = bookings
     
     def insert(self):
         db.session.add(self)
@@ -155,6 +158,5 @@ class Stylist(db.Model):
             'phone': self.phone,
             'email': self.email,
             'skills': self.skills,
-            'image_link': self.image_link,
-            'booking_id': self.booking_id,
+            'image_link': self.image_link
             }
