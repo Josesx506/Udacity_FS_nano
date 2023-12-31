@@ -4,35 +4,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookings Page</title>
+    <title>{% block title %}Bookings Page{% endblock %}</title>
     <!-- Add the evo-calendar.css for styling -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/css/evo-calendar.min.css" />
-    <link rel="stylesheet" href="../stylesheets/header.css">
-    <link rel="stylesheet" href="../stylesheets/booking.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/header.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/booking.css')}}">
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
 </head>
 
 <body>
     <header>
-        <div class="vertical-centerer flex-container">
+        <nav class="vertical-centerer flex-container">
             <div class="flex-container space-between header-content">
                 <div>
                     <span>
-                        <img class="logo" src="../public/logo.png" alt="HofE Logo">
+                        <img class="logo" src="{{ url_for('static', filename='images/logo.png')}}" alt="HofE Logo">
                     </span>
                 </div>
                 <div>
                     <ul class="menu">
-                        <li><a href="index.html">Home</a></li>
-                        <li>Service</li>
-                        <li><a href="booking.html">Book Appointment</a></li>
-                        <li>Stylists</li>
-                        <li id="login-button">Login</li>
+                        <li><a href="{{ url_for('index')}}">Home</a></li>
+                        <!-- <li><a href="{{ url_for('static', filename='services.html')}}">Services</a></li> -->
+                        <li><a href="{{ url_for('get_bookings')}}">Book Appointment</a></li>
+                        <!-- <li><a href="{{ url_for('get_bookings')}}">Stylists</a></li> -->
+                        <!-- <li id="login-button"><a href="{{ url_for('static', filename='login.html')}}">Login</a></li> -->
                     </ul>
                 </div>
             </div>
-        </div>
+        </nav>
     </header>
 
     <!-- Calendar Div -->
@@ -42,10 +42,9 @@
     <div class="action-btns">
         <!-- Buttons to add and delete events -->
         <div class="booking-wrapper">
-            <button id="addBtn" class="click-btns">Book Appointment</button>
+            <button id="addBtn" class="click-btns" action="/appointments/availability" method="get">Book Appointment</button>
             <div class="popup-container">
-                <form class="bookingForm">
-                    <!-- action="/appointments/book" method="post" -->
+                <form class="bookingForm" action="/appointments/book" method="post">
                     <div class="field-wrap">
                         <label for="fname">First Name*</label>
                         <input type="text" id="firstName" name="fname" required autocomplete="off">
@@ -59,8 +58,13 @@
                         <label for="email">Email Address*</label>
                         <input type="email" class="bookEmail" name="email" required autocomplete="on" />
                         <br>
-                        <label for="dt">Date & Time*</label>
-                        <input type="datetime-local" class="bookDateTime" name="dt" required />
+                        <label for="dt">Availability*</label>
+                        <!-- <input type="datetime-local" class="bookDateTime" name="dt" required /> -->
+                        <select class="time_availability" name="dt">
+                            <option value="10 AM">10 AM</option>
+                            <option value="11 AM" disabled>11 AM</option>
+                            <option value="12 PM">12 PM</option>
+                        </select>
                         <br>
                         <button type="submit" class="submitBooking">Book</button>
                     </div>
@@ -75,7 +79,7 @@
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/js/evo-calendar.min.js"></script>
-    <script src="../components/booking.js"></script>
+    <script src="{{ url_for('static', filename='scripts/booking.js') }}"></script>
 </body>
 
 </html>
