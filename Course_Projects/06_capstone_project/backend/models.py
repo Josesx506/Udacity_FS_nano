@@ -41,7 +41,7 @@ class Booking(db.Model):
     completed = db.Column(db.Boolean, nullable=False, default=False)
     # stylists = db.relationship('Stylist', backref='bookings', lazy=True)
     # stylist_id = db.Column(db.Integer, nullable=False)
-    stylist_id = db.Column(db.Integer, db.ForeignKey('Stylists.id'), nullable=False)
+    stylist_id = db.Column(db.Integer, db.ForeignKey('Stylists.id'), nullable=True)
 
     def __init__(self, first_name, last_name, phone, email, start_time, completed, stylist_id):
         self.first_name = first_name
@@ -53,8 +53,12 @@ class Booking(db.Model):
         self.stylist_id = stylist_id
     
     def insert(self):
-        db.session.add(self)
-        db.session.commit()
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except Exception as e:
+            print(f"Error inserting into the database: {e}")
+            db.session.rollback()
 
     def update(self):
         db.session.commit()

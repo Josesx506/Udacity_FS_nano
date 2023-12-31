@@ -1,3 +1,6 @@
+// var eventData = {{ eventsdb|tojson|safe }};
+// console.log(eventsdb);
+
 var today = new Date();
 
 var active_events = [];
@@ -26,38 +29,38 @@ var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
 //     },
 // ];
 
-var events = [ {
-    id: "imwyx6S",
-    name: "Event #3",
-    description: "Lorem ipsum dolor sit amet.",
-    date: today.getMonth() + 1 + "/18/" + today.getFullYear(),
-    type: "event"
-}, {
-    id: "9jU6g6f",
-    name: "Holiday #1",
-    description: "Lorem ipsum dolor sit amet.",
-    date: today.getMonth() + 1 + "/10/" + today.getFullYear(),
-    time: '2023-12-31T10:30:00',
-    type: "holiday"
-}, {
-    id: "d8jai7s",
-    name: "Author's Birthday",
-    description: "Author's note: Thank you for using EvoCalendar! :)",
-    date: "December/25/2023",
-    type: "birthday",
-    everyYear: !0
-}, {
-    id: "in8bha4",
-    name: "Holiday #2 " + today.getFullYear(),
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    date: today,
-    type: "holiday"
-}, {
-    id: "in8bha4",
-    name: "Event #2",
-    date: today,
-    type: "event"
-}];
+// var events = [ {
+//     id: "imwyx6S",
+//     name: "Event #3",
+//     description: "Lorem ipsum dolor sit amet.",
+//     date: today.getMonth() + 1 + "/18/" + today.getFullYear(),
+//     type: "event"
+// }, {
+//     id: "9jU6g6f",
+//     name: "Holiday #1",
+//     description: "Lorem ipsum dolor sit amet.",
+//     date: today.getMonth() + 1 + "/10/" + today.getFullYear(),
+//     time: '2023-12-31T10:30:00',
+//     type: "holiday"
+// }, {
+//     id: "d8jai7s",
+//     name: "Author's Birthday",
+//     description: "Author's note: Thank you for using EvoCalendar! :)",
+//     date: "December/25/2023",
+//     type: "birthday",
+//     everyYear: !0
+// }, {
+//     id: "in8bha4",
+//     name: "Holiday #2 " + today.getFullYear(),
+//     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+//     date: today,
+//     type: "holiday"
+// }, {
+//     id: "in8bha4",
+//     name: "Event #2",
+//     date: today,
+//     type: "event"
+// }];
 
 function getRandom(a) {
     return Math.floor(Math.random() * a);
@@ -73,7 +76,7 @@ $(document).ready(function() {
         sidebarToggler: false,
         eventListToggler: false,
         canAddEvent: true,
-        calendarEvents: events
+        calendarEvents: eventData
     })
 
     // $("#addBtn").click(function(a) {
@@ -88,18 +91,20 @@ $(document).ready(function() {
     //         $("#removeBtn").prop("disabled", false);
     //     }
     // });
-    $("#removeBtn").click(function(a) {
-        curRmv = getRandom(active_events.length);
-        $("#calendar").evoCalendar("removeCalendarEvent", active_events[curRmv].id);
-        events.push(active_events[curRmv]);
-        active_events.splice(curRmv, 1);
-        if (0 === active_events.length) {
-            a.target.disabled = true;
-        }
-        if (events.length > 0) {
-            $("#addBtn").prop("disabled", false);
-        }
-    });
+
+
+    // $("#removeBtn").click(function(a) {
+    //     curRmv = getRandom(active_events.length);
+    //     $("#calendar").evoCalendar("removeCalendarEvent", active_events[curRmv].id);
+    //     events.push(active_events[curRmv]);
+    //     active_events.splice(curRmv, 1);
+    //     if (0 === active_events.length) {
+    //         a.target.disabled = true;
+    //     }
+    //     if (events.length > 0) {
+    //         $("#addBtn").prop("disabled", false);
+    //     }
+    // });
 
     
 
@@ -199,28 +204,44 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function(e) {
                                 'date_time': dateTime}),
         // specify the data type as json so the server understands how to read it
         headers: {'Content-Type': 'application/json'}
-    })
+    }).then(response => response.json())
+    .then(data => {
+        console.log(data)
+        // Update the calendar with the latest event
+        $("#calendar").evoCalendar('addCalendarEvent', [
+            {
+              id: data.event[0].id,
+              name: data.event[0].name,
+              date: data.event[0].date,
+              color: colorArray[getRandom(colorArray.length)],
+              description: data.event[0].description,
+            }
+        ]);
+    }).catch(error => {
+      console.error('Error fetching available times:', error);
+    });
 
     // Update the frontend with a new booking
-    var apptTitle = "Hair Appointment";
+    // var apptTitle = "Hair Appointment";
     // var splitDateTime = dateTime.split('T') // Split the dates
     // var splitDate = splitDateTime[0].split('-');
     // var rearrangedDate = splitDate[1]+"/"+splitDate[2]+"/"+splitDate[0];
-    var description = "<b>Time:</b> "+selectedTime+"\n"+"<b>Name:</b> "+firstName +" "+ lastName
+    // var description = "<b>Time:</b> "+selectedTime+"\n"+"<b>Name:</b> "+firstName +" "+ lastName
 
-    $("#calendar").evoCalendar('addCalendarEvent', [
-        {
-          id: 'skibo',
-          name: apptTitle,
-          date: actDate,
-          color: colorArray[getRandom(colorArray.length)],
-          description: description,
-        }
-    ]);
+    // $("#calendar").evoCalendar('addCalendarEvent', [
+    //     {
+    //       id: 'skibo',
+    //       name: apptTitle,
+    //       date: actDate,
+    //       color: colorArray[getRandom(colorArray.length)],
+    //       description: description,
+    //     }
+    // ]);
     
     // Hide the form after booking the appointment
     $('.bookingForm').toggleClass('open');
 };
+
 
 // function showPopupForm() {
 //     // document.getElementById('popupForm').style.display = 'block';
