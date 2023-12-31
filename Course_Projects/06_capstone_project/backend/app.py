@@ -1,14 +1,23 @@
 import os
 from flask import Flask, request, abort, jsonify, render_template
+# from flask_moment import Moment
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
-# from flask.request import get
+import sys
+
+# Setup the python file path to enable importing the system variables
+sys.path.append(os.getcwd())
+from models import setup_db, db, Booking, Service, Stylist,  database_path
+db_name = database_path
 
 
-def create_app(test_config=None):
+def create_app(test_config=None, db_name=db_name):
   # create and configure the app
   app = Flask(__name__, template_folder='templates/')
+  setup_db(app,db_name)
+  migrate = Migrate(app, db) # Track changes
   CORS(app, resources={r"/api/*": {"origins": "*"}})
 
   return app
@@ -41,11 +50,11 @@ def index():
    # return jsonify("This is the index")
    return render_template("index.html")
 
+# ------------------------------------------------------ APPOINTMENTS ------------------------------------------------------
 @app.route("/appointments")
 def get_bookings():
    # return jsonify("This is the index")
    return render_template("booking.html")
-
 
 # POST new booking to the db
 @app.route("/appointments/book", methods=['POST'])
