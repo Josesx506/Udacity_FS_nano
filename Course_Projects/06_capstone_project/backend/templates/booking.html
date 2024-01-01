@@ -6,11 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Bookings Page{% endblock %}</title>
     <!-- Add the evo-calendar.css for styling -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/css/evo-calendar.min.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/css/evo-calendar.min.css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/header.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/booking.css')}}">
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+    <!-- Font awesome icos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 
 <body>
@@ -42,7 +45,8 @@
     <div class="action-btns">
         <!-- Buttons to add and delete events -->
         <div class="booking-wrapper">
-            <button id="addBtn" class="click-btns" action="/appointments/availability" method="get">Book Appointment</button>
+            <button id="addBtn" class="click-btns" action="/appointments/availability" method="get">Book
+                Appointment</button>
             <div class="popup-container">
                 <form class="bookingForm" action="/appointments/book" method="post">
                     <div class="field-wrap">
@@ -74,18 +78,14 @@
 
         <div class="remove-wrapper">
             <button id="removeBtn" class="click-btns">Delete Appointment</button>
-        </div>   
+        </div>
     </div>
 
-    
-    <script>
-        // Use JSON.stringify to convert the Python data to a JSON string
-        var eventData = {{ eventsdb | tojson | safe }};
-    </script>
+
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/js/evo-calendar.min.js"></script>
-    <script src="{{ url_for('static', filename='scripts/booking.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/booking.js') }}" defer></script>
 </body>
 
 </html>

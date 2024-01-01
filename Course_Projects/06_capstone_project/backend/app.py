@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Flask, request, abort, jsonify, render_template
 from datetime import datetime
 # from flask_moment import Moment
@@ -43,6 +44,24 @@ def index():
    return render_template("index.html")
 
 # ------------------------------------------------------ APPOINTMENTS ------------------------------------------------------
+def format_revocal_events(items):
+   '''Format the data from the db to match the required pattern to be rendered on the front end'''
+   class str2(str):
+      def __repr__(self):
+         return ''.join(('"', super().__repr__()[1:-1], '"'))
+   
+   for k,v in enumerate(items):
+      v['id'] = str(v["id"])
+      v['name'] = f"Hair Appointment #{v['id']}"
+      v['start_time'] = datetime.strftime( v['start_time'], '%m-%d-%Y %I:%M %p')
+      v['date'] = str2(v['start_time'].split(" ")[0].replace('-','/'))
+      v['time'] = " ".join(v['start_time'].split(" ")[1:])
+      # v['description'] = f"<span><b>Time:</b>{v['time']}\t <b>Name:</b> {v['first_name']} {v['last_name']}</span>"
+      v['description'] = f"Time: {v['time']}\t Name: {v['first_name']} {v['last_name']}"
+      v['type'] = 'event'
+   return items
+
+
 @app.route("/appointments")
 def get_bookings():
    allEvents = Booking.query.order_by(Booking.id).all()
@@ -51,22 +70,19 @@ def get_bookings():
    
    # currentEvents = [item['date']=]
    # pas = datetime.strftime(datetime(2024, 1, 4, 10, 0), '%m-%d-%Y %I:%M %p')
-   print(currentEvents,"\n\n\n")
+   # print(currentEvents,"\n\n\n")
    # return jsonify("This is the index")
-   return render_template("booking.html", eventsdb=currentEvents)
+   return render_template("booking.html" ) #, eventsdb=currentEvents
 
 
-def format_revocal_events(items):
-   '''Format the data from the db to match the required pattern to be rendered on the front end'''
-   for k,v in enumerate(items):
-      v['id'] = str(v["id"])
-      v['name'] = "Hair Appointment"
-      v['start_time'] = datetime.strftime( v['start_time'], '%m-%d-%Y %I:%M %p')
-      v['date'] = v['start_time'].split(" ")[0].replace("-","/")
-      v['time'] = " ".join(v['start_time'].split(" ")[1:])
-      v['description'] = f"<b>Time:</b>{v['time']}\n <b>Name:</b> {v['first_name']} {v['last_name']}"
-      v['type'] = 'event'
-   return items
+@app.route("/appointments/refresh")
+def update_appts_page():
+   allEvents = Booking.query.order_by(Booking.id).all()
+   currentEvents = [event.format() for event in allEvents]
+   currentEvents = format_revocal_events(currentEvents)
+
+   return jsonify({'booked_slots': currentEvents})
+
 
 
 # POST new booking to the db
@@ -106,8 +122,6 @@ def create_new_booking():
          abort(422)
    except:
       abort(422)
-   return jsonify("The post request is working")
-#    return render_template("booking.html")
 
 
 # GET existing booking fro the DB

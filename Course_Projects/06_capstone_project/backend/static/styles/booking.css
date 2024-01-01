@@ -80,3 +80,76 @@
     display: block;
     position: fixed;
 }
+
+/* Style the Add event button */
+.addEventButtons {
+    position: absolute;
+    top: 0.5%;
+    right: 10%;
+    cursor: 'pointer';
+    background-color: transparent;
+    display: block;
+    margin: 0;
+    border: dashed;
+    border-width: 3px;
+    border-radius: 70px;
+    border-color: #8773c1;
+    background-color: rgba(255,255, 250, 0.5);
+    color: #8773c1;
+    margin: 5px 5px;
+    z-index: 2;
+}
+.addEventButtons:hover {
+    cursor:pointer;
+}
+.addEventButtons:active {
+    opacity: 0.5;
+    box-sizing: border-box;
+    font-size: 59px;
+    transition: background-color 2s ease, box-shadow .25s ease;
+}
+
+/* Style the delete button */
+.deleteEventButtons {
+    position: absolute;
+    top: 0;
+    right: -3%;
+    cursor: 'pointer';
+    background-color: transparent;
+    display: block;
+    margin: 0;
+    border: 0;
+}
+.deleteEventButtons i {
+    color: lightcoral;
+}
+
+.deleteEventButtons i:active {
+    background-color: #ee97bd;
+    color: red;
+    opacity: 0.5;
+    box-sizing: border-box;
+    transition: background-color 2s ease, box-shadow .25s ease;
+}
+
+/* Style the Edit button */
+.editEventButtons {
+    position: absolute;
+    bottom: 0;
+    right: -3%;
+    cursor: 'pointer';
+    background-color: transparent;
+    display: block;
+    margin: 0;
+    border: 0;
+}
+.editEventButtons i {
+    color: black;
+}
+.editEventButtons i:active {
+    /* background-color: transparent; */
+    color: gray;
+    opacity: 0.5;
+    box-sizing: border-box;
+    transition: background-color 2s ease, box-shadow .25s ease;
+}
