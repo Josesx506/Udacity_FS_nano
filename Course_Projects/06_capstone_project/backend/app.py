@@ -1,7 +1,7 @@
 import os
 import json
 from flask import Flask, request, abort, jsonify, render_template
-from datetime import datetime
+from datetime import datetime,timedelta
 # from flask_moment import Moment
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -64,19 +64,19 @@ def format_revocal_events(items):
 
 @app.route("/appointments")
 def get_bookings():
+   '''
+   This is a simple get request to create the first page
+   I limited the Jinja use to a minimum because it was causing interference with js
+   '''
    allEvents = Booking.query.order_by(Booking.id).all()
    currentEvents = [event.format() for event in allEvents]
    currentEvents = format_revocal_events(currentEvents)
    
-   # currentEvents = [item['date']=]
-   # pas = datetime.strftime(datetime(2024, 1, 4, 10, 0), '%m-%d-%Y %I:%M %p')
-   # print(currentEvents,"\n\n\n")
-   # return jsonify("This is the index")
-   return render_template("booking.html" ) #, eventsdb=currentEvents
+   return render_template("booking.html" )
 
 
 @app.route("/appointments/refresh")
-def update_appts_page():
+def update_appointments_page():
    allEvents = Booking.query.order_by(Booking.id).all()
    currentEvents = [event.format() for event in allEvents]
    currentEvents = format_revocal_events(currentEvents)
@@ -85,11 +85,13 @@ def update_appts_page():
 
 
 
+
+
 # POST new booking to the db
 @app.route("/appointments/book", methods=['POST'])
 def create_new_booking():
+   '''Get the responses'''
    resp = request.get_json()
-   print(resp,"\n","\n","\n")
 
    # Check the validity of the request to confirm there are no errors
    if resp['date_time'] is None:
@@ -124,24 +126,55 @@ def create_new_booking():
       abort(422)
 
 
+
+
+
 # GET existing booking fro the DB
 @app.route('/appointments/<date>')
 def create_availability(date):
+   '''
+   This function returns booked timeslots that the frontend can use to restrict booking availability.
+      booked_times = ["01:00 PM", "02:00 PM", "03:00 PM"]
+   '''
    # List of all available times
    all_times = ["09:00 AM", "10:00 AM", "11:00 AM", 
                            "12:00 PM", "01:00 PM", "02:00 PM", 
                            "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM"]
    
    # In a real application, you would query your database to get the list of booked times
-   booked_times = ["01:00 PM", "02:00 PM", "03:00 PM"]#get_booked_times_from_database(date)
-   # return render_template('booking.html', available_times=available_times, booked_times=booked_times)
-   # Send JSON response containing available times to the client
+   booked_times = get_booked_times_from_database(date)
+   
    return jsonify({'all_times': all_times, 'booked_times': booked_times})
 
-# @TODO
+
+
+
+
 def get_booked_times_from_database(date):
-   # Query the database for the particular date and get all the booked timeslots
-   pass
+   '''
+   Query the database for the particular date and get all the booked timeslots which affects 
+   what future timeslots that the customer can select
+   '''
+   fmt_date = datetime.strptime(date, "%m-%d-%Y")
+   start_of_day = datetime.combine(fmt_date, datetime.min.time())
+   end_of_day = datetime.combine(fmt_date + timedelta(days=1), datetime.min.time())
+   
+   # Perform the sql query
+   booked_events = Booking.query.filter(Booking.start_time.between(start_of_day.date(), 
+                                                end_of_day.date())).order_by(Booking.start_time).all()
+   
+   if len(booked_events)>0:
+      booked_events = [event.format() for event in booked_events]
+      booked_events = format_revocal_events(booked_events)
+      unavailable_timeslots = [event['time'] for event in booked_events]
+      return unavailable_timeslots
+
+   else:
+      return []
+   
+
+# @TODO - Patch and Delete requests
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
