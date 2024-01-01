@@ -27,6 +27,19 @@ function getRandom(a) {
 // }]
 
 
+
+// document.querySelector(`.calendar-events`).onclick = function (e){
+
+//     var eventHeaderContainer =  document.querySelector(`.calendar-events`);
+//     console.log('Ptr')
+    
+// }
+
+// if (eventHeaderContainer.length > 0) {
+    
+// };
+
+
 function updateCalendarView() {
     // $('#calendar').evoCalendar('removeEventList')
 
@@ -65,7 +78,8 @@ function updateCalendarView() {
     return eventList;
 }
 
-var events = updateCalendarView(); // The list of events as a global variable
+// The list of events as a global variable
+var events = updateCalendarView(); 
 
 $(document).ready(function () {
     $("#calendar").evoCalendar({
@@ -79,23 +93,6 @@ $(document).ready(function () {
         canAddEvent: true,
         // calendarEvents: []
     })
-
-    // updateCalendarView()
-
-    
-    // $("#addBtn").click(function(a) {
-    //     curAdd = getRandom(events.length);
-    //     $("#calendar").evoCalendar("addCalendarEvent", events[curAdd]);
-    //     active_events.push(events[curAdd]);
-    //     events.splice(curAdd, 1);
-    //     if (0 === events.length) {
-    //         a.target.disabled = true;
-    //     }
-    //     if (active_events.length > 0) {
-    //         $("#removeBtn").prop("disabled", false);
-    //     }
-    // });
-
 
     // $("#removeBtn").click(function(a) {
     //     curRmv = getRandom(active_events.length);
@@ -141,12 +138,6 @@ $(document).ready(function () {
 // };
 // createDeleteButton();
 
-// document.querySelector('.calendar-active[role="button"]').onclick = function(e) {
-//     // Use this line to prevent the default page refresh each time there is an update
-//     e.preventDefault();
-//     console.log('got you')
-// };
-
 
 // Assuming you have a common ancestor element that contains all the delete buttons
 // Replace "commonAncestor" with the actual parent element that holds the delete buttons
@@ -185,7 +176,6 @@ $(document).ready(function () {
 // Event Listener to enable functionality that will include dynamic add, edit, and delete buttons to the Calendar
 // --------------------------------------------------------------------------------------------
 $("#calendar").on('selectDate', function (event, newDate, oldDate) {
-    console.log('New date selected:', newDate);
 
     // Check if an event-container exists for the selected date
     const eventContainer = $(`.event-container[role='button']`);
@@ -196,7 +186,7 @@ $("#calendar").on('selectDate', function (event, newDate, oldDate) {
         for (i=0;i<eventContainer.length; i++) {
             var element = eventContainer[i];
 
-            var eventId = element.getAttribute('data-event-index');
+            // var eventId = element.getAttribute('data-event-index');
             
             // Add a Delete button
             var deleteButton = document.createElement('button');
@@ -212,36 +202,52 @@ $("#calendar").on('selectDate', function (event, newDate, oldDate) {
             // Append the delete and edit buttons to the parent div
             element.appendChild(deleteButton);
             element.appendChild(editEventButton);
-
-            console.log(element);
         }
     };
 
-    // Check if the 
-    const eventHeaderContainer = $(`.calendar-events`);
-    const addButtonAdded = eventHeaderContainer.data('addButtonAdded'); // Flag for checking the button exists
+    // Include an add event button 
+    var eventHeaderContainer =  $(`.calendar-events`);
+    // Flag for checking the button exists
+    var addButtonAdded = eventHeaderContainer.data('addButtonAdded'); 
 
-    if (!addButtonAdded && eventHeaderContainer.length > 0) {
+    if (!addButtonAdded) {
 
         var eventHeaderElement = eventHeaderContainer[0];
         
         // Include an event Add button
         var addButton = document.createElement('button');
-        // addButton.id = ("addBtn");
+        addButton.id = ("addBtn");
         addButton.className = `addEventButtons`;
         addButton.innerHTML = `<i style="font-size:60px" class="fa-solid fa-plus"></i>`;
-        addButton.action="/appointments/availability" 
-        addButton.method="get"
 
         // Append the Add buttons to the header div
         eventHeaderElement.appendChild(addButton);
 
         // Set the flag to indicate that the button has been added
         eventHeaderContainer.data('addButtonAdded', true);
+    }
 
-        console.log("This is the header div",eventHeaderElement);
-    };
+    // --------------------------------------------------------------------------------------------
+    // Event Listener to allow functionality to identify booked timeslots on the Calendar
+    // --------------------------------------------------------------------------------------------
+    document.getElementById('addBtn').onclick = function (e) {
+        $('.bookingForm').toggleClass('open');
 
+        // Select the date of interest - Perform get request to blank out times that have been selected for that day
+        var doi = $("#calendar").evoCalendar('getActiveDate').replace("/", "-").replace("/", "-")
+        fetch("/appointments/" + doi, {
+            // method type
+            method: 'GET',
+            // specify the data type as json so the server understands how to read it
+            headers: { 'Content-Type': 'application/json' }
+        }).then(response => response.json())
+            .then(data => {
+                // Update the form options to show only available time slots
+                updateFormOptions(data);
+            }).catch(error => {
+                console.error('Error fetching available times:', error);
+            });
+    }
 });
 
 
@@ -272,31 +278,6 @@ function updateFormOptions(data) {
 };
 
 
-// --------------------------------------------------------------------------------------------
-// Event Listener to allow functionality to identify booked timeslots on the Calendar
-// --------------------------------------------------------------------------------------------
-document.getElementById('addBtn').onclick = function (e) {
-    // Use this line to prevent the default page refresh each time there is an update
-    e.preventDefault();
-
-    // Show the booking form
-    $('.bookingForm').toggleClass('open');
-
-    // Select the date of interest - Perform get request to blank out times that have been selected for that day
-    var doi = $("#calendar").evoCalendar('getActiveDate').replace("/", "-").replace("/", "-")
-    fetch("/appointments/" + doi, {
-        // method type
-        method: 'GET',
-        // specify the data type as json so the server understands how to read it
-        headers: { 'Content-Type': 'application/json' }
-    }).then(response => response.json())
-        .then(data => {
-            // Update the form options to show only available time slots
-            updateFormOptions(data);
-        }).catch(error => {
-            console.error('Error fetching available times:', error);
-        });
-};
 
 
 // --------------------------------------------------------------------------------------------
@@ -330,7 +311,7 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
         headers: { 'Content-Type': 'application/json' }
     }).then(response => response.json())
         .then(data => {
-            console.log(data.event[0])
+
             var addEvent = {
                 id: data.event[0].id,
                 name: data.event[0].name,
@@ -340,7 +321,6 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
             };
             // Update the calendar with the latest event
             $("#calendar").evoCalendar('addCalendarEvent', [addEvent]);
-            active_events.push(addEvent)
         }).catch(error => {
             console.error('Error fetching available times:', error);
         });

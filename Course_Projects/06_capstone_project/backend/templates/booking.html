@@ -38,50 +38,40 @@
         </nav>
     </header>
 
-    <!-- Calendar Div -->
-    <div id="calendar"></div>
+    
+    <div id="page-container">
+        <!-- Calendar Div -->
+        <div id="calendar"></div>
 
-    <!-- Action button Div -->
-    <div class="action-btns">
-        <!-- Buttons to add and delete events -->
-        <div class="booking-wrapper">
-            <button id="addBtn" class="click-btns" action="/appointments/availability" method="get">Book
-                Appointment</button>
-            <div class="popup-container">
-                <form class="bookingForm" action="/appointments/book" method="post">
-                    <div class="field-wrap">
-                        <label for="fname">First Name*</label>
-                        <input type="text" id="firstName" name="fname" required autocomplete="off">
-                        <br>
-                        <label for="lname">Last Name *</label>
-                        <input type="text" id="lastName" name="lname" required autocomplete="off">
-                        <br>
-                        <label for="phone">Phone*</label>
-                        <input type="tel" class="bookPhoneNum" name="phone" required autocomplete="on" />
-                        <br>
-                        <label for="email">Email Address*</label>
-                        <input type="email" class="bookEmail" name="email" required autocomplete="on" />
-                        <br>
-                        <label for="dt">Availability*</label>
-                        <!-- <input type="datetime-local" class="bookDateTime" name="dt" required /> -->
-                        <select class="time_availability" name="dt">
-                            <option value="10 AM">10 AM</option>
-                            <option value="11 AM" disabled>11 AM</option>
-                            <option value="12 PM">12 PM</option>
-                        </select>
-                        <br>
-                        <button type="submit" class="submitBooking">Book</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="remove-wrapper">
-            <button id="removeBtn" class="click-btns">Delete Appointment</button>
+        <!-- Pop-up Form to add events -->
+        <div class="popup-container">
+            <form class="bookingForm" action="/appointments/book" method="post">
+                <div class="field-wrap">
+                    <label for="fname">First Name*</label>
+                    <input type="text" id="firstName" name="fname" required autocomplete="off">
+                    <br>
+                    <label for="lname">Last Name *</label>
+                    <input type="text" id="lastName" name="lname" required autocomplete="off">
+                    <br>
+                    <label for="phone">Phone*</label>
+                    <input type="tel" class="bookPhoneNum" name="phone" required autocomplete="on" />
+                    <br>
+                    <label for="email">Email Address*</label>
+                    <input type="email" class="bookEmail" name="email" required autocomplete="on" />
+                    <br>
+                    <label for="dt">Availability*</label>
+                    <!-- <input type="datetime-local" class="bookDateTime" name="dt" required /> -->
+                    <select class="time_availability" name="dt">
+                        <option value="10 AM">10 AM</option>
+                        <option value="11 AM" disabled>11 AM</option>
+                        <option value="12 PM">12 PM</option>
+                    </select>
+                    <br>
+                    <button type="submit" class="submitBooking">Book</button>
+                </div>
+            </form>
         </div>
     </div>
-
-
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/js/evo-calendar.min.js"></script>

@@ -1,57 +1,45 @@
+#page-container {
+    position: fixed;
+    display: flex;
+    width:80%;
+    height: 70%; /* 100% of the viewport height */
+    justify-content:space-evenly; /* Center horizontally */
+    align-items: center;
+    top: 12%;
+    left: 5%;
+    margin: 0;
+    /* transform: translate(-60%, -30%); */
+}
+
 #calendar{
     width: 80%;
-    position: absolute;
-    top: 35%;
-    left: 50%;
-    transform: translate(-60%, -30%);
+    max-width: 85%;
+    height: auto;
+    position:relative;
     z-index: -1;
+    margin-right: 20px;
 }
 
-/* Buttons to book or delete appointments */
-.action-btns {
-    position: absolute;
-    top: 80%;
-    left: 40%;
-    transform: translate(-50%, -50%);
-    width: 500px;
-    height: 40px;
-    display: flex;
-    /* text-align: center; */
-}
-.click-btns {
-    font-family: 'Inter', sans-serif, 'Courier New', Courier, monospace;
-    color: #8773c1;
-    background-color: rgba(255,255, 250, 0.5);
-    margin: 5px 5px;
-    font-size: x-large;
-    z-index: 2;
-}
-.click-btns:hover {
-    cursor:pointer;
-}
-
-
-/* Container pop-up for when an appointment is made */
-.popup-container {
-    position: relative;
-}
 .bookingForm {
     display: none;
-    position: absolute;
-    bottom: 100%;
+    position: fixed;
+    top: 24%;
+    width: auto;
+    height:auto;
     background:rgba(238, 233, 255,.9);
-    padding: 20px;
+    padding-left: 10px;
     border: 1px solid #ccc;
     border-radius: 1px;
     box-shadow:0 4px 10px 4px rgba(238, 233, 255,.3);
-    z-index: 5;
+    z-index: 500;
     font-family: 'Inter', sans-serif;
 }
+
 .field-wrap input, .field-wrap select {
     font-size:16px;
     display:block;
-    width:100%;
-    height:100%;
+    width:95%;
+    height:90%;
     padding:5px 10px;
     background:none;
     border:1px solid #a0b3b0;
@@ -71,15 +59,16 @@
     text-align-last: center; /* Center text in the dropdown options */
 }
 
-
 /* Adjust font size for booking button */
 .submitBooking {
     font-size:16px;
+    margin-bottom: 5px;
 }
 .open {
     display: block;
     position: fixed;
 }
+
 
 /* Style the Add event button */
 .addEventButtons {
@@ -153,3 +142,41 @@
     box-sizing: border-box;
     transition: background-color 2s ease, box-shadow .25s ease;
 }
+
+
+
+
+/* Buttons to book or delete appointments */
+/* .action-btns {
+    position: absolute;
+    top: 80%;
+    left: 40%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    height: 40px;
+    display: flex;
+    text-align: center;
+}
+.click-btns {
+    font-family: 'Inter', sans-serif, 'Courier New', Courier, monospace;
+    color: #8773c1;
+    background-color: rgba(255,255, 250, 0.5);
+    margin: 5px 5px;
+    font-size: x-large;
+    z-index: 2;
+}
+.click-btns:hover {
+    cursor:pointer;
+} */
+
+
+/* Container pop-up for when an appointment is made */
+/* .popup-container {
+    position: relative;
+} */
+
+
+
+
+
+
