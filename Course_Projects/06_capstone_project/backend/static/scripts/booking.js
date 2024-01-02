@@ -1,6 +1,6 @@
 var today = new Date();
 
-
+// Array of colors to be used
 var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
     '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
     '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
@@ -16,6 +16,10 @@ var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
 function getRandom(a) {
     return Math.floor(Math.random() * a);
 }
+
+// Random Text Generator as function
+//Can change 7 to 2 for longer results.
+let rtg = (Math.random() + 1).toString(36).substring(7);
 
 // Place holder event for tests
 // var events = [{
@@ -40,59 +44,73 @@ function getRandom(a) {
 // };
 
 
-function updateCalendarView() {
-    // $('#calendar').evoCalendar('removeEventList')
 
-    var eventList = [];
 
-    fetch("/appointments/refresh", {
-        // method type
-        method: 'GET',
-        // specify the data type as json so the server understands how to read it
-        headers: { 'Content-Type': 'application/json' }
-    }).then(response => response.json())
-        .then(data => {
-            var event = data.booked_slots;
-            
-            event.forEach(function(slotEvent) {
-                existingEvent = {
-                    id: slotEvent.id,
-                    name: slotEvent.name,
-                    date: slotEvent.date,
-                    color: colorArray[getRandom(colorArray.length)],
-                    description: slotEvent.description,
-                    type: slotEvent.type,
-                    everyYear: false
-                };
-                eventList.push(existingEvent);
-                
-                // Add the event to the calendar asynchronously
-                $('#calendar').evoCalendar('addCalendarEvent',existingEvent);
-                
-            })
-        
-        }).catch(error => {
-            console.error('Error fetching available times:', error);
-        });
-    
-    return eventList;
-}
-
-// The list of events as a global variable
-var events = updateCalendarView(); 
 
 $(document).ready(function () {
     $("#calendar").evoCalendar({
-        format: "mm/dd/yyyy",//"MM dd, yyyy",
-        theme: 'default',
+        format: "mm/dd/yyyy", // "MM dd, yyyy",
+        theme: 'Default',
         language: 'en',
-        titleFormat: "MM",
+        titleFormat: "MM yyyy",
         todayHighlight: false,
         sidebarToggler: false,
-        eventListToggler: true,
-        canAddEvent: true,
-        // calendarEvents: []
+        eventListToggler: false,
+        eventDisplayDefault: true,
+        canAddEvent: false,
+        calendarEvents: 0,
     })
+
+    function updateCalendarView() {
+        // $('#calendar').evoCalendar('removeEventList')
+
+        var eventList = [];
+
+        fetch("/appointments/refresh", {
+            // method type
+            method: 'GET',
+            // specify the data type as json so the server understands how to read it
+            headers: { 'Content-Type': 'application/json' }
+        }).then(response => response.json())
+            .then(data => {
+                var event = data.booked_slots;
+                
+                event.forEach(function(slotEvent) {
+                    existingEvent = {
+                        // Using only the numbers for the id generates an error. I included a random 
+                        // text that can be separated with an underscore to get the original event id
+                        id: rtg + "_" + slotEvent.id, 
+                        name: slotEvent.name,
+                        date: slotEvent.date,
+                        color: colorArray[getRandom(colorArray.length)],
+                        description: slotEvent.description,
+                        type: slotEvent.type,
+                        everyYear: false,
+                        dates_range: 100,
+                    };
+                    eventList.push(existingEvent);
+                    
+                    // Add the event to the calendar asynchronously
+                    $('#calendar').evoCalendar('addCalendarEvent',existingEvent);
+                    
+                })
+            
+            }).catch(error => {
+                console.error('Error fetching available times:', error);
+            });
+        
+        return eventList;
+    }
+
+    // The list of events as a global variable
+    var events = updateCalendarView();
+
+
+
+    
+
+
+    
 
     // $("#removeBtn").click(function(a) {
     //     curRmv = getRandom(active_events.length);
@@ -125,7 +143,7 @@ $(document).ready(function () {
     //         });
     //     }
     // }
-})
+});
 
 
 // function createDeleteButton() {
@@ -142,6 +160,7 @@ $(document).ready(function () {
 // Assuming you have a common ancestor element that contains all the delete buttons
 // Replace "commonAncestor" with the actual parent element that holds the delete buttons
 // var commonAncestor = document;
+
 
 // commonAncestor.addEventListener('click', function(event) {
 //     // Check if the clicked element has the class "deleteEventButtons"
@@ -248,7 +267,29 @@ $("#calendar").on('selectDate', function (event, newDate, oldDate) {
                 console.error('Error fetching available times:', error);
             });
     }
+
+
+    // const evliContainer = document.querySelector(".event-container"); // Replace with the actual parent element selector
+    // eventContainer.addEventListener("click", (event) => {
+    //     const clickedButton = event.target.closest(".deleteEventButtons");
+    //     if (clickedButton) {
+    //         // Handle the clicked button here
+    //         console.log("Clicked button:", clickedButton);
+
+    //         // Perform actions specific to the clicked button, such as:
+    //         clickedButton.remove(); // Example: Remove the clicked button
+    //     }
+    //     });
+
+
 });
+
+$('#calendar').on('selectEvent', function(event, activeEvent) {
+        // code here...
+        console.log(event);
+});
+
+
 
 
 // --------------------------------------------------------------------------------------------
@@ -329,15 +370,3 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
     $('.bookingForm').toggleClass('open');
 };
 
-
-// function showPopupForm() {
-//     // document.getElementById('popupForm').style.display = 'block';
-//     var curDate = $("#calendar").evoCalendar('getActiveDate').split("/"); // date format is mm/dd/yyyy
-//     var fillDatetime = curDate[2] + "-" + curDate[0] + "-" + curDate[1] + "T" + "09:00:00";
-//     // Get the first item of from the class
-//     document.getElementsByClassName('bookDateTime')[0].value = fillDatetime;
-// }
-
-// function hidePopupForm() {
-//     document.getElementById('popupForm').style.display = 'none';
-// }

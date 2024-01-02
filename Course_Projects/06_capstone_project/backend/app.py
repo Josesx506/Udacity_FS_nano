@@ -57,7 +57,7 @@ def format_revocal_events(items):
       v['date'] = str2(v['start_time'].split(" ")[0].replace('-','/'))
       v['time'] = " ".join(v['start_time'].split(" ")[1:])
       # v['description'] = f"<span><b>Time:</b>{v['time']}\t <b>Name:</b> {v['first_name']} {v['last_name']}</span>"
-      v['description'] = f"Time: {v['time']}\t Name: {v['first_name']} {v['last_name']}"
+      v['description'] = f"hair appointment Time: {v['time']}\t Name: {v['first_name']} {v['last_name']}"
       v['type'] = 'event'
    return items
 
