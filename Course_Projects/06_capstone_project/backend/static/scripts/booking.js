@@ -66,51 +66,9 @@ $(document).ready(function () {
         // calendarEvents: null,
     })
 
-    function updateCalendarView() {
-        // $('#calendar').evoCalendar('removeEventList')
-
-        var eventList = [];
-
-        fetch("/appointments/refresh", {
-            // method type
-            method: 'GET',
-            // specify the data type as json so the server understands how to read it
-            headers: { 'Content-Type': 'application/json' }
-        }).then(response => response.json())
-            .then(data => {
-                var event = data.booked_slots;
-                
-                event.forEach(function(slotEvent) {
-                    existingEvent = {
-                        // Using only the numbers for the id generates an error. I included a random 
-                        // text that can be separated with an underscore to get the original event id
-                        id: rtg + "_" + slotEvent.id, 
-                        name: slotEvent.name,
-                        date: slotEvent.date,
-                        color: colorArray[getRandom(colorArray.length)],
-                        description: slotEvent.description,
-                        type: slotEvent.type,
-                        phone: slotEvent.phone,
-                        email: slotEvent.email,
-                        time: slotEvent.time
-                    };
-
-                    // The values don't have to be appended to the list above
-                    eventList.push(existingEvent);
-                    
-                    // Add the event to the calendar asynchronously
-                    $('#calendar').evoCalendar('addCalendarEvent',existingEvent);
-                })
-            
-            }).catch(error => {
-                console.error('Error fetching available times:', error);
-            });
-        
-        return eventList;
-    }
-
     // The list of events as a global variable
-    var events = updateCalendarView();
+    // var events = 
+    updateCalendarView();
 
     // Initially set to none and will be updated with dynamic clicks below
     // var activeEventEvo; 
@@ -196,6 +154,52 @@ $(document).ready(function () {
 //         });
 //     }
 // });
+
+
+function updateCalendarView() {
+    $('#calendar').evoCalendar('removeEventList')
+
+    // var eventList = [];
+
+    fetch("/appointments/refresh", {
+        // method type
+        method: 'GET',
+        // specify the data type as json so the server understands how to read it
+        headers: { 'Content-Type': 'application/json' }
+    }).then(response => response.json())
+        .then(data => {
+            var event = data.booked_slots;
+            
+            event.forEach(function(slotEvent) {
+                existingEvent = {
+                    // Using only the numbers for the id generates an error. I included a random 
+                    // text that can be separated with an underscore to get the original event id
+                    id: rtg + "_" + slotEvent.id, 
+                    name: slotEvent.name,
+                    date: slotEvent.date,
+                    color: colorArray[getRandom(colorArray.length)],
+                    description: slotEvent.description,
+                    type: slotEvent.type,
+                    phone: slotEvent.phone,
+                    email: slotEvent.email,
+                    time: slotEvent.time
+                };
+
+                // The values don't have to be appended to the list above
+                // eventList.push(existingEvent);
+                
+                // Add the event to the calendar asynchronously
+                $('#calendar').evoCalendar('addCalendarEvent',existingEvent);
+            })
+        
+        }).catch(error => {
+            console.error('Error fetching available times:', error);
+        });
+    
+    // return eventList;
+}
+
+
 
 function insertEditEventButton(element) {
     // Function to add an edit button to an Event element
@@ -476,7 +480,7 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
             }),
             // specify the data type as json so the server understands how to read it
             headers: { 'Content-Type': 'application/json' }
-    });
+        }).then(updateCalendarView());
 
         // After editing, switch off the edit mode
         editMode = false;
