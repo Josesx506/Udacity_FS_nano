@@ -57,7 +57,7 @@ def format_revocal_events(items):
       v['date'] = str2(v['start_time'].split(" ")[0].replace('-','/'))
       v['time'] = " ".join(v['start_time'].split(" ")[1:])
       # v['description'] = f"<span><b>Time:</b>{v['time']}\t <b>Name:</b> {v['first_name']} {v['last_name']}</span>"
-      v['description'] = f"hair appointment Time: {v['time']}\t Name: {v['first_name']} {v['last_name']}"
+      v['description'] = f"Time: {v['time']}\t Name: {v['first_name']} {v['last_name']}"
       v['type'] = 'event'
    return items
 
@@ -126,6 +126,46 @@ def create_new_booking():
       abort(422)
 
 
+
+# PATCH existing booking in the db
+@app.route("/appointments/book/<int:b_id>", methods=['PATCH'])
+def update_existing_booking(b_id):
+   '''Get the responses'''
+   resp = request.get_json()
+
+   # Check the validity of the request to confirm there are no errors
+   if b_id is None:
+      abort(400)
+
+   try:
+      # This only works for valid booking ids
+      # Extract the booking that matches the specified id
+      current_booking = Booking.query.filter(Booking.id == b_id).all()[0]
+
+      # Parameters to create a new drink. Check for None values
+      for key,value in resp.items():
+         if key!='id' and key!='start_time' and value is not None:
+            setattr(current_booking, key, value)
+         elif key=="start_time" and value is not None:
+            setattr(current_booking, key, f"{datetime.strptime(value, '%m-%d-%Y %I:%M %p')}")
+         
+         # Update the row
+         current_booking.update()
+         
+         # Extract the updated drink long format
+         updated_booking = [current_booking.format()]
+
+         # Create the additional attributes
+         fmtrd_booking = format_revocal_events(updated_booking)
+
+
+      return jsonify(
+         {
+               "success": True,
+               "event": fmtrd_booking,
+         })
+   except:
+      abort(422)
 
 
 

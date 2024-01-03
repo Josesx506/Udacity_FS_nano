@@ -1,5 +1,8 @@
 var today = new Date();
 
+// Assume the submit form is not in edit mode by default
+var editMode = false; 
+
 // Array of colors to be used
 var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
     '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
@@ -20,6 +23,8 @@ function getRandom(a) {
 // Random Text Generator as function
 //Can change 7 to 2 for longer results.
 let rtg = (Math.random() + 1).toString(36).substring(7);
+
+
 
 // Place holder event for tests
 // var events = [{
@@ -58,7 +63,7 @@ $(document).ready(function () {
         eventListToggler: false,
         eventDisplayDefault: true,
         canAddEvent: false,
-        calendarEvents: 0,
+        // calendarEvents: null,
     })
 
     function updateCalendarView() {
@@ -85,14 +90,16 @@ $(document).ready(function () {
                         color: colorArray[getRandom(colorArray.length)],
                         description: slotEvent.description,
                         type: slotEvent.type,
-                        everyYear: false,
-                        dates_range: 100,
+                        phone: slotEvent.phone,
+                        email: slotEvent.email,
+                        time: slotEvent.time
                     };
+
+                    // The values don't have to be appended to the list above
                     eventList.push(existingEvent);
                     
                     // Add the event to the calendar asynchronously
                     $('#calendar').evoCalendar('addCalendarEvent',existingEvent);
-                    
                 })
             
             }).catch(error => {
@@ -105,7 +112,8 @@ $(document).ready(function () {
     // The list of events as a global variable
     var events = updateCalendarView();
 
-
+    // Initially set to none and will be updated with dynamic clicks below
+    // var activeEventEvo; 
 
     
 
@@ -189,7 +197,46 @@ $(document).ready(function () {
 //     }
 // });
 
+function insertEditEventButton(element) {
+    // Function to add an edit button to an Event element
+    
+    // Extract the event id from the data-event-index attribute
+    var eventId = element.getAttribute('data-event-index');
 
+    // Add an Event button
+    var editEventButton = document.createElement('button');
+    editEventButton.className = `editEventButtons ${eventId}`;
+    editEventButton.innerHTML = `<i style="font-size:28px" class="far fa-edit"></i>`;
+
+    $(`.event-container[role='button']`)[0].style.zIndex = 10;
+
+    // Append the edit buttons to the parent div
+    element.appendChild(editEventButton);
+
+    // Add an attribute to let the element know if the button already exists
+    element.dataset.insertButtonAdded = true;
+};
+
+function insertDeleteEventButton(element) {
+    // Function to add a delete button to an Event element
+
+    // Extract the event id from the data-event-index attribute
+    var eventId = element.getAttribute('data-event-index');
+    
+    // Add a Delete button
+    var deleteButton = document.createElement('button');
+    deleteButton.className = `deleteEventButtons ${eventId}`;
+    // You can replace this with an "x-icon" HTML or use an image
+    deleteButton.innerHTML =  `<i style="font-size:28px" class="fa">&#xf014;</i>`;
+
+    $(`.event-container[role='button']`)[0].style.zIndex = 10;
+
+    // Append the delete buttons to the parent div
+    element.appendChild(deleteButton);
+
+    // Add an attribute to let the element know if the button already exists
+    element.dataset.deleteButtonAdded = true;
+};
 
 // --------------------------------------------------------------------------------------------
 // Event Listener to enable functionality that will include dynamic add, edit, and delete buttons to the Calendar
@@ -197,30 +244,48 @@ $(document).ready(function () {
 $("#calendar").on('selectDate', function (event, newDate, oldDate) {
 
     // Check if an event-container exists for the selected date
-    const eventContainer = $(`.event-container[role='button']`);
+    var eventContainer = $(`.event-container[role='button']`);
     
     if (eventContainer.length > 0) {
-        
         // Your logic for handling the existence of an event-container goes here
         for (i=0;i<eventContainer.length; i++) {
-            var element = eventContainer[i];
+            var eventElement = eventContainer[i];
 
+            // Flag for checking the button exists before creating edit button
+            var editButtonAdded = eventElement.dataset.insertButtonAdded; 
+            if (!editButtonAdded) {
+                insertEditEventButton(eventElement);
+            };
+
+            // Flag for checking the button exists before creating delete button
+            var deleteButtonAdded = eventElement.dataset.deleteButtonAdded; 
+            if (!deleteButtonAdded) {
+                insertDeleteEventButton(eventElement);
+            };
+
+            
+            // // Extract the event id from the data-event-index attribute
             // var eventId = element.getAttribute('data-event-index');
             
-            // Add a Delete button
-            var deleteButton = document.createElement('button');
-            deleteButton.className = `deleteEventButtons`;
-            // You can replace this with an "x-icon" HTML or use an image
-            deleteButton.innerHTML =  `<i style="font-size:24px" class="fa">&#xf014;</i>`;
+            // // Add a Delete button
+            // var deleteButton = document.createElement('button');
+            // deleteButton.className = `deleteEventButtons ${eventId}`;
+            // // You can replace this with an "x-icon" HTML or use an image
+            // deleteButton.innerHTML =  `<i style="font-size:28px" class="fa">&#xf014;</i>`;
 
-            // Add an Event button
-            var editEventButton = document.createElement('button');
-            editEventButton.className = `editEventButtons`;
-            editEventButton.innerHTML = `<i style="font-size:24px" class="far fa-edit"></i>`;
+            // // Add an Event button
+            // var editEventButton = document.createElement('button');
+            // editEventButton.className = `editEventButtons ${eventId}`;
+            // editEventButton.innerHTML = `<i style="font-size:28px" class="far fa-edit"></i>`;
 
-            // Append the delete and edit buttons to the parent div
-            element.appendChild(deleteButton);
-            element.appendChild(editEventButton);
+            // $(`.event-container[role='button']`)[0].style.zIndex = 10;
+
+            // // Append the delete and edit buttons to the parent div
+            // element.appendChild(deleteButton);
+            // element.appendChild(editEventButton);
+
+            // // 
+            // element.data('insertButtonAdded', true);
         }
     };
 
@@ -230,7 +295,7 @@ $("#calendar").on('selectDate', function (event, newDate, oldDate) {
     var addButtonAdded = eventHeaderContainer.data('addButtonAdded'); 
 
     if (!addButtonAdded) {
-
+        // Header Element for existing event
         var eventHeaderElement = eventHeaderContainer[0];
         
         // Include an event Add button
@@ -284,9 +349,66 @@ $("#calendar").on('selectDate', function (event, newDate, oldDate) {
 
 });
 
-$('#calendar').on('selectEvent', function(event, activeEvent) {
-        // code here...
-        console.log(event);
+
+// Patch a pre-existing booking
+$('#calendar').on('click', '.editEventButtons', function(e) {
+    editMode = true;
+
+    // Get the list of active events for the day of interest
+    var allActiveEvents = $('#calendar').evoCalendar('getActiveEvents');
+
+    // Get the event id from the parent node of the button
+    var evoId = e.target.parentNode.className.split(" ")[1];
+    var eventId = evoId.split("_")[1];
+
+    // Find the active event with a matching id from the list of active events
+    var activeEvent = allActiveEvents.find(function(listEvent) {
+        return listEvent.id === evoId;
+    });
+    
+    // Toggle on the form with the display
+    var editForm = $('.bookingForm')[0];
+    var formStyle = getComputedStyle(editForm).getPropertyValue("display");
+    if (formStyle === 'none') {
+        // Hide the form after booking the appointment
+        $('.bookingForm').toggleClass('open');
+    }
+    
+    // Attach the event id to the form's dataset
+    $('.bookingForm')[0].dataset.event_id =  eventId;
+
+    // Event description that contains first and last names
+    var activeEventDesc = activeEvent['description'];
+
+    // Update the prexisting values of the form
+    // ----------------------------------------------------------------------------------------
+    document.getElementById('firstName').value = activeEventDesc.split(' ')[4];
+    document.getElementById('lastName').value = activeEventDesc.split(' ')[5];
+    document.getElementsByClassName('bookPhoneNum')[0].value = activeEvent.phone;
+    document.getElementsByClassName('bookEmail')[0].value = activeEvent.email;
+    // Update the available times in the form while ensuring the previous appointment time
+    // is not blocked off. Start with selecting the date of interest
+    var doi = $("#calendar").evoCalendar('getActiveDate').replace("/", "-").replace("/", "-")
+    fetch("/appointments/" + doi, {
+        // method type
+        method: 'GET',
+        // specify the data type as json so the server understands how to read it
+        headers: { 'Content-Type': 'application/json' }
+    }).then(response => response.json())
+        .then(data => { // booked Time Slots
+            console.log(data);
+            // Find the index of the previous time slot and remove it from disabled time slots
+            previousBookingIndex = data.booked_times.indexOf(activeEvent.time);
+            data.booked_times.splice(previousBookingIndex, 1);
+            // Update the form options to show only available time slots
+            updateFormOptions(data);
+            // Define the active option that's available
+            document.getElementsByClassName('time_availability')[0].value = activeEvent.time;
+        }).catch(error => {
+            console.error('Error fetching available times:', error);
+        });
+    // 
+    
 });
 
 
@@ -334,39 +456,66 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
     var actDate = $("#calendar").evoCalendar('getActiveDate').replace("/", "-").replace("/", "-")
     var selectedTime = document.getElementsByClassName('time_availability')[0].value
     var dateTime = actDate + " " + selectedTime;
-    console.log()
 
-    // Implement the asynchronous fetch
-    fetch("/appointments/book", {
-        // method type
-        method: 'POST',
-        // json formatted string from the form input
-        body: JSON.stringify({
-            'first': firstName,
-            'last': lastName,
-            'phone': phoneNum,
-            'email': emailAdd,
-            'date_time': dateTime
-        }),
-        // specify the data type as json so the server understands how to read it
-        headers: { 'Content-Type': 'application/json' }
-    }).then(response => response.json())
-        .then(data => {
 
-            var addEvent = {
-                id: data.event[0].id,
-                name: data.event[0].name,
-                date: data.event[0].date,
-                color: colorArray[getRandom(colorArray.length)],
-                description: data.event[0].description,
-            };
-            // Update the calendar with the latest event
-            $("#calendar").evoCalendar('addCalendarEvent', [addEvent]);
-        }).catch(error => {
-            console.error('Error fetching available times:', error);
-        });
+    if (editMode) {
+        var eventId = $('.bookingForm')[0].dataset.event_id;
+        console.log("editing");
+        console.log(eventId);
+        // Implement the asynchronous fetch
+        fetch("/appointments/book/" + eventId, {
+            // method type
+            method: 'PATCH',
+            // json formatted string from the form input
+            body: JSON.stringify({
+                'first_name': firstName,
+                'last_name': lastName,
+                'phone': phoneNum,
+                'email': emailAdd,
+                'start_time': dateTime
+            }),
+            // specify the data type as json so the server understands how to read it
+            headers: { 'Content-Type': 'application/json' }
+    });
+
+        // After editing, switch off the edit mode
+        editMode = false;
+    } else {
+        // Implement the asynchronous fetch
+        fetch("/appointments/book", {
+            // method type
+            method: 'POST',
+            // json formatted string from the form input
+            body: JSON.stringify({
+                'first': firstName,
+                'last': lastName,
+                'phone': phoneNum,
+                'email': emailAdd,
+                'date_time': dateTime
+            }),
+            // specify the data type as json so the server understands how to read it
+            headers: { 'Content-Type': 'application/json' }
+        }).then(response => response.json())
+            .then(data => {
+
+                var addEvent = {
+                    id: data.event[0].id,
+                    name: data.event[0].name,
+                    date: data.event[0].date,
+                    color: colorArray[getRandom(colorArray.length)],
+                    description: data.event[0].description,
+                };
+                // Update the calendar with the latest event
+                $("#calendar").evoCalendar('addCalendarEvent', [addEvent]);
+            }).catch(error => {
+                console.error('Error fetching available times:', error);
+            });
+    }
 
     // Hide the form after booking the appointment
     $('.bookingForm').toggleClass('open');
+    
 };
+
+
 
