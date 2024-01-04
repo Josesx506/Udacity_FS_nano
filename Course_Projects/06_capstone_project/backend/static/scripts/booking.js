@@ -188,6 +188,12 @@ function insertAddEventButton() {
 };
 
 function qualityCheckAddBtn() {
+    // Close the form if it has the "open" class
+    if ($('.bookingForm').hasClass('open')) {
+        $('.bookingForm').removeClass('open');
+    }
+
+
     // Disable the add event button for dates older than today
     var check_date = new Date($('#calendar').evoCalendar('getActiveDate'));
 
