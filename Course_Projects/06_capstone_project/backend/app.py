@@ -130,7 +130,7 @@ def create_new_booking():
 # PATCH existing booking in the db
 @app.route("/appointments/book/<int:b_id>", methods=['PATCH'])
 def update_existing_booking(b_id):
-   '''Get the responses'''
+   '''Update parameters for an existing timeslot in the db'''
    resp = request.get_json()
 
    # Check the validity of the request to confirm there are no errors
@@ -167,9 +167,32 @@ def update_existing_booking(b_id):
    except:
       abort(422)
 
+   
+
+# DELETE existing booking in the db
+@app.route("/appointments/book/<int:b_id>", methods=['DELETE'])
+def delete_existing_booking(b_id):
+   # Check the validity of the request to confirm there are no errors
+   if b_id is None:
+      abort(400)
+
+   try:
+      del_booking = Booking.query.filter(Booking.id == b_id).one_or_none()
+
+      if del_booking is None:
+            abort(404)
+
+      del_booking.delete()
+        
+      return jsonify({'success': True,
+                      "delete": b_id})
+
+   except:
+        abort(422)
 
 
-# GET existing booking fro the DB
+
+# GET existing booking from the DB
 @app.route('/appointments/<date>')
 def create_availability(date):
    '''

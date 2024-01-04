@@ -21,9 +21,8 @@ function getRandom(a) {
 }
 
 // Random Text Generator as function
-//Can change 7 to 2 for longer results.
+// Can change 7 to 12 for longer results.
 let rtg = (Math.random() + 1).toString(36).substring(7);
-
 
 
 // Place holder event for tests
@@ -36,7 +35,9 @@ let rtg = (Math.random() + 1).toString(36).substring(7);
 // }]
 
 
-
+// --------------------------------------------------------------------------------------------
+// On page load, initialize the Calendar
+// --------------------------------------------------------------------------------------------
 $(document).ready(function () {
     $("#calendar").evoCalendar({
         format: "mm/dd/yyyy", // "MM dd, yyyy",
@@ -51,17 +52,8 @@ $(document).ready(function () {
         // calendarEvents: null,
     })
 
-    // The list of events as a global variable
-    // var events = 
+    // Update list of calendar events with this get command
     updateCalendarView();
-
-    // Initially set to none and will be updated with dynamic clicks below
-    // var activeEventEvo; 
-
-    
-
-
-    
 
     // $("#removeBtn").click(function(a) {
     //     curRmv = getRandom(active_events.length);
@@ -76,24 +68,6 @@ $(document).ready(function () {
     //     }
     // });
 
-
-
-    // function updateCalendarEvents() {
-    //     $('#calendar').evoCalendar('removeAllEvents');
-
-    //     for (const event of events) {
-    //         const datetime = new Date(event.datetime);
-
-    //         $('#calendar').evoCalendar('addCalendarEvent', {
-    //             id: event.id,
-    //             name: event.name,
-    //             date: datetime.toISOString().split('T')[0], // Extract the date part
-    //             type: 'time',
-    //             color: 'red', // Set your desired color
-    //             description: datetime.toLocaleTimeString(), // Display time in the description
-    //         });
-    //     }
-    // }
 });
 
 
@@ -140,10 +114,12 @@ $(document).ready(function () {
 //     }
 // });
 
-
+// Function to perform async GET request that obtains all the saved booking events from the db
 function updateCalendarView() {
+    // Remove all the events that might exist in the calendar
     $('#calendar').evoCalendar('removeEventList')
 
+    // Uncomment the following line if you want the function to return a variable
     // var eventList = [];
 
     fetch("/appointments/refresh", {
@@ -170,7 +146,7 @@ function updateCalendarView() {
                     time: slotEvent.time
                 };
 
-                // The values don't have to be appended to the list above
+                // The values here are appended to the `eventList` array above
                 // eventList.push(existingEvent);
                 
                 // Add the event to the calendar asynchronously
@@ -181,11 +157,12 @@ function updateCalendarView() {
             console.error('Error fetching available times:', error);
         });
     
+    // Return the array or not.
     // return eventList;
 }
 
 
-
+// Function to create an `Edit button` element dynamically for each new booking appointment that is made
 function insertEditEventButton(activeDt) {
     // Function to add an edit button to an Event element
     var active_date = $('#calendar').evoCalendar('getActiveDate');
@@ -222,6 +199,8 @@ function insertEditEventButton(activeDt) {
     };
 };
 
+
+// Function to create a `Delete button` element dynamically for each new booking appointment that is made
 function insertDeleteEventButton() {
     // Function to add a delete button to an Event element
     var active_date = $('#calendar').evoCalendar('getActiveDate');
@@ -261,10 +240,45 @@ function insertDeleteEventButton() {
 
 
 // --------------------------------------------------------------------------------------------
+// Function to modify the dropdown of available times to exclude booked slots.
+// --------------------------------------------------------------------------------------------
+function updateFormOptions(data) {
+    // Assuming you have a <select> element with the class 'time_availability'
+    var selectElement = document.getElementsByClassName('time_availability')[0];
+
+    // Extract all timeslots that should be displayed and unavailable time slots
+    var allTimes = data.all_times;
+    var unavailable = data.booked_times;
+
+    // Clear existing options
+    selectElement.innerHTML = '';
+
+    // Populate options based on availableTimes with an js version of enumerate
+    allTimes.forEach(time => {
+        var option = document.createElement('option');
+        option.value = time;
+        option.textContent = time;
+        if (unavailable.includes(time)) {
+            option.disabled = true;
+        }
+        selectElement.appendChild(option);
+    });
+};
+
+
+// Update booking numbers
+function updateDailyAppointments(data) {
+    // Get the list of active events for the day of interest
+    var allActiveEvents = $('#calendar').evoCalendar('getActiveEvents');
+};
+
+
+
+// --------------------------------------------------------------------------------------------
 // Event Listener to enable functionality that will include dynamic add, edit, and delete buttons to the Calendar
 // --------------------------------------------------------------------------------------------
 $('#calendar').on('click', '.calendar-day', function() {
-    // $(this)[0] // - Print the active div
+    // $(this)[0] // - Print the active div from the listener
 
     // Include an add event button 
     var eventHeaderContainer =  $(`.calendar-events`);
@@ -288,10 +302,19 @@ $('#calendar').on('click', '.calendar-day', function() {
         eventHeaderContainer.data('addButtonAdded', true);
     }
 
+    // Disable the add event button for dates older than today
+    //     if (0 === active_events.length) {
+    //         a.target.disabled = true;
+    //     }
+    //     if (events.length > 0) {
+    //         $("#addBtn").prop("disabled", false);
+    //     }
+
     // --------------------------------------------------------------------------------------------
     // Event Listener to allow functionality to identify booked timeslots on the Calendar
     // --------------------------------------------------------------------------------------------
     document.getElementById('addBtn').onclick = function (e) {
+        // Make the form element visible
         $('.bookingForm').toggleClass('open');
 
         // Clear the form input
@@ -320,8 +343,9 @@ $('#calendar').on('click', '.calendar-day', function() {
 
 
 
-
-// Patch a pre-existing booking
+// --------------------------------------------------------------------------------------------
+// Event listener that updates the form prior to performing a PATCH update to an existing booking
+// --------------------------------------------------------------------------------------------
 $('#calendar').on('click', '.editEventButtons', function(e) {
     editMode = true;
 
@@ -348,12 +372,13 @@ $('#calendar').on('click', '.editEventButtons', function(e) {
     // }
     
     // Attach the event id to the form's dataset
+    $('.bookingForm')[0].dataset.evoId =  evoId;
     $('.bookingForm')[0].dataset.event_id =  eventId;
 
     // Event description that contains first and last names
     var activeEventDesc = activeEvent['description'];
 
-    // Update the prexisting values of the form
+    // Update the prexisting values of the form that is being edited
     // ----------------------------------------------------------------------------------------
     document.getElementById('firstName').value = activeEventDesc.split(' ')[4];
     document.getElementById('lastName').value = activeEventDesc.split(' ')[5];
@@ -377,46 +402,50 @@ $('#calendar').on('click', '.editEventButtons', function(e) {
             // Define the active option that's available
             document.getElementsByClassName('time_availability')[0].value = activeEvent.time;
         }).catch(error => {
-            console.error('Error fetching available times:', error);
+            console.error('Error updating available times:', error);
         });
-    // 
     
+    // Update the booking submit button text
+    $('.submitBooking')[0].textContent = 'Modify Booking';
 });
 
 
 
-
 // --------------------------------------------------------------------------------------------
-// Function to modify the dropdown of available times to exclude booked slots.
+// Event listener that updates the form prior to performing a PATCH update to an existing booking
 // --------------------------------------------------------------------------------------------
-function updateFormOptions(data) {
-    // Assuming you have a <select> element with the class 'time_availability'
-    var selectElement = document.getElementsByClassName('time_availability')[0];
+$('#calendar').on('click', '.deleteEventButtons', function(e) {
+    // Get the list of active events for the day of interest
+    var allActiveEvents = $('#calendar').evoCalendar('getActiveEvents');
 
-    // Extract all timeslots that should be displayed and unavailable time slots
-    var allTimes = data.all_times;
-    var unavailable = data.booked_times;
+    // Get the event id from the parent node of the button
+    var evoId = e.target.parentNode.className.split(" ")[1];
+    var eventId = evoId.split("_")[1];
 
-    // Clear existing options
-    selectElement.innerHTML = '';
-
-    // Populate options based on availableTimes
-    allTimes.forEach(time => {
-        var option = document.createElement('option');
-        option.value = time;
-        option.textContent = time;
-        if (unavailable.includes(time)) {
-            option.disabled = true;
-        }
-        selectElement.appendChild(option);
+    // Find the active event with a matching id from the list of active events
+    var activeEvent = allActiveEvents.find(function(listEvent) {
+        return listEvent.id === evoId;
     });
-};
 
+    // Implement the asynchronous fetch
+    fetch("/appointments/book/" + eventId, {
+        // method type. Delete request has no body
+        method: 'DELETE',
+        // specify the data type as json so the server understands how to read it
+        headers: { 'Content-Type': 'application/json' }
+    }).then(response => response.json())
+    .then(data => {
+        // Remove the old event from the calendar
+        $("#calendar").evoCalendar("removeCalendarEvent", evoId);
+    }).catch(error => {
+        console.error('Error during delete request:', error);
+    });
+});
 
 
 
 // --------------------------------------------------------------------------------------------
-// Event Listener to allow POST functionality for an event to the Calendar
+// Event Listener to allow PATCH and POST functionality for an existing/new event in the Calendar
 // --------------------------------------------------------------------------------------------
 document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
     e.preventDefault();
@@ -431,9 +460,9 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
 
 
     if (editMode) {
-        var eventId = $('.bookingForm')[0].dataset.event_id;
-        console.log("editing");
-        console.log(eventId);
+        var evoId = $('.bookingForm')[0].dataset.evoId;         // Id for evo calendar with random string appended
+        var eventId = $('.bookingForm')[0].dataset.event_id;    // Id for psql db as incrementing integers
+
         // Implement the asynchronous fetch
         fetch("/appointments/book/" + eventId, {
             // method type
@@ -450,9 +479,32 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
             headers: { 'Content-Type': 'application/json' }
         }).then(response => response.json())
         .then(data => {
+            // Remove the old event from the calendar
+            $("#calendar").evoCalendar("removeCalendarEvent", evoId);
+
+            // Insert the new event from the response
+            var addEvent = {
+                id: rtg + "_" + data.event[0].id,
+                name: data.event[0].name,
+                date: data.event[0].date,
+                color: colorArray[getRandom(colorArray.length)],
+                description: data.event[0].description,
+                type: data.event[0].type,
+                phone: data.event[0].phone,
+                email: data.event[0].email,
+                time: data.event[0].time
+            };
+            // Update the calendar with the latest event
+            $("#calendar").evoCalendar('addCalendarEvent', [addEvent]);
+
             // Update the calendars view
             insertEditEventButton();
             insertDeleteEventButton();
+
+            // Update the booking submit button text
+            $('.submitBooking')[0].textContent = 'Book';
+        }).catch(error => {
+            console.error('Error modifying appointment:', error);
         });
 
         // After editing, switch off the edit mode
@@ -494,7 +546,7 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
                 insertDeleteEventButton();
 
             }).catch(error => {
-                console.error('Error fetching available times:', error);
+                console.error('Error creating new appointment:', error);
             });
     }
 
