@@ -58,60 +58,9 @@ $(document).ready(function () {
     // Update list of calendar events with this get command
     updateCalendarView();
 
-    // $('#calendar').evoCalendar({
-    //     onSelectMonth: function() {
-    //       console.log('onSelectDate!')
-    //     }
-    //   });
-
-    // $("#removeBtn").click(function(a) {
-    //     curRmv = getRandom(active_events.length);
-    //     $("#calendar").evoCalendar("removeCalendarEvent", active_events[curRmv].id);
-    //     events.push(active_events[curRmv]);
-    //     active_events.splice(curRmv, 1);
-    //     if (0 === active_events.length) {
-    //         a.target.disabled = true;
-    //     }
-    //     if (events.length > 0) {
-    //         $("#addBtn").prop("disabled", false);
-    //     }
-    // });
-
 });
 
 
-
-// Assuming you have a common ancestor element that contains all the delete buttons
-// Replace "commonAncestor" with the actual parent element that holds the delete buttons
-// var commonAncestor = document;
-
-
-// commonAncestor.addEventListener('click', function(event) {
-//     // Check if the clicked element has the class "deleteEventButtons"
-//     if (event.target.classList.contains('deleteEventButtons')) {
-//         // Retrieve the event index from the data attribute
-//         var eventId = event.target.dataset.eventIndex;
-
-//         // Perform your delete request using the eventId
-//         // Example: You can use fetch to send a DELETE request to your server
-//         fetch(`/delete-event/${eventId}`, {
-//             method: 'DELETE',
-//             // Additional options if needed (headers, body, etc.)
-//         })
-//         .then(response => {
-//             if (response.ok) {
-//                 // Successful delete, you may want to update the UI accordingly
-//                 console.log(`Event ${eventId} deleted successfully.`);
-//             } else {
-//                 // Handle errors if needed
-//                 console.error(`Failed to delete event ${eventId}.`);
-//             }
-//         })
-//         .catch(error => {
-//             console.error('Error during delete request:', error);
-//         });
-//     }
-// });
 
 // Function to perform async GET request that obtains all the saved booking events from the db
 function updateCalendarView() {
@@ -150,6 +99,9 @@ function updateCalendarView() {
                 
                 // Add the event to the calendar asynchronously
                 $('#calendar').evoCalendar('addCalendarEvent',existingEvent);
+
+                // Update the add event button
+                qualityCheckAddBtn();
 
                 // Update the number of daily events in visible calendar
                 updateDailyAppointmentsCalendarView()
@@ -207,6 +159,101 @@ function insertEditEventButton(activeDt) {
     };
 };
 
+
+// Function to create a `Add event` button
+function insertAddEventButton() {
+
+    // Check if an event-container exists for the event header
+    var eventHeaderContainer =  $(`.calendar-events`);
+
+    // Flag for checking the button exists
+    var addButtonAdded = eventHeaderContainer.data('addButtonAdded'); 
+
+    if (!addButtonAdded) {
+        // Header Element for existing event
+        var eventHeaderElement = eventHeaderContainer[0];
+        
+        // Include an event Add button
+        var addButton = document.createElement('button');
+        addButton.id = ("addBtn");
+        addButton.className = `addEventButtons`;
+        addButton.innerHTML = `<i style="font-size:60px" class="fa-solid fa-plus"></i>`;
+
+        // Append the Add buttons to the header div
+        eventHeaderElement.appendChild(addButton);
+
+        // Set the flag to indicate that the button has been added
+        eventHeaderContainer.data('addButtonAdded', true);
+    };
+};
+
+function qualityCheckAddBtn() {
+    // Disable the add event button for dates older than today
+    var check_date = new Date($('#calendar').evoCalendar('getActiveDate'));
+
+    // Change the hours of both dates to midnight
+    check_date.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    // Perform the comparison with if statement
+    if (check_date >= today) {
+        var buttonIndicator = document.getElementById('addBtn');
+        if (buttonIndicator) {
+            // Remove the data attributes from the calendar events
+            $(`.calendar-events`).removeData('addButtonAdded');
+            // Remove the pre-existing button
+            buttonIndicator.remove();
+            // Add a new button
+            insertAddEventButton();
+            $("#addBtn").prop("disabled", false);
+        } else {
+            insertAddEventButton();
+            $("#addBtn").prop("disabled", false);
+        };
+    
+    } else {
+        var buttonIndicator = document.getElementById('addBtn');
+        if (buttonIndicator) {
+            // Remove the data attributes from the calendar events
+            $(`.calendar-events`).removeData('addButtonAdded');
+            // Remove the pre-existing button
+            buttonIndicator.remove();
+            // Add a new button
+            insertAddEventButton();
+            $("#addBtn").prop("disabled", true);
+        } else {
+            insertAddEventButton();
+            $("#addBtn").prop("disabled", true);
+        };
+    };
+
+
+    // --------------------------------------------------------------------------------------------
+    // Event Listener to allow functionality to identify booked timeslots on the Calendar
+    // --------------------------------------------------------------------------------------------
+    document.getElementById('addBtn').onclick = function (e) {
+        // Make the form element visible
+        $('.bookingForm').toggleClass('open');
+
+        // Clear the form input
+        $('.bookingForm')[0].reset();
+
+        // Select the date of interest - Perform get request to blank out times that have been selected for that day
+        var doi = $("#calendar").evoCalendar('getActiveDate').replace("/", "-").replace("/", "-")
+        fetch("/appointments/" + doi, {
+            // method type
+            method: 'GET',
+            // specify the data type as json so the server understands how to read it
+            headers: { 'Content-Type': 'application/json' }
+        }).then(response => response.json())
+            .then(data => {
+                // Update the form options to show only available time slots
+                updateFormOptions(data);
+            }).catch(error => {
+                console.error('Error fetching available times:', error);
+            });
+    };
+};
 
 // Function to create a `Delete button` element dynamically for each new booking appointment that is made
 function insertDeleteEventButton() {
@@ -309,6 +356,9 @@ $("#calendar").on('click', '.calendar-year', function (e) {
     firstDayOfMonth = $(".day")["0"].getAttribute('data-date-val');
     $('#calendar').evoCalendar('selectDate', firstDayOfMonth);
 
+    // Update the add event button
+    qualityCheckAddBtn();
+
     // Update the daily event count on the visible calendar
     updateDailyAppointmentsCalendarView();
 
@@ -322,6 +372,9 @@ $("#calendar").on('click', '.month', function (e) {
     // Select the first day of the new month from the day element and make it active
     firstDayOfMonth = $(".day")["0"].getAttribute('data-date-val');
     $('#calendar').evoCalendar('selectDate', firstDayOfMonth);
+
+    // Update the add event button
+    qualityCheckAddBtn();
 
     // Update the daily event count on the visible calendar
     updateDailyAppointmentsCalendarView();
@@ -338,65 +391,8 @@ $("#calendar").on('click', '.month', function (e) {
 $('#calendar').on('click', '.calendar-day', function() {
     // $(this)[0] // - Print the active div from the listener
 
-    // Include an add event button 
-    var eventHeaderContainer =  $(`.calendar-events`);
-    // Flag for checking the button exists
-    var addButtonAdded = eventHeaderContainer.data('addButtonAdded'); 
-
-    if (!addButtonAdded) {
-        // Header Element for existing event
-        var eventHeaderElement = eventHeaderContainer[0];
-        
-        // Include an event Add button
-        var addButton = document.createElement('button');
-        addButton.id = ("addBtn");
-        addButton.className = `addEventButtons`;
-        addButton.innerHTML = `<i style="font-size:60px" class="fa-solid fa-plus"></i>`;
-
-        // Append the Add buttons to the header div
-        eventHeaderElement.appendChild(addButton);
-
-        // Set the flag to indicate that the button has been added
-        eventHeaderContainer.data('addButtonAdded', true);
-    };
-
-    // Disable the add event button for dates older than today
-    var active_date = new Date($('#calendar').evoCalendar('getActiveDate'));
-    // Change the hours of both dates to midnight
-    active_date.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    // Perform the comparison with if statement
-    if (active_date >= today) {
-        $("#addBtn").prop("disabled", false);
-    } else {
-        $("#addBtn").prop("disabled", true);
-    };
-
-    // --------------------------------------------------------------------------------------------
-    // Event Listener to allow functionality to identify booked timeslots on the Calendar
-    // --------------------------------------------------------------------------------------------
-    document.getElementById('addBtn').onclick = function (e) {
-        // Make the form element visible
-        $('.bookingForm').toggleClass('open');
-
-        // Clear the form input
-        $('.bookingForm')[0].reset();
-
-        // Select the date of interest - Perform get request to blank out times that have been selected for that day
-        var doi = $("#calendar").evoCalendar('getActiveDate').replace("/", "-").replace("/", "-")
-        fetch("/appointments/" + doi, {
-            // method type
-            method: 'GET',
-            // specify the data type as json so the server understands how to read it
-            headers: { 'Content-Type': 'application/json' }
-        }).then(response => response.json())
-            .then(data => {
-                // Update the form options to show only available time slots
-                updateFormOptions(data);
-            }).catch(error => {
-                console.error('Error fetching available times:', error);
-            });
-    }
+    // Update the add event button
+    qualityCheckAddBtn();
 
     // Update the daily event count on the visible calendar
     updateDailyAppointmentsCalendarView();
@@ -504,6 +500,9 @@ $('#calendar').on('click', '.deleteEventButtons', function(e) {
         // Remove the old event from the calendar
         $("#calendar").evoCalendar("removeCalendarEvent", evoId);
 
+        // Update the add event button
+        qualityCheckAddBtn();
+
         // Update the daily event count on the visible calendar
         updateDailyAppointmentsCalendarView();
 
@@ -571,6 +570,9 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
             // Update the calendar with the latest event
             $("#calendar").evoCalendar('addCalendarEvent', [addEvent]);
 
+            // Update the add event button
+            qualityCheckAddBtn();
+
             // Update the daily event count on the visible calendar
             updateDailyAppointmentsCalendarView();
 
@@ -623,6 +625,9 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
                 // Update the calendar with the latest event
                 $("#calendar").evoCalendar('addCalendarEvent', [addEvent]);
 
+                // Update the add event button
+                qualityCheckAddBtn();
+
                 // Update the daily event count on the visible calendar
                 updateDailyAppointmentsCalendarView();
 
@@ -642,3 +647,34 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
 
 
 
+
+
+// Assuming you have a common ancestor element that contains all the delete buttons
+// Replace "commonAncestor" with the actual parent element that holds the delete buttons
+// var commonAncestor = document;
+// commonAncestor.addEventListener('click', function(event) {
+//     // Check if the clicked element has the class "deleteEventButtons"
+//     if (event.target.classList.contains('deleteEventButtons')) {
+//         // Retrieve the event index from the data attribute
+//         var eventId = event.target.dataset.eventIndex;
+
+//         // Perform your delete request using the eventId
+//         // Example: You can use fetch to send a DELETE request to your server
+//         fetch(`/delete-event/${eventId}`, {
+//             method: 'DELETE',
+//             // Additional options if needed (headers, body, etc.)
+//         })
+//         .then(response => {
+//             if (response.ok) {
+//                 // Successful delete, you may want to update the UI accordingly
+//                 console.log(`Event ${eventId} deleted successfully.`);
+//             } else {
+//                 // Handle errors if needed
+//                 console.error(`Failed to delete event ${eventId}.`);
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error during delete request:', error);
+//         });
+//     }
+// });
