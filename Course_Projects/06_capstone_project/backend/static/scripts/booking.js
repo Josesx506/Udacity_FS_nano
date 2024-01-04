@@ -50,10 +50,19 @@ $(document).ready(function () {
         eventDisplayDefault: true,
         canAddEvent: false,
         // calendarEvents: null,
-    })
+        onSelectDay: function() {
+            console.log('onSelectDate!');
+        }
+    });
 
     // Update list of calendar events with this get command
     updateCalendarView();
+
+    // $('#calendar').evoCalendar({
+    //     onSelectMonth: function() {
+    //       console.log('onSelectDate!')
+    //     }
+    //   });
 
     // $("#removeBtn").click(function(a) {
     //     curRmv = getRandom(active_events.length);
@@ -70,16 +79,6 @@ $(document).ready(function () {
 
 });
 
-
-// function createDeleteButton() {
-//     var active = $("#calendar").evoCalendar('getActiveDate');
-//     document.querySelector('.day calendar-active[role="button"][data-date-val='${active}']').onclick = (e) {
-//         // Use this line to prevent the default page refresh each time there is an update
-//         e.preventDefault();
-//         console.log('got you')
-//     }
-// };
-// createDeleteButton();
 
 
 // Assuming you have a common ancestor element that contains all the delete buttons
@@ -151,7 +150,16 @@ function updateCalendarView() {
                 
                 // Add the event to the calendar asynchronously
                 $('#calendar').evoCalendar('addCalendarEvent',existingEvent);
-            })
+
+                // Update the number of daily events in visible calendar
+                updateDailyAppointmentsCalendarView()
+
+                // Insert an edit and delete button
+                insertEditEventButton();
+                insertDeleteEventButton();
+            });
+
+            // Update the view
         
         }).catch(error => {
             console.error('Error fetching available times:', error);
@@ -266,12 +274,62 @@ function updateFormOptions(data) {
 };
 
 
-// Update booking numbers
-function updateDailyAppointments(data) {
+// Function to update daily booking numbers for visible number of days in calendar
+function updateDailyAppointmentsCalendarView() {
     // Get the list of active events for the day of interest
-    var allActiveEvents = $('#calendar').evoCalendar('getActiveEvents');
+    var currentActiveDate = $("#calendar").evoCalendar('getActiveDate');
+    
+    // Loop over all the visible calendar days that are accessed from a NodeList
+    document.querySelectorAll('.calendar-day').forEach(function(dateDiv) {
+        // Get the date string of each visible day div
+        var dateString = dateDiv.querySelector(".day").getAttribute('data-date-val');
+        // Make that day active and count the number of visible events
+        $('#calendar').evoCalendar('selectDate', dateString);
+        var allActiveEvents = $('#calendar').evoCalendar('getActiveEvents');
+
+        // Syntax to check if the event-indicator span exists in the .calendar-day div
+        var eventIndicator = dateDiv.querySelector('.event-indicator');
+
+        // Change the value of the event-indicator span
+        if (allActiveEvents.length > 0) {
+            dateDiv.querySelector('.event-indicator').textContent = allActiveEvents.length;
+        } else if (allActiveEvents.length === 0 && eventIndicator) {
+            eventIndicator.remove();
+        };
+    });
+
+    // After updating the list, change the active date back to what it was 
+    $('#calendar').evoCalendar('selectDate', currentActiveDate);
 };
 
+
+// Update the annual view
+$("#calendar").on('click', '.calendar-year', function (e) {
+    // Select the first day of the new month & year from the day element and make it active
+    firstDayOfMonth = $(".day")["0"].getAttribute('data-date-val');
+    $('#calendar').evoCalendar('selectDate', firstDayOfMonth);
+
+    // Update the daily event count on the visible calendar
+    updateDailyAppointmentsCalendarView();
+
+    // Insert an edit and delete button
+    insertEditEventButton();
+    insertDeleteEventButton();
+});
+
+// Update the monthly view
+$("#calendar").on('click', '.month', function (e) {
+    // Select the first day of the new month from the day element and make it active
+    firstDayOfMonth = $(".day")["0"].getAttribute('data-date-val');
+    $('#calendar').evoCalendar('selectDate', firstDayOfMonth);
+
+    // Update the daily event count on the visible calendar
+    updateDailyAppointmentsCalendarView();
+
+    // Insert an edit and delete button
+    insertEditEventButton();
+    insertDeleteEventButton();
+});
 
 
 // --------------------------------------------------------------------------------------------
@@ -300,15 +358,19 @@ $('#calendar').on('click', '.calendar-day', function() {
 
         // Set the flag to indicate that the button has been added
         eventHeaderContainer.data('addButtonAdded', true);
-    }
+    };
 
     // Disable the add event button for dates older than today
-    //     if (0 === active_events.length) {
-    //         a.target.disabled = true;
-    //     }
-    //     if (events.length > 0) {
-    //         $("#addBtn").prop("disabled", false);
-    //     }
+    var active_date = new Date($('#calendar').evoCalendar('getActiveDate'));
+    // Change the hours of both dates to midnight
+    active_date.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    // Perform the comparison with if statement
+    if (active_date >= today) {
+        $("#addBtn").prop("disabled", false);
+    } else {
+        $("#addBtn").prop("disabled", true);
+    };
 
     // --------------------------------------------------------------------------------------------
     // Event Listener to allow functionality to identify booked timeslots on the Calendar
@@ -336,9 +398,13 @@ $('#calendar').on('click', '.calendar-day', function() {
             });
     }
 
+    // Update the daily event count on the visible calendar
+    updateDailyAppointmentsCalendarView();
+
     // Insert an edit and delete button
     insertEditEventButton();
     insertDeleteEventButton();
+ 
 });
 
 
@@ -437,6 +503,14 @@ $('#calendar').on('click', '.deleteEventButtons', function(e) {
     .then(data => {
         // Remove the old event from the calendar
         $("#calendar").evoCalendar("removeCalendarEvent", evoId);
+
+        // Update the daily event count on the visible calendar
+        updateDailyAppointmentsCalendarView();
+
+        // Update the calendars view
+        insertEditEventButton();
+        insertDeleteEventButton();
+    
     }).catch(error => {
         console.error('Error during delete request:', error);
     });
@@ -497,6 +571,9 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
             // Update the calendar with the latest event
             $("#calendar").evoCalendar('addCalendarEvent', [addEvent]);
 
+            // Update the daily event count on the visible calendar
+            updateDailyAppointmentsCalendarView();
+
             // Update the calendars view
             insertEditEventButton();
             insertDeleteEventButton();
@@ -509,8 +586,13 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
 
         // After editing, switch off the edit mode
         editMode = false;
+
+
+
     } else {
-        // Implement the asynchronous fetch
+
+
+        // Implement the asynchronous fetch to POST an event to the db
         fetch("/appointments/book", {
             // method type
             method: 'POST',
@@ -540,6 +622,9 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
                 };
                 // Update the calendar with the latest event
                 $("#calendar").evoCalendar('addCalendarEvent', [addEvent]);
+
+                // Update the daily event count on the visible calendar
+                updateDailyAppointmentsCalendarView();
 
                 // Update the calendars view
                 insertEditEventButton();
