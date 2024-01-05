@@ -9,3 +9,6 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD")
 AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN")
 ALGORITHMS = [os.environ.get("AUTH0_ALGORITHMS")]
 API_AUDIENCE = os.environ.get("AUTH0__AUDIENCE")
+CLIENT_ID = os.environ.get("CLIENT_ID")
+CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
+LOCAL_SECRET_KEY = os.environ.get("LOCAL_SECRET_KEY")

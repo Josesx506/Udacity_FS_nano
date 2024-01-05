@@ -99,19 +99,19 @@ function updateCalendarView() {
                 
                 // Add the event to the calendar asynchronously
                 $('#calendar').evoCalendar('addCalendarEvent',existingEvent);
-
-                // Update the add event button
-                qualityCheckAddBtn();
-
-                // Update the number of daily events in visible calendar
-                updateDailyAppointmentsCalendarView()
-
-                // Insert an edit and delete button
-                insertEditEventButton();
-                insertDeleteEventButton();
             });
 
-            // Update the view
+            // Update the views
+
+            // Update the add event button
+            qualityCheckAddBtn();
+
+            // Update the number of daily events in visible calendar
+            updateDailyAppointmentsCalendarView()
+
+            // Insert an edit and delete button
+            insertEditEventButton();
+            insertDeleteEventButton();
         
         }).catch(error => {
             console.error('Error fetching available times:', error);
@@ -192,7 +192,6 @@ function qualityCheckAddBtn() {
     if ($('.bookingForm').hasClass('open')) {
         $('.bookingForm').removeClass('open');
     }
-
 
     // Disable the add event button for dates older than today
     var check_date = new Date($('#calendar').evoCalendar('getActiveDate'));

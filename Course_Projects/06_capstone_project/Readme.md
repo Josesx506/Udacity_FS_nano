@@ -8,6 +8,24 @@ node server.js # Start node server
 
 http-server src -p 3500
 
+### Endpoints
+
+
+
+### Auth0
+- [x] Set up Auth0 Service and APIs
+- [x] Set up API permissions with RBAC
+- [x] Create Roles and Permissions
+- [x] Assign user roles after signup
+    - [x] Modify the [login flow](https://auth0.com/docs/customize/actions/flows-and-triggers/login-flow#add-user-roles-to-id-and-access-tokens) in **`Auth0 actions`** using instructions from [here](https://www.youtube.com/watch?v=CZxfMD8lXg8).
+- [x] Generate a string for `LOCAL_SECRET_KEY` using `openssl rand -hex 32` from your terminal. Include the following lines in your environment file
+    ```bash
+    ~ $export CLIENT_ID='AUTH0-CLIENT-ID'
+    ~ $export CLIENT_SECRET='AUTH0-CLIENT-SECRET'
+    ~ $export AUTH0_DOMAIN='**********.auth0.com'
+    ~ $export LOCAL_SECRET_KEY='*********'
+    ```
+
 # --------------
 npm install -g live-server Install the server
 live-server # Launch the server from terminal

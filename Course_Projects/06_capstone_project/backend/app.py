@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask, request, abort, jsonify, render_template
+from flask import Flask, request, abort, jsonify, render_template, session
 from datetime import datetime,timedelta
 # from flask_moment import Moment
 from flask_migrate import Migrate
@@ -12,17 +12,31 @@ import sys
 # Setup the python file path to enable importing the system variables
 sys.path.append(os.getcwd())
 from models import setup_db, db, Booking, Service, Stylist,  database_path
+from auth.auth import AuthError, requires_auth
+from auth.views import auth_bp
+from settings import AUTH0_DOMAIN
 db_name = database_path
+
+# Rendering format for Jinja
+def to_pretty_json(obj: dict) -> str:
+    return json.dumps(obj, default=lambda o: o.__dict__, indent=4)
 
 
 # ---------------------------------------- Create the Flask app ----------------------------------------
 def create_app(test_config=None, db_name=db_name):
   # create and configure the app
   app = Flask(__name__, template_folder='templates/')
+
+  # Setup app authentication
+  app.jinja_env.filters['to_pretty_json'] = to_pretty_json
+  app.register_blueprint(auth_bp, url_prefix='/')
+
+  # Setup app database
   setup_db(app,db_name)
   migrate = Migrate(app, db) # Track changes
   CORS(app, resources={r"/api/*": {"origins": "*"}})
   return app
+
 
 
 app: Flask = create_app()
@@ -34,14 +48,13 @@ def after_request(response):
     response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,PATCH,DELETE,OPTIONS")
     return response
 
-# date_string = "12-31-2023 09:00 AM"
-# Convert the string to a datetime object
-#  datetime_obj = datetime.strptime(date_string, '%m-%d-%Y %I:%M %p')
 
 @app.route("/home")
 def index():
    # return jsonify("This is the index")
    return render_template("index.html")
+
+
 
 # ------------------------------------------------------ APPOINTMENTS ------------------------------------------------------
 def format_revocal_events(items):
@@ -56,8 +69,8 @@ def format_revocal_events(items):
       v['start_time'] = datetime.strftime( v['start_time'], '%m-%d-%Y %I:%M %p')
       v['date'] = str2(v['start_time'].split(" ")[0].replace('-','/'))
       v['time'] = " ".join(v['start_time'].split(" ")[1:])
-      # v['description'] = f"<span><b>Time:</b>{v['time']}\t <b>Name:</b> {v['first_name']} {v['last_name']}</span>"
-      v['description'] = f"Time: {v['time']}\t Name: {v['first_name']} {v['last_name']}"
+      v['description'] = f"<span><b>Time:</b>{v['time']}\t <b>Name:</b> {v['first_name']} {v['last_name']}</span>"
+      # v['description'] = f"Time: {v['time']}\t Name: {v['first_name']} {v['last_name']}"
       v['type'] = 'event'
    return items
 
@@ -75,6 +88,7 @@ def get_bookings():
    return render_template("booking.html" )
 
 
+
 @app.route("/appointments/refresh")
 def update_appointments_page():
    allEvents = Booking.query.order_by(Booking.id).all()
@@ -89,7 +103,8 @@ def update_appointments_page():
 
 # POST new booking to the db
 @app.route("/appointments/book", methods=['POST'])
-def create_new_booking():
+@requires_auth('post:bookings')
+def create_new_booking(jwt):
    '''Get the responses'''
    resp = request.get_json()
 
@@ -129,7 +144,8 @@ def create_new_booking():
 
 # PATCH existing booking in the db
 @app.route("/appointments/book/<int:b_id>", methods=['PATCH'])
-def update_existing_booking(b_id):
+@requires_auth('patch:bookings')
+def update_existing_booking(jwt,b_id):
    '''Update parameters for an existing timeslot in the db'''
    resp = request.get_json()
 
@@ -171,7 +187,10 @@ def update_existing_booking(b_id):
 
 # DELETE existing booking in the db
 @app.route("/appointments/book/<int:b_id>", methods=['DELETE'])
-def delete_existing_booking(b_id):
+@requires_auth('delete:bookings')
+def delete_existing_booking(jwt,b_id):
+   user_role = jwt[f'{AUTH0_DOMAIN}/roles'][0]
+
    # Check the validity of the request to confirm there are no errors
    if b_id is None:
       abort(400)
@@ -182,7 +201,9 @@ def delete_existing_booking(b_id):
       if del_booking is None:
             abort(404)
 
-      del_booking.delete()
+      # Include permissions for general user to delete
+      if user_role == 'SalonAdmin' or user_role == 'SalonStylist':
+         del_booking.delete()
         
       return jsonify({'success': True,
                       "delete": b_id})
@@ -236,7 +257,56 @@ def get_booked_times_from_database(date):
       return []
    
 
-# @TODO - Patch and Delete requests
+
+# ----------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------ Error Handling ------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------------
+'''
+Implement error handlers using the @app.errorhandler(error) decorator
+   each error handler should return (with approprate messages):
+      jsonify({
+               "success": False,
+               "error": 404,
+               "message": "resource not found"
+            }), 404
+
+'''
+
+
+'''
+error 400 handler for poorly formatted requests
+'''
+@app.errorhandler(400)
+def bad_request(error):
+    return (jsonify({"success": False, "error": 400, "message": "bad request"}), 400)
+
+
+'''
+error 404 handler for mising items in backend
+'''
+@app.errorhandler(404)
+def not_found(error):
+    return (jsonify({"success": False, "error": 404, "message": "resource not found, booking/service/stylist not in the db"}), 404)
+
+
+'''
+error 422 handler for unprocessable entity
+'''
+@app.errorhandler(422)
+def unprocessable(error):
+    return jsonify({"success": False,"error": 422, "message": "unprocessable"}), 422
+
+
+'''
+@TODO implement error handler for AuthError
+    error handler should conform to general task above
+'''
+@app.errorhandler(AuthError)
+def unprocessable(error):
+    return (
+        jsonify({"success": False, "error": error.status_code, "message": error.error['description']}),
+        error.status_code,
+    )
 
 
 if __name__ == '__main__':

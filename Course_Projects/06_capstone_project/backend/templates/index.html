@@ -22,7 +22,10 @@
                     <!-- <li><a href="{{ url_for('static', filename='services.html')}}">Services</a></li> -->
                     <li><a href="{{ url_for('get_bookings')}}">Book Appointment</a></li>
                     <!-- <li><a href="{{ url_for('get_bookings')}}">Stylists</a></li> -->
-                    <!-- <li id="login-button"><a href="{{ url_for('static', filename='login.html')}}">Login</a></li> -->
+                    <li id="login-button"><a href="{{ url_for('auth.login')}}">Login</a></li>
+                    {% if session.user %}
+                    <li id="logout-button"><a href="{{ url_for('auth.logout')}}">Logout</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
