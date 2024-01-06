@@ -15,21 +15,24 @@ def single_entry_db(app):
                       email='jugu@gmail.com',
                       start_time=f"{datetime(2023, 12, 1, 12, 0)}",
                       completed=True,
-                      stylist_id=1)
+                      stylist_id=1,
+                      user_id='demo')
    event_2 =  Booking(first_name="Elizabeth",
                       last_name='Tyler',
                       phone='+4494041098',
                       email='eller@yahoo.com',
                       start_time=f"{datetime(2023, 12, 6, 14, 0)}",
                       completed=True,
-                      stylist_id=1)
+                      stylist_id=1,
+                      user_id='demo')
    event_3 =  Booking(first_name="Reina",
                       last_name='Akurus',
                       phone='+4494041098',
                       email='rerus@zinmo.com',
                       start_time=f"{datetime(2024, 1, 4, 10, minute=0)}",
                       completed=False,
-                      stylist_id=1)
+                      stylist_id=1,
+                      user_id='demo')
    stylist1 = Stylist(name="King Ella",
                       phone="+2275499450",
                       email="stylist1@luxehair.com",

@@ -20,10 +20,11 @@ function getRandom(a) {
     return Math.floor(Math.random() * a);
 }
 
-// Random Text Generator as function
-// Can change 7 to 12 for longer results.
+// Random Text Generator as function. You can change 7 to 12 for longer results.
 let rtg = (Math.random() + 1).toString(36).substring(7);
 
+// Obtain the user role for front-end rendering
+var userRoles = document.getElementById('user-role').textContent;
 
 // Place holder event for tests
 // var events = [{
@@ -33,6 +34,8 @@ let rtg = (Math.random() + 1).toString(36).substring(7);
 //     date: today.getMonth() + 1 + "/18/" + today.getFullYear(),
 //     type: "event"
 // }]
+
+
 
 
 // --------------------------------------------------------------------------------------------
@@ -50,14 +53,10 @@ $(document).ready(function () {
         eventDisplayDefault: true,
         canAddEvent: false,
         // calendarEvents: null,
-        onSelectDay: function() {
-            console.log('onSelectDate!');
-        }
     });
 
     // Update list of calendar events with this get command
     updateCalendarView();
-
 });
 
 
@@ -69,6 +68,7 @@ function updateCalendarView() {
 
     // Uncomment the following line if you want the function to return a variable
     // var eventList = [];
+    // var roles_list = [];
 
     fetch("/appointments/refresh", {
         // method type
@@ -91,7 +91,8 @@ function updateCalendarView() {
                     type: slotEvent.type,
                     phone: slotEvent.phone,
                     email: slotEvent.email,
-                    time: slotEvent.time
+                    time: slotEvent.time,
+                    verified: slotEvent.verified
                 };
 
                 // The values here are appended to the `eventList` array above
@@ -102,13 +103,14 @@ function updateCalendarView() {
             });
 
             // Update the views
-
-            // Update the add event button
-            qualityCheckAddBtn();
+            user_roles = data.roles;
 
             // Update the number of daily events in visible calendar
             updateDailyAppointmentsCalendarView()
-
+            
+            // Update the add event button
+            qualityCheckAddBtn();
+            
             // Insert an edit and delete button
             insertEditEventButton();
             insertDeleteEventButton();
@@ -117,12 +119,35 @@ function updateCalendarView() {
             console.error('Error fetching available times:', error);
         });
     
-    // Return the array or not.
-    // return eventList;
 }
 
+// --------------------------------------------------------------------------------------------
+// Verify that the event being viewed was created by the user (Async functions must be used to avoid hoisting errors)
+// --------------------------------------------------------------------------------------------
+// async function verifyUserEntry(evId) {
+//     try {
+//         const response = await fetch("/appointments/verify", {
+//             method: 'GET',
+//             headers: { 'Content-Type': 'application/json' }
+//         });
 
-// Function to create an `Edit button` element dynamically for each new booking appointment that is made
+//         const data = await response.json();
+//         const verifiedValue = data.verified;
+
+//         return verifiedValue;
+//     } catch (error) {
+//         console.error('Error verifying selecting user appointment:', error);
+//         throw error;
+//     }
+// }
+
+
+// console.log(userEventIdList)
+
+// --------------------------------------------------------------------------------------------
+// Function to create an `Edit button` element dynamically for each new booking appointment that 
+// is made
+// --------------------------------------------------------------------------------------------
 function insertEditEventButton(activeDt) {
     // Function to add an edit button to an Event element
     var active_date = $('#calendar').evoCalendar('getActiveDate');
@@ -130,16 +155,18 @@ function insertEditEventButton(activeDt) {
     // Select the events for the provided date
     $("#calendar").evoCalendar('selectDate',active_date);
 
+    // Get the list of active events for the day of interest
+    var allActiveEvents = $('#calendar').evoCalendar('getActiveEvents');
+
     // Check if an event-container exists for the selected date
     var eventContainer = $(`.event-container[role='button']`);
     
-    // if (eventContainer.length > 0) {
     // Your logic for handling the existence of an event-container goes here
     for (i=0;i<eventContainer.length; i++) {
         var eventElement = eventContainer[i];
         var editButtonAdded = eventElement.dataset.insertButtonAdded; 
 
-        if (!editButtonAdded) {
+        if ((user_roles === 'SalonAdmin' || user_roles === 'SalonStylist') && !editButtonAdded) {
             // Extract the event id from the data-event-index attribute
             var eventId = eventElement.getAttribute('data-event-index');
 
@@ -155,12 +182,108 @@ function insertEditEventButton(activeDt) {
 
             // Add an attribute to let the element know if the button already exists
             eventElement.dataset.insertButtonAdded = true;
-        }
+
+        } else if (user_roles === 'SalonUser' && !editButtonAdded) {
+            // Extract the event id from the data-event-index attribute
+            var eventId = eventElement.getAttribute('data-event-index');
+            
+            // Find the active event with a matching id from the list of active events
+            var activeEvent = allActiveEvents.find(function(listEvent) {
+                return listEvent.id === eventId;
+            });
+
+            if (activeEvent.verified) {
+                // Add an Event button
+                var editEventButton = document.createElement('button');
+                editEventButton.className = `editEventButtons ${eventId}`;
+                
+                editEventButton.innerHTML = `<i style="font-size:24px" class="far fa-edit"></i>`;
+
+                $(`.event-container[role='button']`)[0].style.zIndex = 10;
+
+                // Append the edit buttons to the parent div
+                eventElement.appendChild(editEventButton);
+
+                // Add an attribute to let the element know if the button already exists
+                eventElement.dataset.insertButtonAdded = true;
+            };
+        };
+    };
+};
+
+// --------------------------------------------------------------------------------------------
+// Function to create a `Delete button` element dynamically for each new booking appointment that 
+// is made
+// --------------------------------------------------------------------------------------------
+function insertDeleteEventButton() {
+    // Function to add a delete button to an Event element
+    var active_date = $('#calendar').evoCalendar('getActiveDate');
+
+    // Select the events for the provided date
+    $("#calendar").evoCalendar('selectDate',active_date);
+
+    // Get the list of active events for the day of interest
+    var allActiveEvents = $('#calendar').evoCalendar('getActiveEvents');
+
+    // Check if an event-container exists for the selected date
+    var eventContainer = $(`.event-container[role='button']`);
+    
+    // Your logic for handling the existence of an event-container goes here
+    for (i=0;i<eventContainer.length; i++) {
+        var eventElement = eventContainer[i];
+        var deleteButtonAdded = eventElement.dataset.deleteButtonAdded;
+
+        if ((user_roles === 'SalonAdmin' || user_roles === 'SalonStylist') && !deleteButtonAdded) {
+            // Extract the event id from the data-event-index attribute
+            var eventId = eventElement.getAttribute('data-event-index');
+            
+            
+            // Add a Delete button
+            var deleteButton = document.createElement('button');
+            deleteButton.className = `deleteEventButtons ${eventId}`;
+            // You can replace this with an "x-icon" HTML or use an image
+            deleteButton.innerHTML =  `<i style="font-size:24px" class="fa">&#xf014;</i>`;
+
+            $(`.event-container[role='button']`)[0].style.zIndex = 10;
+
+            // Append the delete buttons to the parent div
+            eventElement.appendChild(deleteButton);
+
+            // Add an attribute to let the element know if the button already exists
+            eventElement.dataset.deleteButtonAdded = true;
+        
+        } else if (user_roles === 'SalonUser') {
+            // Extract the event id from the data-event-index attribute
+            var eventId = eventElement.getAttribute('data-event-index');
+
+            // Find the active event with a matching id from the list of active events
+            var activeEvent = allActiveEvents.find(function(listEvent) {
+                return listEvent.id === eventId;
+            });
+
+            if (activeEvent.verified) {
+                // Add a Delete button
+                var deleteButton = document.createElement('button');
+                deleteButton.className = `deleteEventButtons ${eventId}`;
+                // You can replace this with an "x-icon" HTML or use an image
+                deleteButton.innerHTML =  `<i style="font-size:24px" class="fa">&#xf014;</i>`;
+
+                $(`.event-container[role='button']`)[0].style.zIndex = 10;
+
+                // Append the delete buttons to the parent div
+                eventElement.appendChild(deleteButton);
+
+                // Add an attribute to let the element know if the button already exists
+                eventElement.dataset.deleteButtonAdded = true;
+            };
+        };
     };
 };
 
 
+// --------------------------------------------------------------------------------------------
 // Function to create a `Add event` button
+// --------------------------------------------------------------------------------------------
 function insertAddEventButton() {
 
     // Check if an event-container exists for the event header
@@ -169,7 +292,7 @@ function insertAddEventButton() {
     // Flag for checking the button exists
     var addButtonAdded = eventHeaderContainer.data('addButtonAdded'); 
 
-    if (!addButtonAdded) {
+    if ((user_roles === 'SalonAdmin' || user_roles === 'SalonStylist' || user_roles === 'SalonUser') && !addButtonAdded) {
         // Header Element for existing event
         var eventHeaderElement = eventHeaderContainer[0];
         
@@ -187,6 +310,9 @@ function insertAddEventButton() {
     };
 };
 
+// --------------------------------------------------------------------------------------------
+// Function to make sure that new events can only be added on the current or future dates
+// --------------------------------------------------------------------------------------------
 function qualityCheckAddBtn() {
     // Close the form if it has the "open" class
     if ($('.bookingForm').hasClass('open')) {
@@ -260,43 +386,6 @@ function qualityCheckAddBtn() {
     };
 };
 
-// Function to create a `Delete button` element dynamically for each new booking appointment that is made
-function insertDeleteEventButton() {
-    // Function to add a delete button to an Event element
-    var active_date = $('#calendar').evoCalendar('getActiveDate');
-
-    // Select the events for the provided date
-    $("#calendar").evoCalendar('selectDate',active_date);
-
-    // Check if an event-container exists for the selected date
-    var eventContainer = $(`.event-container[role='button']`);
-    
-    // Your logic for handling the existence of an event-container goes here
-    for (i=0;i<eventContainer.length; i++) {
-        var eventElement = eventContainer[i];
-
-        var deleteButtonAdded = eventElement.dataset.deleteButtonAdded;
-
-        if (!deleteButtonAdded) {
-            // Extract the event id from the data-event-index attribute
-            var eventId = eventElement.getAttribute('data-event-index');
-            
-            // Add a Delete button
-            var deleteButton = document.createElement('button');
-            deleteButton.className = `deleteEventButtons ${eventId}`;
-            // You can replace this with an "x-icon" HTML or use an image
-            deleteButton.innerHTML =  `<i style="font-size:24px" class="fa">&#xf014;</i>`;
-
-            $(`.event-container[role='button']`)[0].style.zIndex = 10;
-
-            // Append the delete buttons to the parent div
-            eventElement.appendChild(deleteButton);
-
-            // Add an attribute to let the element know if the button already exists
-            eventElement.dataset.deleteButtonAdded = true;
-        }
-    };
-};
 
 
 // --------------------------------------------------------------------------------------------
@@ -326,7 +415,10 @@ function updateFormOptions(data) {
 };
 
 
+
+// --------------------------------------------------------------------------------------------
 // Function to update daily booking numbers for visible number of days in calendar
+// --------------------------------------------------------------------------------------------
 function updateDailyAppointmentsCalendarView() {
     // Get the list of active events for the day of interest
     var currentActiveDate = $("#calendar").evoCalendar('getActiveDate');
@@ -570,7 +662,8 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
                 type: data.event[0].type,
                 phone: data.event[0].phone,
                 email: data.event[0].email,
-                time: data.event[0].time
+                time: data.event[0].time,
+                verified: true
             };
             // Update the calendar with the latest event
             $("#calendar").evoCalendar('addCalendarEvent', [addEvent]);
@@ -625,7 +718,8 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
                     type: data.event[0].type,
                     phone: data.event[0].phone,
                     email: data.event[0].email,
-                    time: data.event[0].time
+                    time: data.event[0].time,
+                    verified: true
                 };
                 // Update the calendar with the latest event
                 $("#calendar").evoCalendar('addCalendarEvent', [addEvent]);
@@ -649,9 +743,6 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
     $('.bookingForm').toggleClass('open');
     
 };
-
-
-
 
 
 // Assuming you have a common ancestor element that contains all the delete buttons

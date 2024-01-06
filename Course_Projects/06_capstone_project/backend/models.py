@@ -35,7 +35,6 @@ class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String)
     last_name = db.Column(db.String)
-    role = db.Column(db.String)
     phone = db.Column(db.String(120))
     email = db.Column(db.String(500))
     start_time = db.Column(db.DateTime)
@@ -43,15 +42,16 @@ class Booking(db.Model):
     # stylists = db.relationship('Stylist', backref='bookings', lazy=True)
     # stylist_id = db.Column(db.Integer, nullable=False)
     stylist_id = db.Column(db.Integer, db.ForeignKey('Stylists.id'), nullable=True)
+    user_id = db.Column(db.String, nullable=True)
 
-    def __init__(self, first_name, last_name, role, phone, email, start_time, completed, stylist_id):
+    def __init__(self, first_name, last_name, phone, email, start_time, completed, user_id, stylist_id):
         self.first_name = first_name
         self.last_name = last_name
-        self.role = role
         self.phone = phone
         self.email = email
         self.start_time = start_time
         self.completed = completed
+        self.user_id = user_id
         self.stylist_id = stylist_id
     
     def insert(self):
@@ -74,11 +74,11 @@ class Booking(db.Model):
             'id': self.id,
             'first_name': self.first_name,
             'last_name': self.last_name,
-            'role': self.role,
             'phone': self.phone,
             'email': self.email,
             'start_time': self.start_time,
             'completed': self.completed,
+            'user_id': self.user_id,
             'stylist_id': self.stylist_id
             }
 

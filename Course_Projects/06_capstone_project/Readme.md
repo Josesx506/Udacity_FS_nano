@@ -18,17 +18,29 @@ http-server src -p 3500
 - [x] Create Roles and Permissions
 - [x] Assign user roles after signup
     - [x] Modify the [login flow](https://auth0.com/docs/customize/actions/flows-and-triggers/login-flow#add-user-roles-to-id-and-access-tokens) in **`Auth0 actions`** using instructions from [here](https://www.youtube.com/watch?v=CZxfMD8lXg8).
-- [x] Generate a string for `LOCAL_SECRET_KEY` using `openssl rand -hex 32` from your terminal. Include the following lines in your environment file
+- [x] Include the following lines in your environment file
     ```bash
     ~ $export CLIENT_ID='AUTH0-CLIENT-ID'
     ~ $export CLIENT_SECRET='AUTH0-CLIENT-SECRET'
     ~ $export AUTH0_DOMAIN='**********.auth0.com'
+    ~ $export AUTH0_ALGORITHMS='*******'
+    ~ $export AUTH0__AUDIENCE='********'
     ~ $export LOCAL_SECRET_KEY='*********'
     ```
+- [x] Instead of using `response.headers['Authorization']`, I used [authlib to access Auth0](https://developer.auth0.com/resources/guides/web-app/flask/basic-authentication#configure-flask-with-auth-0) to create access-tokens that were saved in flask session cookies. This simplified obtaining and decoding the tokens required to verify **user permissions**.
+    - Other [useful resources](https://auth0.com/docs/quickstart/webapp/python/interactive) for Auth0 integration with flask.
+    - Another technique to obtain user permissions with Auth0 can be found [here](https://auth0.com/docs/quickstart/backend/python/interactive).
+- [x] Because **`user roles`** are also specified, they can be used to verify actions like deleting booking actions for individuals vs. admins.
+- [x] All user sessions are closed upon logout.
 
 # --------------
 npm install -g live-server Install the server
 live-server # Launch the server from terminal
+
+
+1. Add userId to the Bookings db column
+2. Add user roles to event-container data.
+3. Users will only be able to view events that were created by that user
 
 
 ### Create a React app

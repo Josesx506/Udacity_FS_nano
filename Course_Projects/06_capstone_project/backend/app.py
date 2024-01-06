@@ -14,7 +14,7 @@ sys.path.append(os.getcwd())
 from models import setup_db, db, Booking, Service, Stylist,  database_path
 from auth.auth import AuthError, requires_auth
 from auth.views import auth_bp
-from settings import AUTH0_DOMAIN
+from settings import AUTH0_DOMAIN, LOCAL_SECRET_KEY
 db_name = database_path
 
 # Rendering format for Jinja
@@ -30,6 +30,7 @@ def create_app(test_config=None, db_name=db_name):
   # Setup app authentication
   app.jinja_env.filters['to_pretty_json'] = to_pretty_json
   app.register_blueprint(auth_bp, url_prefix='/')
+  app.secret_key = LOCAL_SECRET_KEY
 
   # Setup app database
   setup_db(app,db_name)
@@ -57,11 +58,12 @@ def index():
 
 
 # ------------------------------------------------------ APPOINTMENTS ------------------------------------------------------
-def format_revocal_events(items):
+def format_revocal_events(items,user_id=''):
    '''Format the data from the db to match the required pattern to be rendered on the front end'''
    class str2(str):
       def __repr__(self):
          return ''.join(('"', super().__repr__()[1:-1], '"'))
+   
    
    for k,v in enumerate(items):
       v['id'] = str(v["id"])
@@ -69,9 +71,13 @@ def format_revocal_events(items):
       v['start_time'] = datetime.strftime( v['start_time'], '%m-%d-%Y %I:%M %p')
       v['date'] = str2(v['start_time'].split(" ")[0].replace('-','/'))
       v['time'] = " ".join(v['start_time'].split(" ")[1:])
-      v['description'] = f"<span><b>Time:</b>{v['time']}\t <b>Name:</b> {v['first_name']} {v['last_name']}</span>"
-      # v['description'] = f"Time: {v['time']}\t Name: {v['first_name']} {v['last_name']}"
+      # v['description'] = f"<span><b>Time:</b>{v['time']}\t <b>Name:</b> {v['first_name']} {v['last_name']}</span>"
+      v['description'] = f"Time: {v['time']}\t Name: {v['first_name']} {v['last_name']}"
       v['type'] = 'event'
+      if v['user_id'] == user_id:
+         v['verified'] = True
+      else:
+         v['verified'] = False
    return items
 
 
@@ -83,9 +89,12 @@ def get_bookings():
    '''
    allEvents = Booking.query.order_by(Booking.id).all()
    currentEvents = [event.format() for event in allEvents]
-   currentEvents = format_revocal_events(currentEvents)
+   user_id = session.get('user').get('userinfo')['sub']
+   currentEvents = format_revocal_events(currentEvents,user_id)
+
+   roles = session.get('role')
    
-   return render_template("booking.html" )
+   return render_template("booking.html", user_role=roles)
 
 
 
@@ -93,9 +102,12 @@ def get_bookings():
 def update_appointments_page():
    allEvents = Booking.query.order_by(Booking.id).all()
    currentEvents = [event.format() for event in allEvents]
-   currentEvents = format_revocal_events(currentEvents)
+   user_id = session.get('user').get('userinfo')['sub']
+   currentEvents = format_revocal_events(currentEvents, user_id)
+   roles = session.get('role')
 
-   return jsonify({'booked_slots': currentEvents})
+   return jsonify({'booked_slots': currentEvents,
+                   'roles': roles})
 
 
 
@@ -112,6 +124,9 @@ def create_new_booking(jwt):
    if resp['date_time'] is None:
       abort(400)
 
+   # Identify the user id
+   user_id = jwt['sub']
+
    try:
       if resp['first'] is not None:
             new_booking=Booking(first_name=resp['first'],
@@ -120,6 +135,7 @@ def create_new_booking(jwt):
                         email=resp['email'],
                         start_time= f"{datetime.strptime(resp['date_time'], '%m-%d-%Y %I:%M %p')}",
                         completed=False,
+                        user_id=user_id,
                         stylist_id=None)
             new_booking.insert()
 
@@ -153,18 +169,24 @@ def update_existing_booking(jwt,b_id):
    if b_id is None:
       abort(400)
 
+   # Identify the user role and id
+   user_role = jwt[f'{AUTH0_DOMAIN}/roles'][0]
+   user_id = jwt['sub']
+
    try:
       # This only works for valid booking ids
       # Extract the booking that matches the specified id
       current_booking = Booking.query.filter(Booking.id == b_id).all()[0]
 
-      # Parameters to create a new drink. Check for None values
-      for key,value in resp.items():
-         if key!='id' and key!='start_time' and value is not None:
-            setattr(current_booking, key, value)
-         elif key=="start_time" and value is not None:
-            setattr(current_booking, key, f"{datetime.strptime(value, '%m-%d-%Y %I:%M %p')}")
-         
+      # Admin patch update
+      if user_role == 'SalonAdmin' or user_role == 'SalonStylist':
+         # Parameters to create a new drink. Check for None values
+         for key,value in resp.items():
+            if key!='id' and key!='start_time' and value is not None:
+               setattr(current_booking, key, value)
+            elif key=="start_time" and value is not None:
+               setattr(current_booking, key, f"{datetime.strptime(value, '%m-%d-%Y %I:%M %p')}")
+            
          # Update the row
          current_booking.update()
          
@@ -174,12 +196,37 @@ def update_existing_booking(jwt,b_id):
          # Create the additional attributes
          fmtrd_booking = format_revocal_events(updated_booking)
 
+         return jsonify(
+            {
+                  "success": True,
+                  "event": fmtrd_booking,
+            })
+      
+      # User Patch update
+      elif user_role == 'SalonUser' and user_id == current_booking.user_id:
+         for key,value in resp.items():
+            if key!='id' and key!='start_time' and value is not None:
+               setattr(current_booking, key, value)
+            elif key=="start_time" and value is not None:
+               setattr(current_booking, key, f"{datetime.strptime(value, '%m-%d-%Y %I:%M %p')}")
+            
+         # Update the row
+         current_booking.update()
+         
+         # Extract the updated drink long format
+         updated_booking = [current_booking.format()]
 
-      return jsonify(
-         {
-               "success": True,
-               "event": fmtrd_booking,
-         })
+         # Create the additional attributes
+         fmtrd_booking = format_revocal_events(updated_booking)
+
+         return jsonify(
+            {
+                  "success": True,
+                  "event": fmtrd_booking,
+            })
+   
+      else:
+         abort(403)
    except:
       abort(422)
 
@@ -189,11 +236,14 @@ def update_existing_booking(jwt,b_id):
 @app.route("/appointments/book/<int:b_id>", methods=['DELETE'])
 @requires_auth('delete:bookings')
 def delete_existing_booking(jwt,b_id):
-   user_role = jwt[f'{AUTH0_DOMAIN}/roles'][0]
 
    # Check the validity of the request to confirm there are no errors
    if b_id is None:
       abort(400)
+   
+   # Identify the user role and id
+   user_role = jwt[f'{AUTH0_DOMAIN}/roles'][0]
+   user_id = jwt['sub']
 
    try:
       del_booking = Booking.query.filter(Booking.id == b_id).one_or_none()
@@ -204,12 +254,46 @@ def delete_existing_booking(jwt,b_id):
       # Include permissions for general user to delete
       if user_role == 'SalonAdmin' or user_role == 'SalonStylist':
          del_booking.delete()
-        
-      return jsonify({'success': True,
-                      "delete": b_id})
 
+         return jsonify({'success': True,
+                         "delete": b_id})
+
+      elif user_role == 'SalonUser' and user_id == del_booking.user_id:
+         del_booking.delete()
+
+         return jsonify({'success': True,
+                         "delete": b_id})
+      else:
+         abort(403)
    except:
         abort(422)
+
+@app.route('/appointments/verify/<b_id>')
+@requires_auth('get:bookings')
+def verify_user_event(jwt, b_id):
+   '''This function verifies that a user was the one that created an entry'''
+
+   # Check the validity of the request to confirm there are no errors
+   if b_id is None:
+      abort(400)
+   
+   # Identify the user role and id
+   user_role = jwt[f'{AUTH0_DOMAIN}/roles'][0]
+   user_id = jwt['sub']
+
+   try:
+      booking_db = Booking.query.filter(Booking.id == b_id,Booking.user_id == user_id).one_or_none()
+      booking_id = booking_db.format()['id'] # [event.format()['id'] for event in booking_db]
+      if booking_db is not None:
+         return jsonify({'success': True,
+                         "verified": True,
+                         "numbered_id": booking_id})
+      else:
+         return jsonify({'success': True,
+                         "verified": False,
+                         "numbered_ids":""})
+   except:
+      abort(422)
 
 
 
@@ -280,6 +364,12 @@ error 400 handler for poorly formatted requests
 def bad_request(error):
     return (jsonify({"success": False, "error": 400, "message": "bad request"}), 400)
 
+'''
+error 403 handler for mising items in backend
+'''
+@app.errorhandler(404)
+def not_found(error):
+    return (jsonify({"success": False, "error": 403, "message": "Forbidden request, you did not create this item"}), 404)
 
 '''
 error 404 handler for mising items in backend
