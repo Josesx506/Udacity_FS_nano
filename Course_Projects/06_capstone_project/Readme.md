@@ -18,13 +18,19 @@ UPDATE "Stylists" SET user_id='demo' WHERE user_id IS NULL;
 ```
 
 
-### Auth0
+## Files
+### Authentication files
+auth.views is used to create and authenticate login and callback endpoints, open secure user sessions, as well as close user sessions upon logout.
+auth.auth is used to verify permissions in a user session. This wrapper is used to verify that a user has necessary permissions before secured endpoints can be accessed.
+
+
+### Auth0 Checks
 - [x] Set up Auth0 Service and APIs
 - [x] Set up API permissions with RBAC
 - [x] Create Roles and Permissions
-- [x] Assign user roles after signup
+- [x] Assign user roles after signup manually (This can be automated in login flow to provide a default user role).
     - [x] Modify the [login flow](https://auth0.com/docs/customize/actions/flows-and-triggers/login-flow#add-user-roles-to-id-and-access-tokens) in **`Auth0 actions`** using instructions from [here](https://www.youtube.com/watch?v=CZxfMD8lXg8).
-- [x] Include the following lines in your environment file
+- [x] Include the following lines in your environment file. You can generate a string for `LOCAL_SECRET_KEY` using o`penssl rand -hex 32` from your terminal.
     ```bash
     ~ $export CLIENT_ID='AUTH0-CLIENT-ID'
     ~ $export CLIENT_SECRET='AUTH0-CLIENT-SECRET'

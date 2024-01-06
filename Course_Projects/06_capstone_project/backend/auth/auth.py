@@ -21,15 +21,11 @@ class AuthError(Exception):
         self.status_code = status_code
 
 
-## Auth Header
-
 '''
 Implement get_token_auth_header() method
-    it should attempt to get the header from the request
-        it should raise an AuthError if no header is present
-    it should attempt to split bearer and the token
-        it should raise an AuthError if the header is malformed
-    return the token part of the header
+It should attempt to get the authorization token from the 
+    session user. It should raise an AuthError if no session is present
+    or if the token is malformed. It returns the token
 '''
 def get_token_auth_header():
     '''

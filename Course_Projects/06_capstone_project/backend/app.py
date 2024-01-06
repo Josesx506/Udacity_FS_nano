@@ -38,8 +38,6 @@ def create_app(test_config=None, db_name=db_name):
   CORS(app, resources={r"/api/*": {"origins": "*"}})
   return app
 
-
-
 app: Flask = create_app()
 
 
@@ -48,43 +46,23 @@ def after_request(response):
     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization,true")
     response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,PATCH,DELETE,OPTIONS")
     return response
+# ------------------------------------------------------------------------------------------------------------------------
 
-
+# Setup the home route endpoint
 @app.route("/home")
 def index():
    # return jsonify("This is the index")
    return render_template("index.html")
 
 
-
-# ------------------------------------------------------ APPOINTMENTS ------------------------------------------------------
-def format_revocal_events(items,user_id=''):
-   '''Format the data from the db to match the required pattern to be rendered on the front end'''
-   class str2(str):
-      def __repr__(self):
-         return ''.join(('"', super().__repr__()[1:-1], '"'))
-   
-   for k,v in enumerate(items):
-      v['id'] = str(v["id"])
-      v['name'] = f"Hair Appointment"
-      v['start_time'] = datetime.strftime( v['start_time'], '%m-%d-%Y %I:%M %p')
-      v['date'] = str2(v['start_time'].split(" ")[0].replace('-','/'))
-      v['time'] = " ".join(v['start_time'].split(" ")[1:])
-      # v['description'] = f"<span><b>Time:</b>{v['time']}\t <b>Name:</b> {v['first_name']} {v['last_name']}</span>"
-      v['description'] = f"Time: {v['time']}\t Name: {v['first_name']} {v['last_name']}"
-      v['type'] = 'event'
-      if v['user_id'] == user_id:
-         v['verified'] = True
-      else:
-         v['verified'] = False
-   return items
-
-
+# ----------------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------- APPOINTMENTS PAGE ----------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------------
 @app.route("/appointments")
 def get_bookings():
    '''
-   This is a simple get request to create the first page
-   I limited the Jinja use to a minimum because it was causing interference with js
+   This is a simple unsecured GET request for guests and users alike to view the booked appointeds in the db.
+   I limited the Jinja use to a minimum because it was causing interference with js and evoCalendar API
    '''
    allEvents = Booking.query.order_by(Booking.start_time).all()
    currentEvents = [event.format() for event in allEvents]
@@ -106,6 +84,11 @@ def get_bookings():
 
 @app.route("/appointments/refresh")
 def update_appointments_page():
+   '''
+   This is another unsecured GET request for updating the appointments page.
+   Because I was using JS instead of jinja, the page is being updated with AJAX fetch requests
+   and not output variables
+   '''
    allEvents = Booking.query.order_by(Booking.start_time).all()
    currentEvents = [event.format() for event in allEvents]
    
@@ -283,6 +266,28 @@ def delete_existing_booking(jwt,b_id):
 
 
 # ------------------------------------------- APPOINTMENTS PAGE HELPER FUNCTIONS -------------------------------------------
+def format_revocal_events(items,user_id=''):
+   '''Format the data from the db to match the required pattern to be rendered on the front end'''
+   class str2(str):
+      def __repr__(self):
+         return ''.join(('"', super().__repr__()[1:-1], '"'))
+   
+   for k,v in enumerate(items):
+      v['id'] = str(v["id"])
+      v['name'] = f"Hair Appointment"
+      v['start_time'] = datetime.strftime( v['start_time'], '%m-%d-%Y %I:%M %p')
+      v['date'] = str2(v['start_time'].split(" ")[0].replace('-','/'))
+      v['time'] = " ".join(v['start_time'].split(" ")[1:])
+      # v['description'] = f"<span><b>Time:</b>{v['time']}\t <b>Name:</b> {v['first_name']} {v['last_name']}</span>"
+      v['description'] = f"Time: {v['time']}\t Name: {v['first_name']} {v['last_name']}"
+      v['type'] = 'event'
+      if v['user_id'] == user_id:
+         v['verified'] = True
+      else:
+         v['verified'] = False
+   return items
+
+
 # GET existing booking from the DB
 @app.route('/appointments/<date>')
 def create_availability(date):
