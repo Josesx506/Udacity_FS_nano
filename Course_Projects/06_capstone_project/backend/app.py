@@ -64,10 +64,9 @@ def format_revocal_events(items,user_id=''):
       def __repr__(self):
          return ''.join(('"', super().__repr__()[1:-1], '"'))
    
-   
    for k,v in enumerate(items):
       v['id'] = str(v["id"])
-      v['name'] = f"Hair Appointment #{v['id']}"
+      v['name'] = f"Hair Appointment"
       v['start_time'] = datetime.strftime( v['start_time'], '%m-%d-%Y %I:%M %p')
       v['date'] = str2(v['start_time'].split(" ")[0].replace('-','/'))
       v['time'] = " ".join(v['start_time'].split(" ")[1:])
@@ -87,12 +86,19 @@ def get_bookings():
    This is a simple get request to create the first page
    I limited the Jinja use to a minimum because it was causing interference with js
    '''
-   allEvents = Booking.query.order_by(Booking.id).all()
+   allEvents = Booking.query.order_by(Booking.start_time).all()
    currentEvents = [event.format() for event in allEvents]
-   user_id = session.get('user').get('userinfo')['sub']
-   currentEvents = format_revocal_events(currentEvents,user_id)
 
-   roles = session.get('role')
+   # Check if the authenticated session is initiated
+   if session.get('user'):
+      user_id = session.get('user').get('userinfo')['sub']
+      roles = session.get('role')
+   else:
+      user_id = 'demo'
+      roles = 'guest'
+
+   # Format the event json output
+   currentEvents = format_revocal_events(currentEvents,user_id)
    
    return render_template("booking.html", user_role=roles)
 
@@ -100,11 +106,19 @@ def get_bookings():
 
 @app.route("/appointments/refresh")
 def update_appointments_page():
-   allEvents = Booking.query.order_by(Booking.id).all()
+   allEvents = Booking.query.order_by(Booking.start_time).all()
    currentEvents = [event.format() for event in allEvents]
-   user_id = session.get('user').get('userinfo')['sub']
+   
+   # Check if the authenticated session is initiated
+   if session.get('user'):
+      user_id = session.get('user').get('userinfo')['sub']
+      roles = session.get('role')
+   else:
+      user_id = 'demo'
+      roles = 'guest'
+
+   # Format the event json output
    currentEvents = format_revocal_events(currentEvents, user_id)
-   roles = session.get('role')
 
    return jsonify({'booked_slots': currentEvents,
                    'roles': roles})
@@ -174,8 +188,7 @@ def update_existing_booking(jwt,b_id):
    user_id = jwt['sub']
 
    try:
-      # This only works for valid booking ids
-      # Extract the booking that matches the specified id
+      # This only works for valid booking ids. Extract the booking that matches the specified id
       current_booking = Booking.query.filter(Booking.id == b_id).all()[0]
 
       # Admin patch update
@@ -268,35 +281,8 @@ def delete_existing_booking(jwt,b_id):
    except:
         abort(422)
 
-@app.route('/appointments/verify/<b_id>')
-@requires_auth('get:bookings')
-def verify_user_event(jwt, b_id):
-   '''This function verifies that a user was the one that created an entry'''
 
-   # Check the validity of the request to confirm there are no errors
-   if b_id is None:
-      abort(400)
-   
-   # Identify the user role and id
-   user_role = jwt[f'{AUTH0_DOMAIN}/roles'][0]
-   user_id = jwt['sub']
-
-   try:
-      booking_db = Booking.query.filter(Booking.id == b_id,Booking.user_id == user_id).one_or_none()
-      booking_id = booking_db.format()['id'] # [event.format()['id'] for event in booking_db]
-      if booking_db is not None:
-         return jsonify({'success': True,
-                         "verified": True,
-                         "numbered_id": booking_id})
-      else:
-         return jsonify({'success': True,
-                         "verified": False,
-                         "numbered_ids":""})
-   except:
-      abort(422)
-
-
-
+# ------------------------------------------- APPOINTMENTS PAGE HELPER FUNCTIONS -------------------------------------------
 # GET existing booking from the DB
 @app.route('/appointments/<date>')
 def create_availability(date):
@@ -313,8 +299,6 @@ def create_availability(date):
    booked_times = get_booked_times_from_database(date)
    
    return jsonify({'all_times': all_times, 'booked_times': booked_times})
-
-
 
 
 

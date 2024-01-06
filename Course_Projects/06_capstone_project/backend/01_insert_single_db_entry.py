@@ -37,7 +37,8 @@ def single_entry_db(app):
                       phone="+2275499450",
                       email="stylist1@luxehair.com",
                       skills=["lace wigs",'hair treatment','frontal installation'],
-                      image_link='https://qcitymetro.com/wp-content/uploads/2017/07/LaMonica-Cuthbertson-1.jpg')
+                      image_link='https://qcitymetro.com/wp-content/uploads/2017/07/LaMonica-Cuthbertson-1.jpg',
+                      user_id='demo')
    service1 = Service(name="Hair Reconstruction",
                       price=50,
                       duration=1,

@@ -1,9 +1,10 @@
+// Current date to quality check calendar
 var today = new Date();
 
 // Assume the submit form is not in edit mode by default
 var editMode = false; 
 
-// Array of colors to be used
+// Array of colors to be used to style booked event icons
 var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
     '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
     '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
@@ -15,7 +16,7 @@ var colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
     '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3',
     '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
 
-
+// Random selector function to select from the array of colors above
 function getRandom(a) {
     return Math.floor(Math.random() * a);
 }
@@ -25,17 +26,6 @@ let rtg = (Math.random() + 1).toString(36).substring(7);
 
 // Obtain the user role for front-end rendering
 var userRoles = document.getElementById('user-role').textContent;
-
-// Place holder event for tests
-// var events = [{
-//     id: "imwyx6S",
-//     name: "Event #3",
-//     description: "Lorem ipsum dolor sit amet.",
-//     date: today.getMonth() + 1 + "/18/" + today.getFullYear(),
-//     type: "event"
-// }]
-
-
 
 
 // --------------------------------------------------------------------------------------------
@@ -60,8 +50,10 @@ $(document).ready(function () {
 });
 
 
-
-// Function to perform async GET request that obtains all the saved booking events from the db
+// --------------------------------------------------------------------------------------------
+// Function to perform async GET request that obtains all the saved booking events from the db.
+// This is the first section that runs and updates the user view
+// --------------------------------------------------------------------------------------------
 function updateCalendarView() {
     // Remove all the events that might exist in the calendar
     $('#calendar').evoCalendar('removeEventList')
@@ -109,7 +101,10 @@ function updateCalendarView() {
             updateDailyAppointmentsCalendarView()
             
             // Update the add event button
-            qualityCheckAddBtn();
+            if (user_roles === 'SalonAdmin' || user_roles === 'SalonStylist' || user_roles === 'SalonUser') {
+                qualityCheckAddBtn();
+            };
+            
             
             // Insert an edit and delete button
             insertEditEventButton();
@@ -121,32 +116,10 @@ function updateCalendarView() {
     
 }
 
-// --------------------------------------------------------------------------------------------
-// Verify that the event being viewed was created by the user (Async functions must be used to avoid hoisting errors)
-// --------------------------------------------------------------------------------------------
-// async function verifyUserEntry(evId) {
-//     try {
-//         const response = await fetch("/appointments/verify", {
-//             method: 'GET',
-//             headers: { 'Content-Type': 'application/json' }
-//         });
-
-//         const data = await response.json();
-//         const verifiedValue = data.verified;
-
-//         return verifiedValue;
-//     } catch (error) {
-//         console.error('Error verifying selecting user appointment:', error);
-//         throw error;
-//     }
-// }
-
-
-// console.log(userEventIdList)
 
 // --------------------------------------------------------------------------------------------
 // Function to create an `Edit button` element dynamically for each new booking appointment that 
-// is made
+// is made. Execution varies depending on the user roles
 // --------------------------------------------------------------------------------------------
 function insertEditEventButton(activeDt) {
     // Function to add an edit button to an Event element
@@ -213,7 +186,7 @@ function insertEditEventButton(activeDt) {
 
 // --------------------------------------------------------------------------------------------
 // Function to create a `Delete button` element dynamically for each new booking appointment that 
-// is made
+// is made. Execution varies depending on the user roles
 // --------------------------------------------------------------------------------------------
 function insertDeleteEventButton() {
     // Function to add a delete button to an Event element
@@ -236,7 +209,6 @@ function insertDeleteEventButton() {
         if ((user_roles === 'SalonAdmin' || user_roles === 'SalonStylist') && !deleteButtonAdded) {
             // Extract the event id from the data-event-index attribute
             var eventId = eventElement.getAttribute('data-event-index');
-            
             
             // Add a Delete button
             var deleteButton = document.createElement('button');
@@ -282,7 +254,7 @@ function insertDeleteEventButton() {
 
 
 // --------------------------------------------------------------------------------------------
-// Function to create a `Add event` button
+// Function to create a `Add event` button. Execution varies depending on the user roles
 // --------------------------------------------------------------------------------------------
 function insertAddEventButton() {
 
@@ -292,7 +264,7 @@ function insertAddEventButton() {
     // Flag for checking the button exists
     var addButtonAdded = eventHeaderContainer.data('addButtonAdded'); 
 
-    if ((user_roles === 'SalonAdmin' || user_roles === 'SalonStylist' || user_roles === 'SalonUser') && !addButtonAdded) {
+    if (!addButtonAdded) {
         // Header Element for existing event
         var eventHeaderElement = eventHeaderContainer[0];
         
@@ -327,34 +299,36 @@ function qualityCheckAddBtn() {
     today.setHours(0, 0, 0, 0);
 
     // Perform the comparison with if statement
-    if (check_date >= today) {
-        var buttonIndicator = document.getElementById('addBtn');
-        if (buttonIndicator) {
-            // Remove the data attributes from the calendar events
-            $(`.calendar-events`).removeData('addButtonAdded');
-            // Remove the pre-existing button
-            buttonIndicator.remove();
-            // Add a new button
-            insertAddEventButton();
-            $("#addBtn").prop("disabled", false);
+    if (user_roles === 'SalonAdmin' || user_roles === 'SalonStylist' || user_roles === 'SalonUser') {
+        if (check_date >= today) {
+            var buttonIndicator = document.getElementById('addBtn');
+            if (buttonIndicator) {
+                // Remove the data attributes from the calendar events
+                $(`.calendar-events`).removeData('addButtonAdded');
+                // Remove the pre-existing button
+                buttonIndicator.remove();
+                // Add a new button
+                insertAddEventButton();
+                $("#addBtn").prop("disabled", false);
+            } else {
+                insertAddEventButton();
+                $("#addBtn").prop("disabled", false);
+            };
+        
         } else {
-            insertAddEventButton();
-            $("#addBtn").prop("disabled", false);
-        };
-    
-    } else {
-        var buttonIndicator = document.getElementById('addBtn');
-        if (buttonIndicator) {
-            // Remove the data attributes from the calendar events
-            $(`.calendar-events`).removeData('addButtonAdded');
-            // Remove the pre-existing button
-            buttonIndicator.remove();
-            // Add a new button
-            insertAddEventButton();
-            $("#addBtn").prop("disabled", true);
-        } else {
-            insertAddEventButton();
-            $("#addBtn").prop("disabled", true);
+            var buttonIndicator = document.getElementById('addBtn');
+            if (buttonIndicator) {
+                // Remove the data attributes from the calendar events
+                $(`.calendar-events`).removeData('addButtonAdded');
+                // Remove the pre-existing button
+                buttonIndicator.remove();
+                // Add a new button
+                insertAddEventButton();
+                $("#addBtn").prop("disabled", true);
+            } else {
+                insertAddEventButton();
+                $("#addBtn").prop("disabled", true);
+            };
         };
     };
 
@@ -416,9 +390,70 @@ function updateFormOptions(data) {
 
 
 
-// --------------------------------------------------------------------------------------------
-// Function to update daily booking numbers for visible number of days in calendar
-// --------------------------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------------------------------------------
+// Event Listener to enable functionality that will include dynamic add, edit, and delete buttons to the Calendar
+// ---------------------------------------------------------------------------------------------------------------
+
+// ------------------------------------ Update the annual view ------------------------------------
+$("#calendar").on('click', '.calendar-year', function (e) {
+    // Select the first day of the new month & year from the day element and make it active
+    firstDayOfMonth = $(".day")["0"].getAttribute('data-date-val');
+    $('#calendar').evoCalendar('selectDate', firstDayOfMonth);
+
+    // Update the add event button
+    if (user_roles === 'SalonAdmin' || user_roles === 'SalonStylist' || user_roles === 'SalonUser') {
+        qualityCheckAddBtn();
+    };
+
+    // Update the daily event count on the visible calendar
+    updateDailyAppointmentsCalendarView();
+
+    // Insert an edit and delete button
+    insertEditEventButton();
+    insertDeleteEventButton();
+});
+
+
+// ------------------------------------ Update the monthly view ------------------------------------
+$("#calendar").on('click', '.month', function (e) {
+    // Select the first day of the new month from the day element and make it active
+    firstDayOfMonth = $(".day")["0"].getAttribute('data-date-val');
+    $('#calendar').evoCalendar('selectDate', firstDayOfMonth);
+
+    // Update the add event button
+    if (user_roles === 'SalonAdmin' || user_roles === 'SalonStylist' || user_roles === 'SalonUser') {
+        qualityCheckAddBtn();
+    };
+
+    // Update the daily event count on the visible calendar
+    updateDailyAppointmentsCalendarView();
+
+    // Insert an edit and delete button
+    insertEditEventButton();
+    insertDeleteEventButton();
+});
+
+
+// --------------------------------- Update the daily view on the sidebar ---------------------------------
+$('#calendar').on('click', '.calendar-day', function() {
+    // $(this)[0] // - Print the active div from the listener
+
+    // Update the add event button
+    if (user_roles === 'SalonAdmin' || user_roles === 'SalonStylist' || user_roles === 'SalonUser') {
+        qualityCheckAddBtn();
+    };
+
+    // Update the daily event count on the visible calendar
+    updateDailyAppointmentsCalendarView();
+
+    // Insert an edit and delete button
+    insertEditEventButton();
+    insertDeleteEventButton();
+});
+
+
+// ---- Function to update daily booking numbers for visible number of days in calendar body ----
 function updateDailyAppointmentsCalendarView() {
     // Get the list of active events for the day of interest
     var currentActiveDate = $("#calendar").evoCalendar('getActiveDate');
@@ -445,66 +480,57 @@ function updateDailyAppointmentsCalendarView() {
     // After updating the list, change the active date back to what it was 
     $('#calendar').evoCalendar('selectDate', currentActiveDate);
 };
+// --------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------
 
 
-// Update the annual view
-$("#calendar").on('click', '.calendar-year', function (e) {
-    // Select the first day of the new month & year from the day element and make it active
-    firstDayOfMonth = $(".day")["0"].getAttribute('data-date-val');
-    $('#calendar').evoCalendar('selectDate', firstDayOfMonth);
+// ----------------------------------------------------------------------------------------------
+// Event listener that DELETEs the form on click. It also dynamically updates the frontend
+// ----------------------------------------------------------------------------------------------
+$('#calendar').on('click', '.deleteEventButtons', function(e) {
+    // Get the list of active events for the day of interest
+    var allActiveEvents = $('#calendar').evoCalendar('getActiveEvents');
 
-    // Update the add event button
-    qualityCheckAddBtn();
+    // Get the event id from the parent node of the button
+    var evoId = e.target.parentNode.className.split(" ")[1];
+    var eventId = evoId.split("_")[1];
 
-    // Update the daily event count on the visible calendar
-    updateDailyAppointmentsCalendarView();
+    // Find the active event with a matching id from the list of active events
+    var activeEvent = allActiveEvents.find(function(listEvent) {
+        return listEvent.id === evoId;
+    });
 
-    // Insert an edit and delete button
-    insertEditEventButton();
-    insertDeleteEventButton();
-});
+    // Implement the asynchronous fetch
+    fetch("/appointments/book/" + eventId, {
+        // method type. Delete request has no body
+        method: 'DELETE',
+        // specify the data type as json so the server understands how to read it
+        headers: { 'Content-Type': 'application/json' }
+    }).then(response => response.json())
+    .then(data => {
+        // Remove the old event from the calendar
+        $("#calendar").evoCalendar("removeCalendarEvent", evoId);
 
-// Update the monthly view
-$("#calendar").on('click', '.month', function (e) {
-    // Select the first day of the new month from the day element and make it active
-    firstDayOfMonth = $(".day")["0"].getAttribute('data-date-val');
-    $('#calendar').evoCalendar('selectDate', firstDayOfMonth);
+        // Update the add event button
+        qualityCheckAddBtn();
 
-    // Update the add event button
-    qualityCheckAddBtn();
+        // Update the daily event count on the visible calendar
+        updateDailyAppointmentsCalendarView();
 
-    // Update the daily event count on the visible calendar
-    updateDailyAppointmentsCalendarView();
-
-    // Insert an edit and delete button
-    insertEditEventButton();
-    insertDeleteEventButton();
-});
-
-
-// --------------------------------------------------------------------------------------------
-// Event Listener to enable functionality that will include dynamic add, edit, and delete buttons to the Calendar
-// --------------------------------------------------------------------------------------------
-$('#calendar').on('click', '.calendar-day', function() {
-    // $(this)[0] // - Print the active div from the listener
-
-    // Update the add event button
-    qualityCheckAddBtn();
-
-    // Update the daily event count on the visible calendar
-    updateDailyAppointmentsCalendarView();
-
-    // Insert an edit and delete button
-    insertEditEventButton();
-    insertDeleteEventButton();
- 
+        // Update the calendars view
+        insertEditEventButton();
+        insertDeleteEventButton();
+    
+    }).catch(error => {
+        console.error('Error during delete request:', error);
+    });
 });
 
 
-
-// --------------------------------------------------------------------------------------------
+// -------------------------------------- PATCH AND POST ---------------------------------------
+// ----------------------------------------------------------------------------------------------
 // Event listener that updates the form prior to performing a PATCH update to an existing booking
-// --------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
 $('#calendar').on('click', '.editEventButtons', function(e) {
     editMode = true;
 
@@ -567,52 +593,6 @@ $('#calendar').on('click', '.editEventButtons', function(e) {
     // Update the booking submit button text
     $('.submitBooking')[0].textContent = 'Modify Booking';
 });
-
-
-
-// --------------------------------------------------------------------------------------------
-// Event listener that updates the form prior to performing a PATCH update to an existing booking
-// --------------------------------------------------------------------------------------------
-$('#calendar').on('click', '.deleteEventButtons', function(e) {
-    // Get the list of active events for the day of interest
-    var allActiveEvents = $('#calendar').evoCalendar('getActiveEvents');
-
-    // Get the event id from the parent node of the button
-    var evoId = e.target.parentNode.className.split(" ")[1];
-    var eventId = evoId.split("_")[1];
-
-    // Find the active event with a matching id from the list of active events
-    var activeEvent = allActiveEvents.find(function(listEvent) {
-        return listEvent.id === evoId;
-    });
-
-    // Implement the asynchronous fetch
-    fetch("/appointments/book/" + eventId, {
-        // method type. Delete request has no body
-        method: 'DELETE',
-        // specify the data type as json so the server understands how to read it
-        headers: { 'Content-Type': 'application/json' }
-    }).then(response => response.json())
-    .then(data => {
-        // Remove the old event from the calendar
-        $("#calendar").evoCalendar("removeCalendarEvent", evoId);
-
-        // Update the add event button
-        qualityCheckAddBtn();
-
-        // Update the daily event count on the visible calendar
-        updateDailyAppointmentsCalendarView();
-
-        // Update the calendars view
-        insertEditEventButton();
-        insertDeleteEventButton();
-    
-    }).catch(error => {
-        console.error('Error during delete request:', error);
-    });
-});
-
-
 
 // --------------------------------------------------------------------------------------------
 // Event Listener to allow PATCH and POST functionality for an existing/new event in the Calendar
@@ -740,37 +720,5 @@ document.getElementsByClassName('bookingForm')[0].onsubmit = function (e) {
     }
 
     // Hide the form after booking the appointment
-    $('.bookingForm').toggleClass('open');
-    
+    $('.bookingForm').toggleClass('open');  
 };
-
-
-// Assuming you have a common ancestor element that contains all the delete buttons
-// Replace "commonAncestor" with the actual parent element that holds the delete buttons
-// var commonAncestor = document;
-// commonAncestor.addEventListener('click', function(event) {
-//     // Check if the clicked element has the class "deleteEventButtons"
-//     if (event.target.classList.contains('deleteEventButtons')) {
-//         // Retrieve the event index from the data attribute
-//         var eventId = event.target.dataset.eventIndex;
-
-//         // Perform your delete request using the eventId
-//         // Example: You can use fetch to send a DELETE request to your server
-//         fetch(`/delete-event/${eventId}`, {
-//             method: 'DELETE',
-//             // Additional options if needed (headers, body, etc.)
-//         })
-//         .then(response => {
-//             if (response.ok) {
-//                 // Successful delete, you may want to update the UI accordingly
-//                 console.log(`Event ${eventId} deleted successfully.`);
-//             } else {
-//                 // Handle errors if needed
-//                 console.error(`Failed to delete event ${eventId}.`);
-//             }
-//         })
-//         .catch(error => {
-//             console.error('Error during delete request:', error);
-//         });
-//     }
-// });

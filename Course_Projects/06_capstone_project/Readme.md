@@ -10,6 +10,12 @@ http-server src -p 3500
 
 ### Endpoints
 
+Update empty columns before migrating db
+```psql
+# Update the db 
+UPDATE "Bookings" SET user_id='demo' WHERE user_id IS NULL;
+UPDATE "Stylists" SET user_id='demo' WHERE user_id IS NULL;
+```
 
 
 ### Auth0
@@ -58,3 +64,46 @@ npm show revo-calendar version
 ├── evo-calendar@1.1.2
 ├── express@4.18.2
 └── revo-calendar@3.2.3
+
+
+
+// Assuming you have a common ancestor element that contains all the delete buttons
+// Replace "commonAncestor" with the actual parent element that holds the delete buttons
+// var commonAncestor = document;
+// commonAncestor.addEventListener('click', function(event) {
+//     // Check if the clicked element has the class "deleteEventButtons"
+//     if (event.target.classList.contains('deleteEventButtons')) {
+//         // Retrieve the event index from the data attribute
+//         var eventId = event.target.dataset.eventIndex;
+
+//         // Perform your delete request using the eventId
+//         // Example: You can use fetch to send a DELETE request to your server
+//         fetch(`/delete-event/${eventId}`, {
+//             method: 'DELETE',
+//             // Additional options if needed (headers, body, etc.)
+//         })
+//         .then(response => {
+//             if (response.ok) {
+//                 // Successful delete, you may want to update the UI accordingly
+//                 console.log(`Event ${eventId} deleted successfully.`);
+//             } else {
+//                 // Handle errors if needed
+//                 console.error(`Failed to delete event ${eventId}.`);
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error during delete request:', error);
+//         });
+//     }
+// });
+
+// Place holder event for tests
+var today = new Date();
+
+var events = [{
+    id: "imwyx6S",
+    name: "Event #3",
+    description: "Lorem ipsum dolor sit amet.",
+    date: today.getMonth() + 1 + "/18/" + today.getFullYear(),
+    type: "event"
+}]

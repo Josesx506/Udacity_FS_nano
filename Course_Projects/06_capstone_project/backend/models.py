@@ -42,7 +42,7 @@ class Booking(db.Model):
     # stylists = db.relationship('Stylist', backref='bookings', lazy=True)
     # stylist_id = db.Column(db.Integer, nullable=False)
     stylist_id = db.Column(db.Integer, db.ForeignKey('Stylists.id'), nullable=True)
-    user_id = db.Column(db.String, nullable=True)
+    user_id = db.Column(db.String, nullable=False)
 
     def __init__(self, first_name, last_name, phone, email, start_time, completed, user_id, stylist_id):
         self.first_name = first_name
@@ -136,16 +136,17 @@ class Stylist(db.Model):
     email = db.Column(db.String(500))
     skills = db.Column(db.ARRAY(db.String(120)))
     image_link = db.Column(db.String(500))
+    user_id = db.Column(db.String, nullable=False)
     # booking_id = db.Column(db.Integer, db.ForeignKey('Bookings.id'), nullable=False)
     # bookings = db.relationship('Booking', backref='stylist', lazy=True) 
 
-    def __init__(self, name, phone, email, skills, image_link):
+    def __init__(self, name, phone, email, skills, image_link,user_id):
         self.name = name
         self.phone = phone
         self.email = email
         self.skills = skills
         self.image_link = image_link
-        # self.bookings = bookings
+        self.user_id = user_id
     
     def insert(self):
         db.session.add(self)
@@ -165,5 +166,6 @@ class Stylist(db.Model):
             'phone': self.phone,
             'email': self.email,
             'skills': self.skills,
-            'image_link': self.image_link
+            'image_link': self.image_link,
+            'user_id': self.user_id
             }
