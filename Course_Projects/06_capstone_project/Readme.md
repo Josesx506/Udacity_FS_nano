@@ -38,10 +38,6 @@ npm install -g live-server Install the server
 live-server # Launch the server from terminal
 
 
-1. Add userId to the Bookings db column
-2. Add user roles to event-container data.
-3. Users will only be able to view events that were created by that user
-
 
 ### Create a React app
 1. The name of the app is frontend - `npx create-react-app booking_app`
