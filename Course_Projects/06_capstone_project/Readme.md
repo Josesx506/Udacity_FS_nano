@@ -8,13 +8,86 @@ node server.js # Start node server
 
 http-server src -p 3500
 
+display: flex;
+justify-content: center;
+align-items: flex-start; /* Align items at the top of the page */
+min-height: 90vh;
+min-width: 90%;
+background-color: #f0f0f0; /* Optional: Set a background color */
+
+<div class="box-card">
+                <div class="top" style="background-image: url('{{ employee.image_link }}')">
+                    <h3 class="name">{{ employee.name }}<span class="status"></span></h3>
+                    <p class="title">Learner Extraordinaire</p>
+                </div>
+                <div class="middle">
+                    <div class="time">12:34 PM local time</div>
+                </div>
+                <div class="bottom">
+                    <!-- See how the buttons all have the same CSS class?-->
+                    <button class="profile-action">View Services</button>
+                    <button class="profile-action">Open account settings</button>
+                    <button class="profile-action">Edit your profile</button>
+                </div>
+            </div>
+
+### Models
+1. `Bookings` - Main model to manage appointments. Contains the columns below
+    - [x] id - for primary key
+    - [x] name, phone, email
+    - [x] time - for when the appointment will be completed
+    - [x] completed - checkbox for stylist who attended to customer
+    - [x] stylist_id - stylist who completed service. One-to-many relationship with `Stylists` model.
+    - [x] user_id - unique user id for managing access and Auth0 verification
+2. `Stylists` - Main model to describe employee details and services offered. Contains the columns below
+    - [x] id - for primary key
+    - [x] name, phone, email
+    - [x] skills - an array of services offered
+    - [x] image_link - url where profile picture is present
+    - [x] user_id - unique user id for managing access and Auth0 verification
+3. `Services` - Main model for services offered. Contains the columns below
+    - [x] id - for primary key
+    - [x] name, price, duration and image_link
+    - [x] It should contain a many-to-many relationship with `Stylists` but I didn't spend much time on it.
+
+
 ### Endpoints
+1. `/appointments` - Main endpoint for booking appointments however, it only renders the template. I minimized Jinja usage for this because the `evo-Calendar` api came with its methods that restricted Jinja maipulation.
+    | Request Type | Endpoint | Description | Secured Endpoint |
+    | :----------- | :------- | :---------- | :--------------: |
+    | GET | `/appointments/refresh` | View all booked appointments | [ ] |
+    | GET | `/appointments/<date>` | Check available timeslots before redering future booking times | [ ] |
+    | POST | `/appointments/book` | Book an appointment | [x] |
+    | PATCH | `/appointments/book/<int:b_id>` | Update an existing appointment | [x] |
+    | DELETE | `/appointments/book/<int:b_id>` | Delete an existing appointment | [x] |
+2. `/stylists` - Main endpoint for salon employees. Typically renders information in a grid with pagination, however, Admins can perform additional actions on secured endpoints.
+
+<br>
+
+### Roles and Permissions
+- Create three major **ROLES** and one guest role
+    1. `SalonAdmin` - Capable of managing all stylists, services, and appointments. Can create, edit, and delete stylists, services, and appointment bookings.
+    2. `SalonStylist` - Capable of managing all appointments. Can create, edit, and delete appointment bookings.
+    3. `SalonUser` - Capable of managing **only** appointments that are created by them. Can view other appointment timeslots but cannot modify them.
+    4. `Guest` - Can access unsecured endpoints to view bookings, services, and stylists.
+- Here's a table of all **PERMISSIONS** used. 
+    Two types of delete permissions were created. Admin delete is used for stylists and services while regular delete is used by all roles. I could have created additional patch roles but I focused on mainly the appointments page for this project.
+    | GET | PATCH | POST | DELETE |
+    | :-: | :---: | :--: | :----: |
+    | `get:bookings` | `patch:bookings` | `post:bookings` | `delete:bookings` |
+    | `get:stylists` |  | `post:stylists` | `delete:stylists` |
+    | `get:services` |  | `post:services` | `delete:services` |
+    |  |  |  | `delete:adminbookings` |
+
+
 
 Update empty columns before migrating db
 ```psql
 # Update the db 
 UPDATE "Bookings" SET user_id='demo' WHERE user_id IS NULL;
 UPDATE "Stylists" SET user_id='demo' WHERE user_id IS NULL;
+UPDATE "Stylists" SET salon_role='Stylist' WHERE salon_role IS NULL;
+UPDATE "Stylists" SET bio='Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi nostrum voluptas repudiandae consequatur animi eos natus laudantium deserunt enim. Accusantium perferendis eaque neque reprehenderit magni dolore molestiae. Officiis, impedit. Labore.' WHERE id=1;
 ```
 
 
@@ -44,6 +117,12 @@ auth.auth is used to verify permissions in a user session. This wrapper is used 
     - Another technique to obtain user permissions with Auth0 can be found [here](https://auth0.com/docs/quickstart/backend/python/interactive).
 - [x] Because **`user roles`** are also specified, they can be used to verify actions like deleting booking actions for individuals vs. admins.
 - [x] All user sessions are closed upon logout.
+
+
+<!-- {% if event.user_id == user_id %}
+    <button onclick="deleteEvent({{ event.id }})">Delete</button>
+{% endif %} -->
+
 
 # --------------
 npm install -g live-server Install the server

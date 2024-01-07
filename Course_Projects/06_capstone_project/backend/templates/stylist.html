@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/header.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/stylist.css')}}">
+    <link type="text/css" href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+    <!-- Font awesome icos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <title>{% block title %}HofEl Stylists Page{% endblock %}</title>
+</head>
+<body>
+  <header>
+    <nav class="vertical-centerer flex-container">
+        <div class="flex-container space-between header-content">
+            <div>
+                <span>
+                    <img class="logo" src="{{ url_for('static', filename='images/logo.png')}}" alt="HofE Logo">
+                </span>
+            </div>
+            <div>
+                <ul class="menu">
+                    <li><a href="{{ url_for('index')}}">Home</a></li>
+                    <!-- <li><a href="{{ url_for('static', filename='services.html')}}">Services</a></li> -->
+                    <li><a href="{{ url_for('get_bookings')}}">Book Appointment</a></li>
+                    <li><a href="{{ url_for('get_stylists')}}">Stylists</a></li>
+                    <li id="login-button"><a href="{{ url_for('auth.login')}}">Login</a></li>
+                    {% if session.user %}
+                    <li id="logout-button"><a href="{{ url_for('auth.logout')}}">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+  </header>
+  <main>
+    {% block content %}
+    <div class="grid-container">
+        <!-- |batch(3) ensures that there are only 3 columns and infinite rows -->
+        {% for employee in employees %}
+        <div class="img-col">
+            <div class="row-img">
+                <!-- <img src="//placehold.it/300x300" alt=""/> -->
+                <img src="{{ employee.image_link }}" alt="">
+            </div>
+            <div class="row-name">{{ employee.name }}</div>
+            <div class="row-stylist-role">{{ employee.salon_role }}</div>
+            <div class="row-contact">
+                <div class="row-phone">
+                    <i style="font-size:24px" class="fa-solid fa-phone"></i>
+                    <p>: {{ employee.phone }}</p>
+                </div>
+                <div class="row-email">
+                    <i style="font-size:24px" class="fa-regular fa-envelope"></i>
+                    <p>: {{ employee.email }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="desc-col">
+            <p>{{ employee.bio }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    <div class="page-nav">
+        {% if page > 1 %}
+        <a href="{{ url_for('get_stylists', page=page-1)}}">{{ page-1 }}</a>
+        {% endif %}
+            <span>Page:{{ page }}</span>
+        {% if page < total_pages %}
+        <a href="{{ url_for('get_stylists', page=page+1)}}">{{ page+1 }}</a>
+        {% endif %}
+    </div>
+
+    {% if admin_access %}
+    <div class="modify-btns">
+        <select id="employedStylists" class="stylist-options">
+            {% for employee in employees %}
+            <option value="{{ employee.name }}">{{ employee.id }}_{{ employee.name }}</option>
+            {% endfor %}
+        </select>
+        <button class="profile-action create-stylist" id="createStylist">
+            <span>Create Stylist Profile</span>
+            <i style="font-size:22px" class="fa-solid fa-plus"></i>
+        </button>
+        <button class="profile-action edit-stylist">
+            <span>Edit Selected Stylist</span>
+            <i style="font-size:22px" class="far fa-edit"></i>
+        </button>
+        <button class="profile-action delete-stylist">
+            <span>Delete Selected Stylist</span>
+            <i style="font-size:22px" class="fa">&#xf014;</i>
+        </button>
+    </div>
+
+    <div class="stylist-form-container">
+        <form class="stylistForm" action="/stylists/create" method="post">
+            <div class="form-row-1">
+                <label for="form-name">Name :</label>
+                <input type="text" id="formName" name="form-name" required autocomplete="off">
+                <br>
+                <label for="form-role">Salon Role :</label>
+                <input type="text" id="formRole" name="form-role" required autocomplete="off">
+                <br>
+                <label for="form-phone">Phone :</label>
+                <input type="tel" class="formPhoneNum" name="phone" required autocomplete="on" />
+                <br>
+                <label for="form-email">Email Address :</label>
+                <input type="email" class="formEmail" name="email" required autocomplete="on" />
+                <br>
+            </div>
+            <div class="form-row-2">
+                <label for="form-image-link">Image Link :</label>
+                <input type="text" id="formImage" name="form-image-link" required autocomplete="off">
+                <br>
+            </div>
+            <div class="form-row-3">
+                <label for="form-bio">Bio :</label>
+                <textarea rows="5" type="text" id="formBio" name="form-bio" required autocomplete="off">Enter Stylist Bio here .....</textarea>
+            </div>
+            <div class="form-submit">
+                <button type="submit" class="submitStylist">Create Stylist</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+    {% endblock %}
+  </main>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="{{ url_for('static', filename='scripts/stylist.js') }}" defer></script>
+</body>
+</html>

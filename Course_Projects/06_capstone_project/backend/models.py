@@ -134,17 +134,19 @@ class Stylist(db.Model):
     name = db.Column(db.String)
     phone = db.Column(db.String(120))
     email = db.Column(db.String(500))
-    skills = db.Column(db.ARRAY(db.String(120)))
+    salon_role = db.Column(db.String)
+    bio = db.Column(db.String)
     image_link = db.Column(db.String(500))
     user_id = db.Column(db.String, nullable=False)
     # booking_id = db.Column(db.Integer, db.ForeignKey('Bookings.id'), nullable=False)
     # bookings = db.relationship('Booking', backref='stylist', lazy=True) 
 
-    def __init__(self, name, phone, email, skills, image_link,user_id):
+    def __init__(self, name, phone, email, salon_role, bio, image_link,user_id):
         self.name = name
         self.phone = phone
         self.email = email
-        self.skills = skills
+        self.salon_role = salon_role
+        self.bio = bio
         self.image_link = image_link
         self.user_id = user_id
     
@@ -165,7 +167,8 @@ class Stylist(db.Model):
             'name': self.name,
             'phone': self.phone,
             'email': self.email,
-            'skills': self.skills,
+            'salon_role': self.salon_role,
+            'bio': self.bio,
             'image_link': self.image_link,
             'user_id': self.user_id
             }

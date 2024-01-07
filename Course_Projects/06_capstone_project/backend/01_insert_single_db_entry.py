@@ -36,8 +36,9 @@ def single_entry_db(app):
    stylist1 = Stylist(name="King Ella",
                       phone="+2275499450",
                       email="stylist1@luxehair.com",
-                      skills=["lace wigs",'hair treatment','frontal installation'],
-                      image_link='https://qcitymetro.com/wp-content/uploads/2017/07/LaMonica-Cuthbertson-1.jpg',
+                      salon_role='Stylist',
+                      bio="Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi nostrum voluptas repudiandae consequatur animi eos natus laudantium deserunt enim. Accusantium perferendis eaque neque reprehenderit magni dolore molestiae. Officiis, impedit. Labore.",
+                      image_link='https://pbs.twimg.com/media/DnZXDYyXcAYsPyj.jpg',
                       user_id='demo')
    service1 = Service(name="Hair Reconstruction",
                       price=50,

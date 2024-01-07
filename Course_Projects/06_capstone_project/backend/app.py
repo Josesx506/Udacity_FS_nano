@@ -1,11 +1,12 @@
 import os
 import json
-from flask import Flask, request, abort, jsonify, render_template, session
+from flask import Flask, request, abort, jsonify, render_template, session,  redirect, url_for
 from datetime import datetime,timedelta
-# from flask_moment import Moment
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+import random
+import string
 from werkzeug.middleware.proxy_fix import ProxyFix
 import sys
 
@@ -20,6 +21,8 @@ db_name = database_path
 # Rendering format for Jinja
 def to_pretty_json(obj: dict) -> str:
     return json.dumps(obj, default=lambda o: o.__dict__, indent=4)
+
+STYLISTS_PER_PAGE = 4
 
 
 # ---------------------------------------- Create the Flask app ----------------------------------------
@@ -53,6 +56,103 @@ def after_request(response):
 def index():
    # return jsonify("This is the index")
    return render_template("index.html")
+
+
+# ----------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------- STYLISTS PAGE ------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------------
+@app.route("/stylists")
+def get_stylists():
+   query_stylists = Stylist.query.order_by(Stylist.id).all()
+   page_stylists, page_num = paginate_stylists(request, query_stylists)
+
+   # Check if the authenticated session is initiated
+   if session.get('user'):
+      user_id = session.get('user').get('userinfo')['sub']
+      roles = session.get('role')
+   else:
+      user_id = f'guest_{random_text_generator()}'
+      roles = f'guest{random_text_generator()}'
+   
+   # Check the list of validated ids and remove demo
+   validated_ids = list(set([person['user_id'] for person in page_stylists if person['user_id']!='demo']))
+
+   validated_user = False
+   if user_id in validated_ids or roles=='SalonAdmin':
+      validated_user =  True
+   
+   # Calculate the total number of pages that should be rendered
+   total_pages= (len(query_stylists) + STYLISTS_PER_PAGE -1) // STYLISTS_PER_PAGE
+
+   return render_template("stylist.html", employees=page_stylists, page=page_num, total_pages=total_pages, admin_access=validated_user)
+
+
+
+# POST new stylist to the db
+@app.route("/stylists/create", methods=['POST'])
+@requires_auth('post:stylists')
+def create_new_stylist(jwt):
+   '''Get the responses'''
+   body = request.get_json()
+ 
+   # Check the validity of the request to confirm there are no errors
+   if body['img_link'] is None:
+      abort(400)
+
+   # Identify the user id
+   user_id = jwt['sub']
+
+   try:
+      if body['bio'] is not None:
+            new_stylist = Stylist(name=body['stylist_name'],
+                                  phone=body['phone'],
+                                  email=body['email'],
+                                  salon_role=body['stylist_salon_role'],
+                                  bio=body['bio'],
+                                  image_link=body['img_link'],
+                                  user_id=user_id)
+            new_stylist.insert()
+
+            # Extract the last drink from the db
+            recent_stylist = Stylist.query.order_by(Stylist.id.desc()).first()
+            latest_stylist = [recent_stylist.format()]
+
+            return jsonify({'success': True,
+                            'stylist': latest_stylist})
+      else:
+         abort(422)
+   except:
+      abort(422)
+
+
+# ------------------------------------------- STYLISTS PAGE HELPER FUNCTIONS -------------------------------------------
+def paginate_stylists(request, selection):
+    '''
+    Paginate the stylists shown on the page
+    '''
+    page = request.args.get("page", 1, type=int)
+    start = (page - 1) * STYLISTS_PER_PAGE
+    end = start + STYLISTS_PER_PAGE
+
+    all_stylists = [person.format() for person in selection]
+    current_stylists = all_stylists[start:end]
+
+    return current_stylists, page
+
+def random_text_generator(num=5):
+   lowera = string.ascii_lowercase
+   uppera = string.ascii_uppercase
+   numbers = string.digits
+   punctuations = string.punctuation
+   la = ''.join(random.choice(lowera) for i in range(num))
+   ua = ''.join(random.choice(uppera) for i in range(num))
+   na = ''.join(random.choice(numbers) for i in range(num))
+   pa = ''.join(random.choice(punctuations) for i in range(num))
+   jumbled = ''.join(random.choices(str(la + ua + na + pa), k=num*3))
+
+   return jumbled
+
+
 
 
 # ----------------------------------------------------------------------------------------------------------------------------
@@ -105,8 +205,6 @@ def update_appointments_page():
 
    return jsonify({'booked_slots': currentEvents,
                    'roles': roles})
-
-
 
 
 
