@@ -8,10 +8,8 @@ sys.path.append(os.getcwd())
 from settings import DB_NAME,DB_USER,DB_PASSWORD
 
 
-# SQLite creates a local db within this folder so only the name has to be specified
+# PostgreSQL was used to create the app locally but sqlite was used to run unittests
 database_filename = DB_NAME
-project_dir = os.path.dirname(os.path.abspath(__file__))
-# database_path = "sqlite:///{}".format(os.path.join(project_dir, database_filename))
 database_path = f'postgresql://{DB_USER}:{DB_PASSWORD}@localhost:5432/{database_filename}'
 
 

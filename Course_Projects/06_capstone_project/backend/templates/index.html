@@ -32,7 +32,23 @@
     </nav>
   </header>
   <main>
-    {% block content %}{% endblock %}
+    {% block content %}
+    <div style="margin-top: 12%;">
+        <h1 style="font-size: 48px; text-align: center; color: #333; font-family: sans-serif; ">
+            HOMEPAGE UNDER CONSTRUCTION &#128679;
+        </h1>
+        <p style="font-size: 32px; text-align: center;">
+            Only the <em style="color: mediumpurple;"><b>BOOK APPOINTMENT</b></em> and 
+            <em style="color: mediumpurple;"><b>STYLIST</b></em> tabs were developed for the Nanodegree capstone project
+        </p>
+        <p style="font-size: 28px; text-align: center;">
+            Access is limited for guest users, check the git repo for login credentials. <br>
+            Signing up will generate access errors because I didn't automatically assign default roles in Auth0 login flow. <br>
+            Please use only git credentials.
+        </p>
+    </div>
+    
+    {% endblock %}
   </main>
 </body>
 </html>

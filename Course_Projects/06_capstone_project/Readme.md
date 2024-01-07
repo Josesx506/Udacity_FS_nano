@@ -8,28 +8,7 @@ node server.js # Start node server
 
 http-server src -p 3500
 
-display: flex;
-justify-content: center;
-align-items: flex-start; /* Align items at the top of the page */
-min-height: 90vh;
-min-width: 90%;
-background-color: #f0f0f0; /* Optional: Set a background color */
-
-<div class="box-card">
-                <div class="top" style="background-image: url('{{ employee.image_link }}')">
-                    <h3 class="name">{{ employee.name }}<span class="status"></span></h3>
-                    <p class="title">Learner Extraordinaire</p>
-                </div>
-                <div class="middle">
-                    <div class="time">12:34 PM local time</div>
-                </div>
-                <div class="bottom">
-                    <!-- See how the buttons all have the same CSS class?-->
-                    <button class="profile-action">View Services</button>
-                    <button class="profile-action">Open account settings</button>
-                    <button class="profile-action">Edit your profile</button>
-                </div>
-            </div>
+PostgreSQL was used to create the app locally but sqlite was used to run unittests
 
 ### Models
 1. `Bookings` - Main model to manage appointments. Contains the columns below
