@@ -56,7 +56,6 @@ def create_app(test_config=None, db_name=db_name):
    # Setup the home route endpoint
    @app.route("/home")
    def index():
-      # return jsonify("This is the index")
       return render_template("index.html")
 
 
@@ -79,7 +78,7 @@ def create_app(test_config=None, db_name=db_name):
       # Check the list of validated ids and remove demo
       validated_ids = list(set([person['user_id'] for person in page_stylists if person['user_id']!='demo']))
 
-      # print(session.get('user')['access_token'])
+      print(session.get('user')['access_token'])
 
       validated_user = False
       if user_id in validated_ids or roles=='SalonAdmin':

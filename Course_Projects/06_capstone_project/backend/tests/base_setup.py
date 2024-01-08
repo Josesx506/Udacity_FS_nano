@@ -30,7 +30,7 @@ class TestSetup(unittest.TestCase):
         self.client = self.app.test_client
         # Test to confirm that the route names for each endpoint is within the app
         # for rule in self.app.url_map.iter_rules():
-        #     print(f"Route names: {rule.rule} | Function name: {rule.endpoint}()")
+        #     print(f"Route names: {rule.rule} | Function name: {rule.endpoint}()\n\n\n\n\n")
 
         # self.app.app_context().push()
         # Perform the db migration programmatically instead of using `db.create_all()`
@@ -67,6 +67,7 @@ class TestSetup(unittest.TestCase):
             'date_time': datetime.now()
         }
 
+
     def randomJWToken(self):
         # Secret key to sign the token
         secret_key = secrets.token_hex(32)
@@ -97,6 +98,7 @@ class TestSetup(unittest.TestCase):
         if os.path.exists('__pycache__'):
             shutil.rmtree('__pycache__')
         # os.system('clear')
+        self.app.session_interface.make_null_session(self.app)
 
 
 # Make the tests conveniently executable

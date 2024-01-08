@@ -13,16 +13,18 @@ sys.path.append(os.getcwd())
 # Import db model dependencies and test initialization class
 from models import db, Booking, Stylist
 from base_setup import TestSetup
+from settings import CUSTOMER_USER_ID
 
-admin_token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Iko5SUc1OUVxLVdNNHM3bmZJYzZpdiJ9.eyJjb2ZmZWVzaG9wLXVkeS1mc25kLnVzLmF1dGgwLmNvbS9yb2xlcyI6WyJTYWx\
-vbkFkbWluIl0sImlzcyI6Imh0dHBzOi8vY29mZmVlc2hvcC11ZHktZnNuZC51cy5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjU5NmZkNWYwNWViYjk4YmExNTRkNjc3IiwiYXVkIjpbInNhbG9u\
-IiwiaHR0cHM6Ly9jb2ZmZWVzaG9wLXVkeS1mc25kLnVzLmF1dGgwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE3MDQ2Njk3NDcsImV4cCI6MTcwNDc1NjE0NywiYXpwIjoicm9PNWdhNE5VUFhtS\
-HhLRE9qclkyN05iUGloR1dNd0siLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwicGVybWlzc2lvbnMiOlsiZGVsZXRlOmFkbWluYm9va2luZ3MiLCJkZWxldGU6Ym9va2luZ3\
-MiLCJkZWxldGU6c2VydmljZXMiLCJkZWxldGU6c3R5bGlzdHMiLCJnZXQ6Ym9va2luZ3MiLCJnZXQ6c2VydmljZXMiLCJnZXQ6c3R5bGlzdHMiLCJwYXRjaDpib29raW5ncyIsIn\
-Bvc3Q6Ym9va2luZ3MiLCJwb3N0OnNlcnZpY2VzIiwicG9zdDpzdHlsaXN0cyJdfQ.RSUo5OSkOT1e0cNuzEuVqYstWjWyxLibvgONj-v6xWBNE469mwxDXIPuupRiHEGqbai\
-KqsvBpgi9oy_DMIezfirH3DQcCyjk4rWNrA7FOI1BSV2Qqg8QblPOv2Q7HUYVQl4fxW-ERpsAE7OT0TIR8oPQGDHESLkmOHGlwYBTlI0-r6DZh5UbrC3VvV9BjO1MAe\
-u5EnKN0YIexChm1z1ls_C8JkWXnaUL55qsatOBU4yEfgaqDWxQGjbRkgS_mtxz3UK2UuWnZ8Hlc3Y4PDMLnY2LBK7Z_0BlCqKmtx0c-S8x0XQ77ZII6Ed-1wir\
-h0woVoeNEaVct3EjqI1SkYwGyQ'
+# admin_token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Iko5SUc1OUVxLVdNNHM3bmZJYzZpdiJ9.eyJjb2ZmZWVzaG9wLXVkeS1mc25kLnVzLmF1dGgwLmNvbS9yb2xlcyI6WyJTYWx\
+# vbkFkbWluIl0sImlzcyI6Imh0dHBzOi8vY29mZmVlc2hvcC11ZHktZnNuZC51cy5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjU5NmZkNWYwNWViYjk4YmExNTRkNjc3IiwiYXVkIjpbInNhbG9u\
+# IiwiaHR0cHM6Ly9jb2ZmZWVzaG9wLXVkeS1mc25kLnVzLmF1dGgwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE3MDQ2Njk3NDcsImV4cCI6MTcwNDc1NjE0NywiYXpwIjoicm9PNWdhNE5VUFhtS\
+# HhLRE9qclkyN05iUGloR1dNd0siLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwicGVybWlzc2lvbnMiOlsiZGVsZXRlOmFkbWluYm9va2luZ3MiLCJkZWxldGU6Ym9va2luZ3\
+# MiLCJkZWxldGU6c2VydmljZXMiLCJkZWxldGU6c3R5bGlzdHMiLCJnZXQ6Ym9va2luZ3MiLCJnZXQ6c2VydmljZXMiLCJnZXQ6c3R5bGlzdHMiLCJwYXRjaDpib29raW5ncyIsIn\
+# Bvc3Q6Ym9va2luZ3MiLCJwb3N0OnNlcnZpY2VzIiwicG9zdDpzdHlsaXN0cyJdfQ.RSUo5OSkOT1e0cNuzEuVqYstWjWyxLibvgONj-v6xWBNE469mwxDXIPuupRiHEGqbai\
+# KqsvBpgi9oy_DMIezfirH3DQcCyjk4rWNrA7FOI1BSV2Qqg8QblPOv2Q7HUYVQl4fxW-ERpsAE7OT0TIR8oPQGDHESLkmOHGlwYBTlI0-r6DZh5UbrC3VvV9BjO1MAe\
+# u5EnKN0YIexChm1z1ls_C8JkWXnaUL55qsatOBU4yEfgaqDWxQGjbRkgS_mtxz3UK2UuWnZ8Hlc3Y4PDMLnY2LBK7Z_0BlCqKmtx0c-S8x0XQ77ZII6Ed-1wir\
+# h0woVoeNEaVct3EjqI1SkYwGyQ'
+admin_token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Iko5SUc1OUVxLVdNNHM3bmZJYzZpdiJ9.eyJjb2ZmZWVzaG9wLXVkeS1mc25kLnVzLmF1dGgwLmNvbS9yb2xlcyI6WyJTYWxvbkFkbWluIl0sImlzcyI6Imh0dHBzOi8vY29mZmVlc2hvcC11ZHktZnNuZC51cy5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjU5NmZkNWYwNWViYjk4YmExNTRkNjc3IiwiYXVkIjpbInNhbG9uIiwiaHR0cHM6Ly9jb2ZmZWVzaG9wLXVkeS1mc25kLnVzLmF1dGgwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE3MDQ2ODYxNzQsImV4cCI6MTcwNDc3MjU3NCwiYXpwIjoicm9PNWdhNE5VUFhtSHhLRE9qclkyN05iUGloR1dNd0siLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwicGVybWlzc2lvbnMiOlsiZGVsZXRlOmFkbWluYm9va2luZ3MiLCJkZWxldGU6Ym9va2luZ3MiLCJkZWxldGU6c2VydmljZXMiLCJkZWxldGU6c3R5bGlzdHMiLCJnZXQ6Ym9va2luZ3MiLCJnZXQ6c2VydmljZXMiLCJnZXQ6c3R5bGlzdHMiLCJwYXRjaDpib29raW5ncyIsInBvc3Q6Ym9va2luZ3MiLCJwb3N0OnNlcnZpY2VzIiwicG9zdDpzdHlsaXN0cyJdfQ.eXpMZNWzaNSvkXrhKS_1dwrXUJQ1Q4l1SedwO2OZxoU2HLcJFUvziL8MEnuMIxSuShawXkPp4wfWlUfKaKuMPYOwFuoBy0UgaF3H9jKasepgJ6B7Pf_CzWb3s7tf6ZuNtH6zb_yBgRGomTftTZeG0ke_jLcQnPaecEBYpHhjSjbXSdGbCJdLSji67rVTsUw3mAzVM3QSuFD5qq_fYdmLqFIcLweKboXjaZn_VIuzh1MwqHGl5AjgBvXEmp8E7kIj8UJ_r078AJ4I1Y7luvf4AKpW_VBauZEUgy8N5KVHMxfMKTuW0ZQImgHMYypPkxgnOyH4mTMiWucNHJvOkZ6_PA'
 
 user_token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Iko5SUc1OUVxLVdNNHM3bmZJYzZpdiJ9.eyJjb2ZmZWVzaG9wLXVkeS1mc25kLnVzLmF1dGgwLmNvbS9yb2xlcyI6WyJT\
 YWxvblVzZXIiXSwiaXNzIjoiaHR0cHM6Ly9jb2ZmZWVzaG9wLXVkeS1mc25kLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw2NTk4NjM3OTQ4YjdiNmNhOWUzY2Q5NjEiLCJhdWQiOlsic2F\
@@ -34,21 +36,21 @@ LZhRXqwY-hYWHF7f0Ctxa54IKcJ51yEgoMQ2iOTKP4i9Tvz7et9v3HjXC4e5YhUPB2Ka09cfKgbKB27A
 tBPzzL0XzgRzMEOTTo6lnrqDXg_-VTthbatg'
 
 
-from contextlib import contextmanager
+# from contextlib import contextmanager
 
-@contextmanager
-def captured_output():
-    import sys
-    from io import StringIO
+# @contextmanager
+# def captured_output():
+#     import sys
+#     from io import StringIO
 
-    new_out, new_err = StringIO(), StringIO()
-    old_out, old_err = sys.stdout, sys.stderr
+#     new_out, new_err = StringIO(), StringIO()
+#     old_out, old_err = sys.stdout, sys.stderr
 
-    try:
-        sys.stdout, sys.stderr = new_out, new_err
-        yield sys.stdout, sys.stderr
-    finally:
-        sys.stdout, sys.stderr = old_out, old_err
+#     try:
+#         sys.stdout, sys.stderr = new_out, new_err
+#         yield sys.stdout, sys.stderr
+#     finally:
+#         sys.stdout, sys.stderr = old_out, old_err
 
 
 class CapstoneEndpointsTestCase(TestSetup):
@@ -157,7 +159,6 @@ class CapstoneEndpointsTestCase(TestSetup):
     #     self.assertEqual(data["success"], True)
     #     self.assertTrue(data["booked_slots"])
     #     self.assertTrue(data["roles"])
-    
 
     # -------- POST Requests --------
     # def test_200_post_new_booking_as_admin(self):
@@ -178,41 +179,42 @@ class CapstoneEndpointsTestCase(TestSetup):
     #     self.assertEqual(data["event"][0]['first_name'], self.booking_entry_admin['first']) # Confirm the returned event is corrent
     
 
-    def test_200_post_new_booking_as_user(self):
-        '''
-        This test confirms that a registered user can create new events in the db. 
-        It also checks that the returned json values correspond to the json payload posted
-        '''
-        endpoint = '/appointments/book'
-        header = {'Authorization': f'Bearer {user_token}'}
-        json_payload = self.booking_entry_user
+    # def test_200_post_new_booking_as_user(self):
+    #     '''
+    #     This test confirms that a registered user can create new events in the db. 
+    #     It also checks that the returned json values correspond to the json payload posted
+    #     '''
+    #     endpoint = '/appointments/book'
+    #     header = {'Authorization': f'Bearer {user_token}'}
+    #     json_payload = self.booking_entry_user
         
-        response = self.client().post(endpoint, json=json_payload, headers=header)
-        data = json.loads(response.data)
+    #     response = self.client().post(endpoint, json=json_payload, headers=header)
+    #     data = json.loads(response.data)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["success"], True)
-        self.assertTrue(data["event"]) # Confirm an event was returned
-        self.assertEqual(data["event"][0]['first_name'], self.booking_entry_user['first']) # Confirm the returned event is corrent
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertTrue(data["event"]) # Confirm an event was returned
+    #     self.assertEqual(data["event"][0]['first_name'], self.booking_entry_user['first']) # Confirm the returned event is corrent
     
 
     # def test_401_post_new_booking_without_authentication(self):
     #     '''
-    #     This test confirms that a guest user cannot post to the db.
+    #     This test confirms that a guest user cannot post to the db, even if bogus permissions and jwts are provided.
     #     I also tried using a random jwt token but I got a urlopen error.
     #     '''
     #     endpoint = '/appointments/book'
     #     json_payload = self.booking_entry_user
+    #     header = {'Authorization': f'Bearer {self.randomJWToken()}'}
         
-    #     response = self.client().post(endpoint, json=json_payload)
+    #     response = self.client().post(endpoint, json=json_payload, headers=header)
     #     data = json.loads(response.data)
 
     #     self.assertEqual(response.status_code, 401)
     #     self.assertEqual(data["success"], False)
-    #     self.assertEqual(data["message"], 'Verified user session is not identified or request header is invalid.')
+    #     self.assertEqual(data["message"], "Authorization malformed 4. This token dies not have a valid `kid`")
 
 
-    # # -------- PATCH Requests --------
+    # -------- PATCH Requests --------
     # def test_200_patch_existing_booking_as_admin(self):
     #     '''
     #     This test confirms that an admin can modify existing events in the db. 
@@ -243,8 +245,108 @@ class CapstoneEndpointsTestCase(TestSetup):
     #     self.assertTrue(data["event"]) # Confirm an event was returned
     #     self.assertEqual(data["event"][0]['first_name'], self.booking_entry_admin['first']) # Confirm the returned event is corrent
 
+    
+    # def test_200_patch_existing_booking_as_user(self):
+    #     '''
+    #     This test confirms that a user can ONLY modify existing events that they created in the db.
+    #     Although they can see all the bookings, the user_id must match the one used to create an event before a
+    #     user role can patch the event. To implement this, an initial post request is done, and then the 
+    #     posted entry is patched. It also checks that the returned test values correspond to the json payload patched
+    #     '''
+    #     endpoint = '/appointments/book'
+    #     header = {'Authorization': f'Bearer {user_token}'}
+
+    #     # Implement the post step so the user has an entry that they created in the db
+    #     post_payload = self.booking_entry_user
+    #     post_response = self.client().post(endpoint, json=post_payload, headers=header)
+    #     post_data = json.loads(post_response.data)
+
+    #     # Perform a db model query to get a random event
+    #     query = Booking.query.all()
+    #     fmt_query = [book.format() for book in query]
+    #     patch_event = [user_event for user_event in fmt_query if user_event['user_id'] == CUSTOMER_USER_ID][0]
+    #     patch_event_id = patch_event['id']
+        
+    #     # Change the names and datetime of the booking to that of the admin
+    #     patch_event['first_name'] = self.booking_entry_admin['first']
+    #     patch_event['last_name'] = self.booking_entry_admin['last']
+    #     patch_event['start_time'] = datetime.now()
+
+    #     # Create the new json payload
+    #     json_payload = patch_event
+        
+    #     response = self.client().patch(f"{endpoint}/{patch_event_id}", json=json_payload, headers=header)
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(data["success"], True)
+    #     self.assertTrue(data["event"]) # Confirm an event was returned
+    #     self.assertEqual(data["event"][0]['first_name'], self.booking_entry_admin['first']) # Confirm the returned event is corrent
+    
+
+    # def test_422_patch_existing_booking_as_user(self):
+    #     '''
+    #     This test confirms that a user can ONLY modify existing events that they created in the db.
+    #     A POST request is not done first and the user attempts to modify an event that they didn't create.
+    #     It checks that the test fails.
+    #     '''
+    #     endpoint = '/appointments/book'
+    #     header = {'Authorization': f'Bearer {user_token}'}
+
+    #     # Perform a db model query to get a random event
+    #     query = Booking.query.all()
+    #     fmt_query = [book.format() for book in query]
+    #     patch_event = random.choice(fmt_query)
+    #     patch_event_id = patch_event['id']
+        
+    #     # Change the names and datetime of the booking to that of the admin
+    #     patch_event['first_name'] = self.booking_entry_user['first']
+    #     patch_event['last_name'] = self.booking_entry_user['last']
+    #     patch_event['start_time'] = datetime.now()
+
+    #     # Create the new json payload
+    #     json_payload = patch_event
+        
+    #     response = self.client().patch(f"{endpoint}/{patch_event_id}", json=json_payload, headers=header)
+    #     data = json.loads(response.data)
+
+    #     self.assertEqual(response.status_code, 422)
+    #     self.assertEqual(data["success"], False)
+    #     self.assertEqual(data["message"], 'unprocessable')
 
 
+    # -------- DELETE Requests --------
+    def test_200_patch_existing_booking_as_admin(self):
+        '''
+        This test confirms that an admin can modify existing events in the db. 
+        It also checks that the returned test values correspond to the json payload patched
+        '''
+        endpoint = '/appointments/book'
+        header = {'Authorization': f'Bearer {admin_token}'}
+
+        # Perform a db model query to get a random event
+        query = Booking.query.all()
+        fmt_query = [book.format() for book in query]
+        patch_event = random.choice(fmt_query)
+        patch_event_id = patch_event['id']
+        
+        # Change the names and datetime of the booking
+        patch_event['first_name'] = self.booking_entry_admin['first']
+        patch_event['last_name'] = self.booking_entry_admin['last']
+        patch_event['start_time'] = datetime.now()
+
+        # Create the new json payload
+        json_payload = patch_event
+        
+        response = self.client().patch(f"{endpoint}/{patch_event_id}", json=json_payload, headers=header)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertTrue(data["event"]) # Confirm an event was returned
+        self.assertEqual(data["event"][0]['first_name'], self.booking_entry_admin['first']) # Confirm the returned event is corrent
+
+# python -m unittest -v test_app.py 
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

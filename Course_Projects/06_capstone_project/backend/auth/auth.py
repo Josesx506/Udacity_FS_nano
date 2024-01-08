@@ -133,7 +133,7 @@ def verify_decode_jwt(token):
     if 'kid' not in unverified_header:
         # Raise a 401 error if it isn't included
         raise AuthError({'code': 'invalid_header',
-                         'description': 'Authorization malformed 4.'}, 401)
+                         'description': 'Authorization malformed 4. This token dies not have a valid `kid`'}, 401)
 
     # If it is included, format it properly
     for key in jwks['keys']:

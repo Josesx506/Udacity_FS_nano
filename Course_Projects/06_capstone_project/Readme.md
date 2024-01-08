@@ -58,6 +58,11 @@ PostgreSQL was used to create the app locally but sqlite was used to run unittes
     | `get:services` |  | `post:services` | `delete:services` |
     |  |  |  | `delete:adminbookings` |
 
+<br>
+
+### Unit test
+1. Always **source the `.env`** before running any unittests to avoid the urllib error. It cost me 2 hours of lost time.
+
 
 
 Update empty columns before migrating db
