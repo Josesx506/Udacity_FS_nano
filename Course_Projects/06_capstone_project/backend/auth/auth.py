@@ -44,13 +44,35 @@ def get_token_auth_header():
         # If it passed all the previous checks extract the token value
         else:
             raise AuthError({'code': 'invalid_authorization',
-                             'description': 'User authorization session malformed.'}, 401)
+                            'description': 'User authorization session malformed.'}, 401)
+        
+    elif 'Authorization' in request.headers:
+            # Unpack the request header  
+            auth_header = request.headers['Authorization']
+            # Split the `Bearer` string from the token
+            header_parts = auth_header.split(' ')
+
+            # check if token has 2 parts after the split for validation
+            if len(header_parts) != 2:
+                raise AuthError({'code': 'invalid_header',
+                                'description': 'Authorization Header malformed 1.'}, 401)
+            
+            # check that the first part of the split file equals 'Bearer'
+            elif header_parts[0].lower() != 'bearer':
+                raise AuthError({'code': 'invalid_header',
+                                'description': 'Authorization Bearer malformed 2.'}, 401)
+            
+            # If it passed all the previous checks extract the token value
+            else:
+                # get the token 
+                header_token = header_parts[1]
     
     else:
         raise AuthError({'code': 'invalid_session',
-                            'description': 'User is not logged in.'}, 401)
+                         'description': 'Verified user session is not identified or request header is invalid.'}, 401)
     
     return header_token
+    
 
 '''
 Implement check_permissions(permission, payload) method
@@ -111,7 +133,7 @@ def verify_decode_jwt(token):
     if 'kid' not in unverified_header:
         # Raise a 401 error if it isn't included
         raise AuthError({'code': 'invalid_header',
-                         'description': 'Authorization malformed.'}, 401)
+                         'description': 'Authorization malformed 4.'}, 401)
 
     # If it is included, format it properly
     for key in jwks['keys']:
