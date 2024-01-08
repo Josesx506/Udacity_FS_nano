@@ -12,6 +12,7 @@ future==0.17.1
 isort==5.13.2
 itsdangerous==2.1.2
 Jinja2==3.1.2
+jq==1.6.0
 lazy-object-proxy==1.10.0
 mccabe==0.7.0
 MarkupSafe==2.1.1
