@@ -78,7 +78,8 @@ def create_app(test_config=None, db_name=db_name):
       # Check the list of validated ids and remove demo
       validated_ids = list(set([person['user_id'] for person in page_stylists if person['user_id']!='demo']))
 
-      print(session.get('user')['access_token'])
+      # Uncomment this line to print the access tokens when logged in. This helps to get valid jwts for unittesting
+      # print(session.get('user')['access_token'])
 
       validated_user = False
       if user_id in validated_ids or roles=='SalonAdmin':
@@ -485,9 +486,9 @@ def create_app(test_config=None, db_name=db_name):
    '''
    error 403 handler for mising items in backend
    '''
-   @app.errorhandler(404)
+   @app.errorhandler(403)
    def not_found(error):
-      return (jsonify({"success": False, "error": 403, "message": "Forbidden request, you did not create this item"}), 404)
+      return (jsonify({"success": False, "error": 403, "message": "Forbidden request, you did not create this item"}), 403)
 
    '''
    error 404 handler for mising items in backend

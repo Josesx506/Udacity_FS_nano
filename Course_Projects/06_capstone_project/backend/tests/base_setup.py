@@ -28,11 +28,12 @@ class TestSetup(unittest.TestCase):
     def setUp(self):
         self.app = create_app(test_config=True, db_name=database_path)
         self.client = self.app.test_client
+        
         # Test to confirm that the route names for each endpoint is within the app
         # for rule in self.app.url_map.iter_rules():
-        #     print(f"Route names: {rule.rule} | Function name: {rule.endpoint}()\n\n\n\n\n")
+        #     print(f"Route names: {rule.rule} | Function name: {rule.endpoint}()\n")
+        #     print('\n\n\n\n\n')
 
-        # self.app.app_context().push()
         # Perform the db migration programmatically instead of using `db.create_all()`
         init()
         migrate()
@@ -97,8 +98,7 @@ class TestSetup(unittest.TestCase):
         os.remove(database_filename)
         if os.path.exists('__pycache__'):
             shutil.rmtree('__pycache__')
-        # os.system('clear')
-        self.app.session_interface.make_null_session(self.app)
+        os.system('clear')
 
 
 # Make the tests conveniently executable
