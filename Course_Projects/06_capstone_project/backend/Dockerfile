@@ -3,7 +3,7 @@
 FROM public.ecr.aws/sam/build-python3.9:latest
 
 # Set up an app directory for your code
-COPY /backend /src
+COPY . /src
 WORKDIR /src
 
 # Install `pip` and needed Python packages from `requirements.txt`
