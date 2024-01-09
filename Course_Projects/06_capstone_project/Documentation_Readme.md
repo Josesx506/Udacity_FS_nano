@@ -65,10 +65,13 @@ The error description returned as a string An example is `unprocessable`. <br><b
         - `curl http://127.0.0.1:5000/stylists` <br><br>
     - Returns: A html page of all the stylists employed by the salon.
     - No permissions are required
-    - Roles - Admin | Stylist | User | Guest
+    - Roles - None
 
 
 <br><br>
+
+export TOKEN=`curl --data '{"email":"salonadmin@myhair.com","password":"DFnMq8Xa5HAgACP"}' --header "Content-Type: application/json" -X POST 127.0.0.1:5000/auth  | jq -r '.token'`
+echo $TOKEN
 
 var today = new Date();
 

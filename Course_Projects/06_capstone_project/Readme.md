@@ -72,6 +72,59 @@
 <br><br>
 
 ### Deployment
+First test if you can access the endpoints locally within a docker container before deploying it remotely.
+
+#### Containerize the app.
+1. Add the `gunicorn` package to the requirements file
+2. I wanted it to run on port :8080 for the gunicorn server, so I added :8080/callback to the Auth0 callback urls when running gunicorn on my local computer, and `/callback` when running gunicorn in docker.
+3. Next step is to create a docker file in the root directory. The files are copied from t
+    ```docker
+    # Use the `python:3.7` as a source image from the Amazon ECR Public Gallery
+    # We are not using `python:3.7.2-slim` from Dockerhub because it has put a  pull rate limit. 
+    FROM public.ecr.aws/sam/build-python3.9:latest
+
+    # Set up an app directory for your code and copy all the files in backend directory to docker
+    COPY /backend /src
+    # Change the workdir which is equivalent to `cd /src`
+    WORKDIR /src
+
+    # Install `pip` and needed Python packages from `requirements.txt`
+    RUN pip install --upgrade pip
+    RUN pip install -r requirements.txt
+
+    # Define an entrypoint which will run the main app using the Gunicorn WSGI server.
+    # The name of the file with the app is `app.py`, the name of the flask app variable is also `app`
+    # Hence the `app:app` entrypoint. This is a gunicorn equivalent of flask run
+    ENTRYPOINT ["gunicorn", "-b", ":8080", "app:app"]
+    ```
+4. Create a docker environment file `.docker_env`. This is used to set environment variables so that the env file is not copied into docker. <br>
+    **NOTE**: variable names in the docker file should not be enclosed in quotes unlike the python environment files, and no spaces should be left between words e.g
+    ```env
+    AUTH0_ALGORITHMS=RS256
+    AUTH0__AUDIENCE=salon
+    ```
+5. To create the docker image and run it locally. Note how the docker port 8080 is exposed to port 80 on localhost
+    ```bash
+    # Create the image
+    ~$docker build -t capstoneimage .
+    # Launch the container with the environmental file. 
+    ~$docker run --detach --name capstoneContainer --env-file=.docker_env -p 80:8080 capstoneimage
+    ```
+6. Test the endpoints on your local computer using port 80 e.g `curl --request GET 'http://localhost:80/home'` returns the HTML of the homepage.
+7. **Note**: the docker container `Base Image` doesn't have postgres installed and the db is not connected. Hence you will not be able to see items on the Book Appointments and Services page.
+    - You can download a separate base image that has psql installed and link both containers together using `docker compose` but it wasn't a priority for me at the time of completion.
+    - For the remote deployment on AWS, I used the `Amazon RDS DB` instance. Check the [link](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/TUT_WebAppWithRDS.html) for additional setup details.
+
+#### Remote deployment to AWS
+- [x] First step will be to install `awscli`, `eksctl`, and `kubectl` packages.
+- [x] Remote deployment on AWS doesn't support using environment variables for docker/python. Instead, the environment variables are stored in `AWS Parameter Store`
+    ```bash
+    ~$aws ssm put-parameter --name JWT_SECRET --overwrite --value "myjwtsecret" --type SecureString
+    # Verify
+    ~$aws ssm get-parameter --name JWT_SECRET
+    # Once you submit your project and receive the reviews, you can consider deleting the variable from parameter-store using:
+    ~$aws ssm delete-parameter --name JWT_SECRET
+    ```
 - [x] The project is deployed on AWS (tentatively).
 
 <br><br>

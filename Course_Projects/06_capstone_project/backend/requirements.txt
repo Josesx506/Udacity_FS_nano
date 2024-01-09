@@ -9,6 +9,7 @@ Flask-Migrate==4.0.5
 Flask-RESTful==0.3.10
 Flask-SQLAlchemy==3.1.1
 future==0.17.1
+gunicorn==21.2.0
 isort==5.13.2
 itsdangerous==2.1.2
 Jinja2==3.1.2

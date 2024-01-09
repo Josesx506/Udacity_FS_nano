@@ -86,4 +86,44 @@ highlight text and press Cmd+Shift+L to change all values that correspond to the
     ~$live-server # Launch the server from terminal
     ```
 
+<br><br>
+
+### Merging multiple flask apps
+After the project, I learnt you can register different python scripts as mini-flask apps with `Flask Blueprint`. In other words, you don't have to write all your endpoints in one infinite app file. You can create multiple files for each page, and register then within the main app. An example is shown below. <br>
+- `appointments.py` file
+    ```python
+    from flask import Blueprint
+
+    # Create the sub-app
+    appts_bp = Blueprint('appts', __name__)
+
+    @appts.route('/appointments')
+    def get_appointments():
+        pass
+    ```
+- `app.py` file
+    ```python
+    from flask import FLASK
+    from appointments import appts_bp
+
+    def create_app(test_config=None, db_name=db_name):
+        # create and configure the app
+        app = Flask(__name__, template_folder='templates/')
+        
+        # Register the mini-app within the main app
+        app.register_blueprint(appts_bp, url_prefix='/')
+
+        @app.route('/')
+        def index():
+            pass
+        
+        return app
+    
+    if __name__ == '__main__':
+        app: Flask = create_app()
+        app.run(host='0.0.0.0', port=8080, debug=True)
+    ```
+
+With this setup, you can access the `/appointments` endpoint whenever the main app is lainched. This means you code blocks can be broken into smaller segments for each page, and a single file can be used to link everything.
+
     

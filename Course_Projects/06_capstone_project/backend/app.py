@@ -15,6 +15,7 @@ sys.path.append(os.getcwd())
 from models import setup_db, db, Booking, Service, Stylist,  database_path
 from auth.auth import AuthError, requires_auth
 from auth.views import auth_bp
+from auth.token import token_bp
 from settings import AUTH0_DOMAIN, LOCAL_SECRET_KEY
 db_name = database_path
 
@@ -33,6 +34,7 @@ def create_app(test_config=None, db_name=db_name):
    # Setup app authentication
    app.jinja_env.filters['to_pretty_json'] = to_pretty_json
    app.register_blueprint(auth_bp, url_prefix='/')
+   app.register_blueprint(token_bp, url_prefix='/')
    app.secret_key = LOCAL_SECRET_KEY
 
    if test_config:
@@ -519,7 +521,7 @@ def create_app(test_config=None, db_name=db_name):
 
    return app
 
+app: Flask = create_app()
 
 if __name__ == '__main__':
-    app: Flask = create_app()
     app.run(host='0.0.0.0', port=8080, debug=True)
