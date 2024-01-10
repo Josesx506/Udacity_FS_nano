@@ -252,7 +252,7 @@ def create_app(test_config=None, db_name=db_name):
                            last_name=resp['last'],
                            phone=resp['phone'],
                            email=resp['email'],
-                           start_time= f"{datetime.strptime(resp['start_time'], '%m-%d-%Y %I:%M %p')}",
+                           start_time= f"{datetime.strptime(resp['date_time'], '%m-%d-%Y %I:%M %p')}",
                            completed=False,
                            user_id=user_id,
                            stylist_id=None)

@@ -126,4 +126,109 @@ After the project, I learnt you can register different python scripts as mini-fl
 
 With this setup, you can access the `/appointments` endpoint whenever the main app is lainched. This means you code blocks can be broken into smaller segments for each page, and a single file can be used to link everything.
 
-    
+<br>
+
+### Deployment Details
+First test if you can access the endpoints locally within a docker container before deploying it remotely.
+
+#### Containerize the app.
+1. Add the `gunicorn` package to the requirements file
+2. I wanted it to run on port :8080 for the gunicorn server, so I added :8080/callback to the Auth0 callback urls when running gunicorn on my local computer, and `/callback` when running gunicorn in docker.
+3. Next step is to create a docker file in the root directory. The files are copied from t
+    ```docker
+    # Use the `python:3.7` as a source image from the Amazon ECR Public Gallery
+    # We are not using `python:3.7.2-slim` from Dockerhub because it has put a  pull rate limit. 
+    FROM public.ecr.aws/sam/build-python3.9:latest
+
+    # Set up an app directory for your code and copy all the files in backend directory to docker
+    COPY /backend /src
+    # Change the workdir which is equivalent to `cd /src`
+    WORKDIR /src
+
+    # Install `pip` and needed Python packages from `requirements.txt`
+    RUN pip install --upgrade pip
+    RUN pip install -r requirements.txt
+
+    # Define an entrypoint which will run the main app using the Gunicorn WSGI server.
+    # The name of the file with the app is `app.py`, the name of the flask app variable is also `app`
+    # Hence the `app:app` entrypoint. This is a gunicorn equivalent of flask run
+    ENTRYPOINT ["gunicorn", "-b", ":8080", "app:app"]
+    ```
+4. Create a docker environment file `.docker_env`. This is used to set environment variables so that the env file is not copied into docker. <br>
+    **NOTE**: variable names in the docker file should not be enclosed in quotes unlike the python environment files, and no spaces should be left between words e.g
+    ```env
+    AUTH0_ALGORITHMS=RS256
+    AUTH0__AUDIENCE=salon
+    ```
+5. To create the docker image and run it locally. Note how the docker port 8080 is exposed to port 80 on localhost
+    ```bash
+    # Create the image
+    ~$docker build -t capstoneimage .
+    # Launch the container with the environmental file. 
+    ~$docker run --detach --name capstoneContainer --env-file=.docker_env -p 80:8080 capstoneimage
+    ```
+6. Test the endpoints on your local computer using port 80 e.g `curl --request GET 'http://localhost:80/home'` returns the HTML of the homepage.
+7. **Note**: the docker container `Base Image` doesn't have postgres installed and the db is not connected. Hence you will not be able to see items on the Book Appointments and Services page.
+    - You can download a separate base image that has psql installed and link both containers together using `docker compose` but it wasn't a priority for me at the time of completion.
+    - For the remote deployment on AWS, I used the `Amazon RDS DB` instance. Check the [link](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/TUT_WebAppWithRDS.html) for additional setup details.
+
+<br>
+
+#### Remote deployment to AWS
+- [x] First step I tried with AWS was to use CloudFormation to create CodePipeline resources for CI-CD. 
+    - I just couldn't get the EKS EC2 instances and RDS DBs to share the same VPC so I let it go after 24 hours.
+- [x] Create a [default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html#create-default-vpc) if you dont have one. It is required for connecting the instances.
+- [x] Create a key pair from the [EC2 key-pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html) page.Be careful about the region when creating key-pairs, my default region was `us-east-2`. Change the region to your default region. You'll need the key-pair to login to your instance.
+- [x] I proceeded to manually create the EC2 Instance and RDS DB using information from (here)[https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/TUT_WebAppWithRDS.html].
+    - Set a database username and password if you  prefer
+- [x] Both the EC2 and RDS instances **MUST** share the same virtual private cloud (VPC) unless they won't work.
+- [x] After linking both instances. Log in to the EC2 instance using ssh and the key-pair file
+    ```bash
+    # Example of `instance-public-dns-name` is 3.139.74.135
+    # The `instance-user-name` is ec2-user
+    ~$ssh -i path-to-key-pair-file.pem instance-user-name@$instance-public-dns-name
+    ```
+- [x] Once you're logged in, install required dependencies like psql,git,python, and docker
+    ```bash
+    ~$sudo dnf update -y 
+    ~$sudo dnf install postgresql 
+    ~$sudo dnf install git 
+    ~$sudo dnf install python
+    ~$sudo dnf install docker
+    # If docker has any permission issues when trying to launch it, run the command below to fix it
+    ~$sudo chmod 666 /var/run/docker.sock
+    ```
+- [x] Connect to the RDS DB from the EC2.
+    ```bash
+    # Example of `db-instance-endpoint` is salon-database.cjiasyzzf8nn.us-east-2.rds.amazonaws.com
+    # This is a replacement for local host in the database path
+    # I used the default port of `5432` and default username of `postgres` when creating the db
+    # The default dbname is `postgres`. You can enter your password after running this line.
+    ~$psql --host=db-instance-endpoint --port=5432 --dbname=postgres --username=postgres
+    ```
+- [x] Once you've tested that the psql server is running, clone the git repository and create an environment file. If you need help setting up git credentials, checkout this [video](https://www.youtube.com/watch?v=2K_-EQ-7vdc).
+    ```bash
+    # Clone repo
+    ~$git clone git@github.com:Josesx506/Joses_FSND_Capstone.git
+    # Create python environment and install requirements
+    ~$python -m venv capstoneenv
+    ~$source capstoneenv/bin/activate
+    ~$pip install -r requirements.txt
+    ```
+- [x] Copy the RDS DB host endpoint into your .env file and prevent the file from being uploaded to git in the `.gitignore` file. Change the database path in your models.py file to 
+    ```python
+    database_path = f'postgresql://{DB_USER}:{DB_PASSWORD}@{RDS_HOST_ADDRESS}:{RDS_SQL_PORT}/{database_filename}'
+    ```
+- [x] Launch the gunicorn server with **Docker** and expose a port to your EC2 instance, I exposed port **2020**.
+    ```bash
+    # Create the docker image. 
+    ~$docker build -t capstoneimage .
+    # Launch the container. The docker file will launch the gunicorn server and start the app
+    ~$docker run --detach --name capstoneContainer --env-file=.docker_env -p 2020:8080 capstoneimage
+    ```
+- [x] Navigate back to your [EC2 web-console](https://console.aws.amazon.com/ec2/), click on the active instance, and select the **security group**.
+    - Change the inbound rules of the security group to allow traffic from port **2020**.
+    - Each time your EC2 instance restarts, the public IP changes and you'll have to change your ssh config etc. To prevent this, use an Elastic IP address.
+- [x] Navigate to the **EC2 web-console/Network & Security/Elastic IPs** service. Create a new elastic IP and associate it with active EC2 instance. Now your public address is fixed.
+- [x] Change the allowed login, callback, and logout addresses in your Auth0 service to the new Elastic IP.
+- [x] You app is live and you can go ahead to assign a free domain name if you want. For this app, the base url address is `http://3.23.56.12:2020/home`.
