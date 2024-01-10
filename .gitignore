@@ -23,3 +23,7 @@ Course_Projects/06_capstone_project/capst
 # Environment variables
 04_Server_Deployment/03_AWS_and_Kubernetes/aws.env
 04_Server_Deployment/03_AWS_and_Kubernetes/jo-udy-fsnd-eks-keyPair.pem
+Course_Projects/02_trivia/.env
+Course_Projects/03_coffee_shop/.env
+Course_Projects/04_jwt_kube/.env
+Course_Projects/06_capstone_project/.env_file
